@@ -18,7 +18,7 @@ export default async function GalleryPage() {
       <p className="text-sm mb-4">Без спойлеров: показываем только превью и комментарии (позже).</p>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
         {photos
-          .sort((a, b) => b.comments.length - a.comments.length)
+          .sort((a: { comments: { id: string }[] }, b: { comments: { id: string }[] }) => b.comments.length - a.comments.length)
           .map((p) => (
             <a key={p.id} href={`/photo/${p.id}`} className="block group">
               <div className="relative w-full h-40">
