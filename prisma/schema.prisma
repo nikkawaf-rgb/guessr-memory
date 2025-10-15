@@ -1,0 +1,279 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===== Enums =====
+
+enum UserRole {
+  admin
+  player
+}
+
+enum GameMode {
+  ranked
+  fun
+}
+
+enum ShapeType {
+  circle
+  rect
+  polygon
+}
+
+enum ReportStatus {
+  open
+  resolved
+}
+
+// ===== Models =====
+
+model User {
+  id                String      @id @default(cuid())
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  // OAuth profile (Auth.js with Supabase adapter will manage auth; we mirror minimal profile data here)
+  email             String?     @unique
+  name              String?
+  avatarUrl         String?
+  provider          String?     // e.g., google, vk
+  role              UserRole    @default(player)
+
+  sessions          Session[]
+  comments          Comment[]
+  commentLikes      CommentLike[]
+  reports           Report[]    @relation("ReportsByUser")
+  userAchievements  UserAchievement[]
+  userLabelPresets  UserLabelPreset[]
+}
+
+model Location {
+  id        String    @id @default(cuid())
+  name      String
+  aliases   String[]  // optional alternative names for search
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  photos    Photo[]
+}
+
+model Person {
+  id          String    @id @default(cuid())
+  displayName String
+  aliases     String[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  zones       PhotoPeopleZone[]
+}
+
+model Photo {
+  id           String     @id @default(cuid())
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  storagePath  String     // path/key in Supabase Storage
+  width        Int?
+  height       Int?
+  isActive     Boolean    @default(true)
+
+  // EXIF
+  exifTakenAt  DateTime?  // full date parsed from EXIF (YYYY:MM:DD HH:mm:ss)
+  exifRaw      Json?
+
+  // Location
+  locationId   String?
+  location     Location?  @relation(fields: [locationId], references: [id])
+
+  // Tagging zones for correct answers (admin-defined)
+  zones        PhotoPeopleZone[]
+
+  // Community
+  comments     Comment[]
+  sessionPhotos SessionPhoto[]
+}
+
+model PhotoPeopleZone {
+  id          String    @id @default(cuid())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  photoId     String
+  photo       Photo     @relation(fields: [photoId], references: [id])
+
+  personId    String
+  person      Person    @relation(fields: [personId], references: [id])
+
+  shapeType   ShapeType
+  shapeData   Json      // coordinates for rect/circle/polygon
+  tolerancePx Int       @default(10)
+
+  @@index([photoId])
+  @@index([personId])
+}
+
+model Session {
+  id           String     @id @default(cuid())
+  createdAt    DateTime   @default(now())
+  finishedAt   DateTime?
+  mode         GameMode
+  photoCount   Int
+  durationSec  Int?
+
+  userId       String
+  user         User       @relation(fields: [userId], references: [id])
+
+  sessionPhotos SessionPhoto[]
+}
+
+model SessionPhoto {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+
+  sessionId   String
+  session     Session  @relation(fields: [sessionId], references: [id])
+
+  photoId     String
+  photo       Photo    @relation(fields: [photoId], references: [id])
+
+  orderIndex  Int
+
+  guesses     Guess[]
+
+  @@index([sessionId])
+  @@index([photoId])
+}
+
+model Guess {
+  id            String    @id @default(cuid())
+  createdAt     DateTime  @default(now())
+
+  sessionPhotoId String
+  sessionPhoto    SessionPhoto @relation(fields: [sessionPhotoId], references: [id])
+
+  // User inputs
+  guessedLocationId String?
+  guessedDay        Int?
+  guessedMonth      Int?
+  guessedYear       Int?
+  usedHint          Boolean   @default(false)
+
+  // For tagging guessed people, we store array of person names or ids the user dropped
+  guessedPeopleNames String[]
+
+  // Results
+  peopleHitAll  Boolean   @default(false)
+  locationHit   Boolean   @default(false)
+  dayHit        Boolean   @default(false)
+  monthHit      Boolean   @default(false)
+  yearHit       Boolean   @default(false)
+  scoreDelta    Int       @default(0)
+  timeSpentSec  Int?
+
+  @@index([sessionPhotoId])
+}
+
+model Comment {
+  id         String    @id @default(cuid())
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  photoId    String
+  photo      Photo     @relation(fields: [photoId], references: [id])
+
+  userId     String
+  user       User      @relation(fields: [userId], references: [id])
+
+  content    String    // limit 200 enforced on app layer
+  isHidden   Boolean   @default(false) // moderation hides comment
+
+  likes      CommentLike[]
+  reports    Report[]
+
+  @@index([photoId])
+  @@index([userId])
+}
+
+model CommentLike {
+  id         String   @id @default(cuid())
+  createdAt  DateTime @default(now())
+
+  commentId  String
+  comment    Comment  @relation(fields: [commentId], references: [id])
+
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@unique([commentId, userId])
+  @@index([userId])
+}
+
+model Report {
+  id          String       @id @default(cuid())
+  createdAt   DateTime     @default(now())
+  resolvedAt  DateTime?
+  status      ReportStatus @default(open)
+  reason      String?
+
+  commentId   String
+  comment     Comment      @relation(fields: [commentId], references: [id])
+
+  reporterUserId String
+  reporter       User       @relation("ReportsByUser", fields: [reporterUserId], references: [id])
+
+  @@index([commentId])
+  @@index([reporterUserId])
+}
+
+model Achievement {
+  id          String  @id @default(cuid())
+  code        String  @unique // e.g., KEEPER_TR, PERFECTIONIST, COMMENTATOR, etc.
+  title       String
+  description String
+  createdAt   DateTime @default(now())
+
+  userAchievements UserAchievement[]
+}
+
+model UserAchievement {
+  id             String       @id @default(cuid())
+  awardedAt      DateTime     @default(now())
+
+  userId         String
+  user           User         @relation(fields: [userId], references: [id])
+
+  achievementId  String
+  achievement    Achievement  @relation(fields: [achievementId], references: [id])
+
+  @@unique([userId, achievementId])
+  @@index([achievementId])
+}
+
+model AdminConfig {
+  id                 Int      @id @default(1)
+  adminPasswordHash  String   // bcrypt hash of 'neverwalkalone'
+  allowedEmails      String[] // emails with admin access (optional)
+}
+
+// User-defined label presets to carry names across photos
+model UserLabelPreset {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  label     String
+
+  @@index([userId])
+}
