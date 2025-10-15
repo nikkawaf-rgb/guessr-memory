@@ -28,7 +28,7 @@ export default async function PhotoPage({ params }: { params: { id: string } }) 
       <p className="text-sm mb-2">⚠️ Не раскрывайте ответы в комментариях! Не портите игру другим!</p>
       <CommentForm photoId={photo.id} />
       <div className="mt-4 space-y-3">
-        {comments.map((c) => (
+        {comments.map((c: { id: string; content: string; _count: { likes: number; reports: number } }) => (
           <CommentItem key={c.id} id={c.id} content={c.content} photoId={photo.id} likesCount={c._count.likes} />
         ))}
       </div>
