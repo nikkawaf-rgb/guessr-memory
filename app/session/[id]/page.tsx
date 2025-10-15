@@ -6,7 +6,7 @@ import { submitGuess } from "@/app/session/actions";
 export default async function SessionPage({ params }: { params: { id: string } }) {
   const session = await prisma.session.findUnique({
     where: { id: params.id },
-    include: { sessionPhotos: { include: { photo: true }, orderBy: { orderIndex: "asc" } } },
+    include: { sessionPhotos: { include: { photo: true, guesses: true }, orderBy: { orderIndex: "asc" } } },
   });
   if (!session) return <div className="p-6">Сессия не найдена</div>;
   // find first sessionPhoto without guesses
