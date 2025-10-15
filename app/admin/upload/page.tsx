@@ -2,6 +2,7 @@
 import { useState } from "react";
 // upload now via server route using service role key
 import exifr from "exifr";
+import { supabase } from "@/app/lib/supabase";
 
 export default function UploadPhotosPage() {
   const [files, setFiles] = useState<FileList | null>(null);
@@ -13,12 +14,13 @@ export default function UploadPhotosPage() {
     for (const file of Array.from(files)) {
       try {
         const uploadKey = `${Date.now()}-${Math.random().toString(36).slice(2)}-${file.name}`;
-        const fd = new FormData();
-        fd.append("file", file);
-        fd.append("name", file.name);
-        const uploadRes = await fetch("/api/photos/upload", { method: "POST", body: fd });
-        if (!uploadRes.ok) throw new Error(`upload failed ${uploadRes.status}`);
-        const { key: storedKey } = await uploadRes.json();
+        // Direct upload to Supabase Storage to avoid Vercel body size limits
+        const { error: upErr } = await supabase.storage.from("photos").upload(uploadKey, file, {
+          contentType: file.type || "image/jpeg",
+          upsert: false,
+        });
+        if (upErr) throw upErr;
+        const storedKey = uploadKey;
         let takenAt: Date | null = null;
         try {
           const exif = await exifr.parse(file, { tiff: true, exif: true });
