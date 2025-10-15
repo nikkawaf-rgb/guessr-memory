@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "@/app/providers";
@@ -31,12 +32,12 @@ export default function RootLayout({
         <Providers>
           <header className="border-b border-white/10">
             <nav className="max-w-6xl mx-auto p-4 flex gap-4 text-sm">
-              <a href="/" className="hover:underline">Главная</a>
-              <a href="/play" className="hover:underline">Играть</a>
-              <a href="/gallery" className="hover:underline">Галерея</a>
-              <a href="/users" className="hover:underline">Участники</a>
-              <a href="/leaderboard" className="hover:underline">Лидерборд</a>
-              <a href="/admin" className="ml-auto hover:underline">Админ</a>
+              <Link href="/" className="hover:underline">Главная</Link>
+              <Link href="/play" className="hover:underline">Играть</Link>
+              <Link href="/gallery" className="hover:underline">Галерея</Link>
+              <Link href="/users" className="hover:underline">Участники</Link>
+              <Link href="/leaderboard" className="hover:underline">Лидерборд</Link>
+              <Link href="/admin" className="ml-auto hover:underline">Админ</Link>
             </nav>
           </header>
           <main className="min-h-screen">{children}</main>

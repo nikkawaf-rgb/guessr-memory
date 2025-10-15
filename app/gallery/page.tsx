@@ -1,5 +1,6 @@
 import { prisma } from "@/app/lib/prisma";
 import { photoPublicUrl } from "@/app/lib/publicUrl";
+import Image from "next/image";
 
 export const revalidate = 60;
 
@@ -20,7 +21,15 @@ export default async function GalleryPage() {
           .sort((a, b) => b.comments.length - a.comments.length)
           .map((p) => (
             <a key={p.id} href={`/photo/${p.id}`} className="block group">
-              <img src={photoPublicUrl(p.storagePath)} alt="photo" className="w-full h-40 object-cover rounded border border-white/10 group-hover:opacity-90" />
+              <div className="relative w-full h-40">
+                <Image
+                  src={photoPublicUrl(p.storagePath)}
+                  alt="photo"
+                  fill
+                  sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 200px"
+                  className="object-cover rounded border border-white/10 group-hover:opacity-90"
+                />
+              </div>
               <div className="text-xs mt-1 opacity-70">💬 {p.comments.length}</div>
             </a>
           ))}

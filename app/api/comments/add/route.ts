@@ -22,8 +22,9 @@ export async function POST(req: NextRequest) {
       },
     });
     return NextResponse.json({ id: comment.id });
-  } catch (e: any) {
-    return NextResponse.json({ error: e?.message || "unknown" }, { status: 500 });
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : "unknown";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 

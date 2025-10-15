@@ -8,8 +8,9 @@ export async function POST(req: NextRequest) {
     const user = await prisma.user.create({ data: { name: "Гость" } });
     await prisma.report.create({ data: { commentId, reporterUserId: user.id, reason: reason?.toString().slice(0, 120) || null } });
     return NextResponse.json({ ok: true });
-  } catch (e: any) {
-    return NextResponse.json({ error: e?.message || "unknown" }, { status: 500 });
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : "unknown";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
