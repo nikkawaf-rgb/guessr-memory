@@ -1,6 +1,8 @@
 "use client";
 import React from "react";
 import { Stage, Layer, Rect, Circle } from "react-konva";
+import type { KonvaEventObject } from "konva/lib/Node";
+import type { Stage as KonvaStage } from "konva/lib/Stage";
 
 export type ShapeDraft =
   | { type: "rect"; data: { x: number; y: number; width: number; height: number } }
@@ -19,16 +21,21 @@ export function ZonesKonvaEditor({
   const [dragStart, setDragStart] = React.useState<{ x: number; y: number } | null>(null);
   const [draft, setDraft] = React.useState<ShapeDraft | null>(null);
 
-  function handleMouseDown(e: import("konva/lib/Node").KonvaEventObject<MouseEvent>) {
-    const stage = (e.target as any).getStage?.();
+  function getPointer(e: KonvaEventObject<MouseEvent>): { x: number; y: number } | null {
+    const node = e.target as unknown as { getStage?: () => KonvaStage };
+    const stage = node.getStage ? node.getStage() : undefined;
     const pos = stage?.getPointerPosition();
+    return pos ? { x: pos.x, y: pos.y } : null;
+  }
+
+  function handleMouseDown(e: KonvaEventObject<MouseEvent>) {
+    const pos = getPointer(e);
     if (!pos) return;
     setDragStart({ x: pos.x, y: pos.y });
   }
-  function handleMouseMove(e: import("konva/lib/Node").KonvaEventObject<MouseEvent>) {
+  function handleMouseMove(e: KonvaEventObject<MouseEvent>) {
     if (!dragStart) return;
-    const stage = (e.target as any).getStage?.();
-    const pos = stage?.getPointerPosition();
+    const pos = getPointer(e);
     if (!pos) return;
     if (mode === "rect") {
       const x = Math.min(dragStart.x, pos.x);
