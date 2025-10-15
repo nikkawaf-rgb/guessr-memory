@@ -4,6 +4,7 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 import { submitGuess } from "@/app/session/actions";
 import React from "react";
+import { TaggerField } from "@/app/session/_components/TaggerField";
 
 export default async function SessionPage({ params }: { params: { id: string } }) {
   const session = await prisma.session.findUnique({

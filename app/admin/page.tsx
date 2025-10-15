@@ -29,6 +29,7 @@ export default function AdminPage() {
           <a className="underline" href="/admin/upload">Загрузка фото</a>
           <a className="underline" href="/admin/people">Люди</a>
           <a className="underline" href="/admin/locations">Локации</a>
+          <a className="underline" href="/admin/zones">Зоны</a>
         </div>
       </div>
     </div>
