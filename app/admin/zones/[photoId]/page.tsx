@@ -6,6 +6,7 @@ import Link from "next/link";
 import React from "react";
 import type { ShapeType } from "@prisma/client";
 import { ZoneCanvasHelper } from "@/app/admin/zones/_components/ZoneCanvasHelper";
+import { ZonesKonvaEditor, type ShapeDraft } from "@/app/admin/zones/_components/ZonesKonvaEditor";
 
 export const revalidate = 0;
 
@@ -76,8 +77,8 @@ export default async function AdminZonesEditorPage({ params }: { params: { photo
         </div>
         <div>
           <h2 className="font-medium mb-2">Add zone</h2>
-          <p className="text-xs opacity-70 mb-2">For now, paste JSON for rect/circle/polygon produced by the canvas tool below.</p>
-          <ZoneCanvasHelper />
+          <p className="text-xs opacity-70 mb-2">Draw a rect or circle, fields below will be prefilled.</p>
+          <KonvaLinker />
           <form action={createZone} className="mt-3 space-y-2">
             <input type="hidden" name="photoId" value={photo.id} />
             <div>
@@ -90,7 +91,7 @@ export default async function AdminZonesEditorPage({ params }: { params: { photo
             </div>
             <div>
               <label className="text-sm">Shape type</label>
-              <select name="shapeType" className="border rounded px-3 py-2 w-full">
+              <select name="shapeType" id="shapeType" className="border rounded px-3 py-2 w-full">
                 <option value="rect">rect</option>
                 <option value="circle">circle</option>
                 <option value="polygon">polygon</option>
@@ -98,7 +99,7 @@ export default async function AdminZonesEditorPage({ params }: { params: { photo
             </div>
             <div>
               <label className="text-sm">Shape data (JSON)</label>
-              <textarea name="shapeData" className="border rounded px-3 py-2 w-full h-28" placeholder='{"x":10,"y":20,"width":100,"height":80}' />
+              <textarea name="shapeData" id="shapeData" className="border rounded px-3 py-2 w-full h-28" placeholder='{"x":10,"y":20,"width":100,"height":80}' />
             </div>
             <div>
               <label className="text-sm">Tolerance (px)</label>
@@ -110,6 +111,19 @@ export default async function AdminZonesEditorPage({ params }: { params: { photo
       </div>
     </div>
   );
+}
+
+function KonvaLinker() {
+  "use client";
+  const onChange = (draft: ShapeDraft | null) => {
+    const typeEl = document.getElementById("shapeType") as HTMLSelectElement | null;
+    const dataEl = document.getElementById("shapeData") as HTMLTextAreaElement | null;
+    if (!typeEl || !dataEl) return;
+    if (!draft) return;
+    typeEl.value = draft.type;
+    dataEl.value = JSON.stringify(draft.data);
+  };
+  return <ZonesKonvaEditor onChange={onChange} />;
 }
 
 // Component moved to client file
