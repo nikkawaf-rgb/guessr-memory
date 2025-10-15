@@ -19,7 +19,7 @@ export default async function GalleryPage() {
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
         {photos
           .sort((a: { comments: { id: string }[] }, b: { comments: { id: string }[] }) => b.comments.length - a.comments.length)
-          .map((p) => (
+          .map((p: { id: string; storagePath: string; comments: { id: string }[] }) => (
             <a key={p.id} href={`/photo/${p.id}`} className="block group">
               <div className="relative w-full h-40">
                 <Image
