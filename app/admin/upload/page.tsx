@@ -34,8 +34,9 @@ export default function UploadPhotosPage() {
         });
         newLog.push(`OK: ${file.name} -> ${storedKey ?? uploadKey} ${takenAt ? `(EXIF ${takenAt.toISOString()})` : "(no EXIF)"}`);
         setLog([...newLog]);
-      } catch (e: any) {
-        newLog.push(`ERR: ${file.name} -> ${e?.message || e}`);
+      } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : String(e);
+        newLog.push(`ERR: ${file.name} -> ${message}`);
         setLog([...newLog]);
       }
     }
