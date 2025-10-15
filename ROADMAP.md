@@ -35,6 +35,7 @@ References: [Supabase — Postgres development platform](https://supabase.com/)
 - Admin: People and Locations CRUD pages (`/admin/people`, `/admin/locations`).
 - Admin: Zones tool added — list and per-photo editor (`/admin/zones`, `/admin/zones/[photoId]`), basic rect helper.
 - Session page: minimal people tagger (client component), `guessedPeopleNames` + `timeSpentSec`, next-photo navigation.
+- Admin landing: added link to Zones; replaced anchors with Next `Link`; build passes on Vercel.
 
 ## Phase 0 — Foundations (in progress)
 - [x] Prisma schema for core entities
@@ -135,10 +136,10 @@ References: [Supabase — Postgres development platform](https://supabase.com/)
 - Seasonality for leaderboards?
 
 ## Current Step (for Cursor to resume)
-1) Production stability: fix Supabase upload error "Invalid Compact JWS" (verify NEXT_PUBLIC_SUPABASE_URL/ANON_KEY on Vercel; Storage policies for `photos` bucket set; redeploy).
+1) People tagging geometry: implement shape comparison (rect/circle/polygon + tolerance) against `PhotoPeopleZone`; upgrade admin editor to `react‑konva` (circle/polygon tools).
 2) Ensure prod DB has migrations applied (`prisma migrate deploy` against Production `DATABASE_URL`).
-3) People tagging geometry: implement shape comparison (rect/circle/polygon + tolerance) against `PhotoPeopleZone` and switch UI to `react‑konva` editor in admin.
-4) Admin route protection (middleware/role checks).
+3) Admin route protection (middleware/role checks).
+4) Monitor upload in prod ("Invalid Compact JWS" should be gone after env/policies; switch to server‑side upload if повторится).
 
 ## Next Steps
 - Add leaderboard and basic achievements.
