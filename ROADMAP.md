@@ -28,6 +28,12 @@ References: [Supabase — Postgres development platform](https://supabase.com/)
 - Play/Leaderboard pages: placeholders exist (`app/play/page.tsx`, `app/leaderboard/page.tsx`).
 - Supabase helpers present in `app/lib/*`.
 
+### Updates (Oct 2025)
+- Direct client upload to Supabase in admin to avoid 413 (`app/admin/upload/page.tsx`).
+- Session start API + session flow (`/api/session/start`, `app/session/[id]/page.tsx`).
+- Server action `submitGuess` with scoring (`app/session/actions.ts`).
+- Admin: People and Locations CRUD pages (`/admin/people`, `/admin/locations`).
+
 ## Phase 0 — Foundations (in progress)
 - [x] Prisma schema for core entities
 - [x] Supabase Storage upload endpoint
@@ -35,27 +41,28 @@ References: [Supabase — Postgres development platform](https://supabase.com/)
 - [x] Basic gallery and photo detail pages
 - [x] Comments + like/report endpoints
 - [x] Admin sign‑in (credentials)
+- [x] Admin upload with EXIF + direct Supabase upload (413 fixed)
 - [ ] Protect admin routes (middleware/role checks)
 - [ ] Rate limiting for comment/like/report
 - [ ] Migrations applied and synced with DB
 
 ## Phase 1 — MVP Game (Ranked mode)
 - Game session core
-  - [ ] Session creation (10 random active photos, per‑player randomized ordering)
+  - [x] Session creation (10 random active photos, per‑player randomized ordering)
   - [ ] Session progress persistence (resume between sessions)
   - [ ] Per‑photo UI: tagging canvas (rect/circle/polygon with tolerance), city input, date input (day/month/year)
   - [ ] People tagging answer check vs. `PhotoPeopleZone`
-  - [ ] Location check vs. `Location` (with aliases)
-  - [ ] Date check: year/month/day vs. `Photo.exifTakenAt` or admin override
-  - [ ] Scoring service (200 people, 200 location, 200 each Y/M/D)
+  - [x] Location check vs. `Location` (with aliases)
+  - [x] Date check: year/month/day vs. `Photo.exifTakenAt` or admin override
+  - [x] Scoring service (200 people, 200 location, 200 each Y/M/D)
   - [ ] Time tracking per photo (for achievements later)
 - Comments during play
   - [ ] Inline comment box on task screen; reminder: no spoilers
-  - [ ] Persist and revalidate; visible later on photo page
+  - [x] Persist and revalidate; visible later on photo page
 - Admin setup for answers
-  - [ ] People directory (`Person`) CRUD
+  - [x] People directory (`Person`) CRUD
   - [ ] Photo tagging zones CRUD (`PhotoPeopleZone` with shapes)
-  - [ ] Locations CRUD with aliases
+  - [x] Locations CRUD with aliases
   - [ ] Photo active/hide moderation, comment moderation
 
 ## Phase 2 — Leaderboard, Profiles, Achievements
@@ -125,7 +132,11 @@ References: [Supabase — Postgres development platform](https://supabase.com/)
 - Allow hints (off by default) for fun mode?
 - Seasonality for leaderboards?
 
+## Current Step (for Cursor to resume)
+1) Implement admin tool to define `PhotoPeopleZone` shapes (rect/circle/polygon) per photo.
+2) Add tagging UI in session (react‑konva) for player guesses; compare with zones and award 200 pts for full match.
+3) Track time per photo in guesses. Persist session state and navigate to next photo.
+
 ## Next Steps
-- Implement MVP game session flow and admin tagging tools.
 - Add leaderboard and basic achievements.
 - Harden APIs with validation and rate limits.
