@@ -5,7 +5,6 @@ import { revalidatePath } from "next/cache";
 import Link from "next/link";
 import React from "react";
 import type { ShapeType } from "@prisma/client";
-import { ZoneCanvasHelper } from "@/app/admin/zones/_components/ZoneCanvasHelper";
 import { ZonesKonvaEditor, type ShapeDraft } from "@/app/admin/zones/_components/ZonesKonvaEditor";
 
 export const revalidate = 0;

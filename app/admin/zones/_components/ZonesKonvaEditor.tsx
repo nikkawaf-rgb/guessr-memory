@@ -19,14 +19,16 @@ export function ZonesKonvaEditor({
   const [dragStart, setDragStart] = React.useState<{ x: number; y: number } | null>(null);
   const [draft, setDraft] = React.useState<ShapeDraft | null>(null);
 
-  function handleMouseDown(e: any) {
-    const pos = e.target.getStage().getPointerPosition();
+  function handleMouseDown(e: import("konva/lib/Node").KonvaEventObject<MouseEvent>) {
+    const stage = (e.target as any).getStage?.();
+    const pos = stage?.getPointerPosition();
     if (!pos) return;
     setDragStart({ x: pos.x, y: pos.y });
   }
-  function handleMouseMove(e: any) {
+  function handleMouseMove(e: import("konva/lib/Node").KonvaEventObject<MouseEvent>) {
     if (!dragStart) return;
-    const pos = e.target.getStage().getPointerPosition();
+    const stage = (e.target as any).getStage?.();
+    const pos = stage?.getPointerPosition();
     if (!pos) return;
     if (mode === "rect") {
       const x = Math.min(dragStart.x, pos.x);
