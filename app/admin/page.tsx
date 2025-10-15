@@ -1,6 +1,7 @@
 "use client";
 import { signIn, useSession } from "next-auth/react";
 import { useState } from "react";
+import Link from "next/link";
 
 export default function AdminPage() {
   const { data: session } = useSession();
@@ -26,10 +27,10 @@ export default function AdminPage() {
       <div className="space-y-2">
         <p>Доступ получен.</p>
         <div className="flex gap-3 text-sm">
-          <a className="underline" href="/admin/upload">Загрузка фото</a>
-          <a className="underline" href="/admin/people">Люди</a>
-          <a className="underline" href="/admin/locations">Локации</a>
-          <a className="underline" href="/admin/zones">Зоны</a>
+          <Link className="underline" href="/admin/upload">Загрузка фото</Link>
+          <Link className="underline" href="/admin/people">Люди</Link>
+          <Link className="underline" href="/admin/locations">Локации</Link>
+          <Link className="underline" href="/admin/zones">Зоны</Link>
         </div>
       </div>
     </div>
