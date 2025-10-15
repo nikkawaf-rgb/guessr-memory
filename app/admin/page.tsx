@@ -23,7 +23,14 @@ export default function AdminPage() {
   return (
     <div className="max-w-3xl mx-auto p-6">
       <h1 className="text-2xl font-semibold mb-4">Админ‑панель</h1>
-      <p>Доступ получен. Дальше добавим загрузку фото, модерацию и т.д.</p>
+      <div className="space-y-2">
+        <p>Доступ получен.</p>
+        <div className="flex gap-3 text-sm">
+          <a className="underline" href="/admin/upload">Загрузка фото</a>
+          <a className="underline" href="/admin/people">Люди</a>
+          <a className="underline" href="/admin/locations">Локации</a>
+        </div>
+      </div>
     </div>
   );
 }
