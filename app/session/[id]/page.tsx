@@ -3,6 +3,7 @@ import { photoPublicUrl } from "@/app/lib/publicUrl";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import { submitGuess } from "@/app/session/actions";
+import React from "react";
 
 export default async function SessionPage({ params }: { params: { id: string } }) {
   const session = await prisma.session.findUnique({
@@ -89,7 +90,6 @@ function GuessForm({ sessionId, sessionPhotoId, peopleOptions }: { sessionId: st
 
 function TaggerField({ peopleOptions }: { peopleOptions: string[] }) {
   "use client";
-  import React from "react";
   const [names, setNames] = React.useState<string[]>([]);
   const [startAt] = React.useState<number>(() => Date.now());
   React.useEffect(() => {
