@@ -33,6 +33,8 @@ References: [Supabase — Postgres development platform](https://supabase.com/)
 - Session start API + session flow (`/api/session/start`, `app/session/[id]/page.tsx`).
 - Server action `submitGuess` with scoring (`app/session/actions.ts`).
 - Admin: People and Locations CRUD pages (`/admin/people`, `/admin/locations`).
+- Admin: Zones tool added — list and per-photo editor (`/admin/zones`, `/admin/zones/[photoId]`), basic rect helper.
+- Session page: minimal people tagger (client component), `guessedPeopleNames` + `timeSpentSec`, next-photo navigation.
 
 ## Phase 0 — Foundations (in progress)
 - [x] Prisma schema for core entities
@@ -50,18 +52,18 @@ References: [Supabase — Postgres development platform](https://supabase.com/)
 - Game session core
   - [x] Session creation (10 random active photos, per‑player randomized ordering)
   - [ ] Session progress persistence (resume between sessions)
-  - [ ] Per‑photo UI: tagging canvas (rect/circle/polygon with tolerance), city input, date input (day/month/year)
-  - [ ] People tagging answer check vs. `PhotoPeopleZone`
+  - [x] Per‑photo UI: minimal tagging UI (names list), city input, date input
+  - [ ] People tagging geometry check vs. `PhotoPeopleZone` (match inside shapes)
   - [x] Location check vs. `Location` (with aliases)
   - [x] Date check: year/month/day vs. `Photo.exifTakenAt` or admin override
   - [x] Scoring service (200 people, 200 location, 200 each Y/M/D)
-  - [ ] Time tracking per photo (for achievements later)
+  - [x] Time tracking per photo (for achievements later)
 - Comments during play
   - [ ] Inline comment box on task screen; reminder: no spoilers
   - [x] Persist and revalidate; visible later on photo page
 - Admin setup for answers
   - [x] People directory (`Person`) CRUD
-  - [ ] Photo tagging zones CRUD (`PhotoPeopleZone` with shapes)
+  - [x] Photo tagging zones CRUD (`PhotoPeopleZone`), basic rect helper; polygon/circle UI pending
   - [x] Locations CRUD with aliases
   - [ ] Photo active/hide moderation, comment moderation
 
@@ -133,10 +135,16 @@ References: [Supabase — Postgres development platform](https://supabase.com/)
 - Seasonality for leaderboards?
 
 ## Current Step (for Cursor to resume)
-1) Implement admin tool to define `PhotoPeopleZone` shapes (rect/circle/polygon) per photo.
-2) Add tagging UI in session (react‑konva) for player guesses; compare with zones and award 200 pts for full match.
-3) Track time per photo in guesses. Persist session state and navigate to next photo.
+1) Production stability: fix Supabase upload error "Invalid Compact JWS" (verify NEXT_PUBLIC_SUPABASE_URL/ANON_KEY on Vercel; Storage policies for `photos` bucket set; redeploy).
+2) Ensure prod DB has migrations applied (`prisma migrate deploy` against Production `DATABASE_URL`).
+3) People tagging geometry: implement shape comparison (rect/circle/polygon + tolerance) against `PhotoPeopleZone` and switch UI to `react‑konva` editor in admin.
+4) Admin route protection (middleware/role checks).
 
 ## Next Steps
 - Add leaderboard and basic achievements.
 - Harden APIs with validation and rate limits.
+- Improve upload path: optional server-side upload using `SUPABASE_SERVICE_ROLE_KEY` to avoid client anon permissions.
+
+## Known Issues / Risks
+- Upload in Production fails with "Invalid Compact JWS" when `NEXT_PUBLIC_SUPABASE_ANON_KEY` is invalid/mismatched; verify env vars and Storage policies; consider moving to server-side upload.
+- Possible missing prod migrations cause server exceptions on `/admin/zones/[photoId]` and `/session/[id]`.
