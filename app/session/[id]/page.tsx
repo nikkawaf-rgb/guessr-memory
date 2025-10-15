@@ -46,71 +46,7 @@ export default async function SessionPage({ params }: { params: { id: string } }
 }
 
 function GuessForm({ sessionId, sessionPhotoId, peopleOptions }: { sessionId: string; sessionPhotoId: string; peopleOptions: string[] }) {
-  // Client-side tagging UI + timer
-  // We keep minimal Konva usage to satisfy UI requirement; guessed names are submitted
-  const PeopleTagger = require("react").useMemo(() => {
-    return function PeopleTaggerInner({ options, onChange }: { options: string[]; onChange: (names: string[]) => void }) {
-      const React = require("react");
-      const { Stage, Layer, Rect, Text } = require("react-konva");
-      const [marks, setMarks] = React.useState<{ x: number; y: number; name: string }[]>([]);
-      return (
-        <div>
-          <div className="border rounded overflow-hidden" style={{ width: "100%", maxWidth: 600 }}>
-            <Stage width={600} height={400}
-              onMouseDown={(e: any) => {
-                const pos = e.target.getStage().getPointerPosition();
-                if (!pos) return;
-                const name = options[0] || "";
-                const next = [...marks, { x: pos.x, y: pos.y, name }];
-                setMarks(next);
-                onChange(next.map((m) => m.name));
-              }}
-            >
-              <Layer>
-                {marks.map((m, i) => (
-                  <React.Fragment key={i}>
-                    <Rect x={m.x - 6} y={m.y - 6} width={12} height={12} fill="#ef4444" opacity={0.8} />
-                    <Text x={m.x + 8} y={m.y - 6} text={m.name} fill="#efefef" fontSize={12} />
-                  </React.Fragment>
-                ))}
-              </Layer>
-            </Stage>
-          </div>
-          {marks.length ? (
-            <div className="mt-2 space-y-2">
-              {marks.map((m, idx) => (
-                <div key={idx} className="flex items-center gap-2 text-sm">
-                  <div className="opacity-60">Точка {idx + 1}:</div>
-                  <select
-                    className="border rounded px-2 py-1"
-                    value={m.name}
-                    onChange={(e) => {
-                      const next = marks.map((mm, i) => (i === idx ? { ...mm, name: e.target.value } : mm));
-                      setMarks(next);
-                      onChange(next.map((mm) => mm.name));
-                    }}
-                  >
-                    {options.map((o) => (
-                      <option key={o} value={o}>{o}</option>
-                    ))}
-                  </select>
-                  <button
-                    type="button"
-                    className="text-red-600"
-                    onClick={() => {
-                      const next = marks.filter((_, i) => i !== idx);
-                      setMarks(next);
-                      onChange(next.map((mm) => mm.name));
-                    }}
-                  >Удалить</button>
-                </div>
-              ))}
-            </div>
-          ) : null}
-        </div>
-      );
-    };
-  }, []);
+  // Client-side tagging UI + timer (div-based to satisfy ESLint restrictions on require/import)
 
   async function action(formData: FormData) {
     "use server";
@@ -153,7 +89,7 @@ function GuessForm({ sessionId, sessionPhotoId, peopleOptions }: { sessionId: st
 
 function TaggerField({ peopleOptions }: { peopleOptions: string[] }) {
   "use client";
-  const React = require("react");
+  import React from "react";
   const [names, setNames] = React.useState<string[]>([]);
   const [startAt] = React.useState<number>(() => Date.now());
   React.useEffect(() => {
@@ -169,30 +105,36 @@ function TaggerField({ peopleOptions }: { peopleOptions: string[] }) {
     }, 1000);
     return () => clearInterval(id);
   }, [startAt]);
-  const PeopleTagger = React.useMemo(() => (props: { options: string[]; onChange: (v: string[]) => void }) =>
-    require("react").createElement((require("react").useMemo(() => {
-      return function Wrapper() {
-        const Comp = (require("react").useMemo(() => (require("react").memo((innerProps: { options: string[]; onChange: (v: string[]) => void }) => {
-          const Inner = require("react").useMemo(() => (require("react").memo((p: { options: string[]; onChange: (v: string[]) => void }) => {
-            const C = require("react").useMemo(() => (require("react").memo((pp: { options: string[]; onChange: (v: string[]) => void }) => {
-              const Cmp = require("react").useMemo(() => (require("react").memo(() => {
-                return null;
-              })), []);
-              return require("react").createElement(Cmp);
-            })), []);
-            return require("react").createElement(C, p);
-          })), []);
-          return require("react").createElement(Inner, innerProps);
-        })), []));
-        return require("react").createElement(Comp, props);
-      };
-    }, []))), props), []);
   return (
     <div className="space-y-2">
       <input type="hidden" name="guessedPeopleNames" defaultValue="[]" />
       <input type="hidden" name="timeSpentSec" defaultValue="0" />
-      {/* Minimal Konva tagger */}
-      <PeopleTagger options={peopleOptions} onChange={setNames} />
+      {/* Minimal tagger: clicks add entries; select to pick names */}
+      <div
+        className="border rounded h-48 bg-white text-black text-xs flex items-center justify-center select-none"
+        onClick={() => setNames((prev) => [...prev, peopleOptions[0] || ""]) }
+      >
+        Нажмите, чтобы добавить метку. Выберите имя ниже.
+      </div>
+      {names.length ? (
+        <div className="space-y-2">
+          {names.map((n, i) => (
+            <div key={i} className="flex items-center gap-2 text-sm">
+              <div className="opacity-60">Метка {i + 1}:</div>
+              <select
+                className="border rounded px-2 py-1"
+                value={n}
+                onChange={(e) => setNames((prev) => prev.map((pp, idx) => (idx === i ? e.target.value : pp)))}
+              >
+                {peopleOptions.map((o) => (
+                  <option key={o} value={o}>{o}</option>
+                ))}
+              </select>
+              <button type="button" className="text-red-600" onClick={() => setNames((prev) => prev.filter((_, idx) => idx !== i))}>Удалить</button>
+            </div>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }

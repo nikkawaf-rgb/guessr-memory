@@ -2,6 +2,9 @@ import { prisma } from "@/app/lib/prisma";
 import { photoPublicUrl } from "@/app/lib/publicUrl";
 import Image from "next/image";
 import { revalidatePath } from "next/cache";
+import Link from "next/link";
+import React from "react";
+import type { ShapeType } from "@prisma/client";
 
 export const revalidate = 0;
 
@@ -16,7 +19,7 @@ async function createZone(formData: FormData) {
   try {
     const shapeData = JSON.parse(shapeDataJson);
     await prisma.photoPeopleZone.create({
-      data: { photoId, personId, shapeType: shapeType as any, shapeData, tolerancePx },
+      data: { photoId, personId, shapeType: shapeType as ShapeType, shapeData, tolerancePx },
     });
   } catch {}
   revalidatePath(`/admin/zones/${photoId}`);
@@ -41,7 +44,7 @@ export default async function AdminZonesEditorPage({ params }: { params: { photo
 
   return (
     <div className="max-w-5xl mx-auto p-6">
-      <a href="/admin/zones" className="text-sm underline">← Back</a>
+      <Link href="/admin/zones" className="text-sm underline">← Back</Link>
       <h1 className="text-2xl font-semibold mb-3">Zones for photo</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
@@ -112,19 +115,19 @@ function ZoneCanvasHelper() {
   "use client";
   // Minimal helper: draws a rectangle and prints JSON payload for shapeData
   // For full UX later, replace with react-konva interactive editor
-  const [start, setStart] = require("react").useState<{ x: number; y: number } | null>(null);
-  const [rect, setRect] = require("react").useState<{ x: number; y: number; width: number; height: number } | null>(null);
+  const [start, setStart] = React.useState<{ x: number; y: number } | null>(null);
+  const [rect, setRect] = React.useState<{ x: number; y: number; width: number; height: number } | null>(null);
   return (
     <div>
       <div
         className="select-none border rounded bg-white text-black text-xs p-2"
         style={{ height: 220, position: "relative", cursor: "crosshair" }}
-        onMouseDown={(e) => {
+        onMouseDown={(e: React.MouseEvent<HTMLDivElement>) => {
           const el = e.currentTarget as HTMLDivElement;
           const r = el.getBoundingClientRect();
           setStart({ x: e.clientX - r.left, y: e.clientY - r.top });
         }}
-        onMouseMove={(e) => {
+        onMouseMove={(e: React.MouseEvent<HTMLDivElement>) => {
           if (!start) return;
           const el = e.currentTarget as HTMLDivElement;
           const r = el.getBoundingClientRect();
