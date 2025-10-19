@@ -6,6 +6,7 @@ interface OptimizedPhotoProps {
   alt: string;
   width?: number;
   height?: number;
+  fill?: boolean;
   className?: string;
   priority?: boolean;
   sizes?: string;
@@ -17,6 +18,7 @@ export function OptimizedPhoto({
   alt,
   width,
   height,
+  fill = false,
   className = "",
   priority = false,
   sizes = "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw",
@@ -29,8 +31,9 @@ export function OptimizedPhoto({
     <Image
       src={imageSrc}
       alt={alt}
-      width={width}
-      height={height}
+      width={fill ? undefined : width}
+      height={fill ? undefined : height}
+      fill={fill}
       className={className}
       priority={priority}
       sizes={sizes}
