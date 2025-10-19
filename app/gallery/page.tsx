@@ -20,13 +20,11 @@ export default async function GalleryPage() {
           .sort((a: { comments: { id: string }[] }, b: { comments: { id: string }[] }) => b.comments.length - a.comments.length)
           .map((p: { id: string; storagePath: string; comments: { id: string }[] }) => (
             <a key={p.id} href={`/photo/${p.id}`} className="block group">
-              <div className="relative w-full h-40">
-                <PhotoThumbnail
-                  src={p.storagePath}
-                  alt="photo"
-                  className="group-hover:opacity-90"
-                />
-              </div>
+              <PhotoThumbnail
+                src={p.storagePath}
+                alt="photo"
+                className="group-hover:opacity-90"
+              />
               <div className="text-xs mt-1 opacity-70">💬 {p.comments.length}</div>
             </a>
           ))}

@@ -4,7 +4,7 @@ import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-export default function SignInPage() {
+export default function AdminSignInPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -19,16 +19,16 @@ export default function SignInPage() {
     setError("");
     
     try {
-      const result = await signIn("Player", {
+      const result = await signIn("Admin", {
         email,
         password,
         redirect: false,
       });
       
       if (result?.ok) {
-        router.push("/profile");
+        router.push("/admin");
       } else {
-        setError("Неверный email или пароль");
+        setError("Неверный email или пароль для админа");
       }
     } catch {
       setError("Ошибка входа");
@@ -39,31 +39,31 @@ export default function SignInPage() {
 
   return (
     <div className="max-w-md mx-auto mt-8 p-6 bg-white rounded-lg shadow">
-      <h1 className="text-2xl font-semibold mb-4 text-center">Вход</h1>
+      <h1 className="text-2xl font-semibold mb-4 text-center">Вход для админа</h1>
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Email
+            Email админа
           </label>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
             required
           />
         </div>
         
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Пароль
+            Пароль админа
           </label>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
             required
           />
         </div>
@@ -75,26 +75,17 @@ export default function SignInPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+          className="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
-          {loading ? "Вход..." : "Войти"}
+          {loading ? "Вход..." : "Войти как админ"}
         </button>
       </form>
       
       <div className="mt-4 text-center">
         <p className="text-sm text-gray-600">
-          Нет аккаунта?{" "}
-          <Link href="/auth/signup" className="text-blue-600 hover:underline">
-            Зарегистрироваться
-          </Link>
-        </p>
-      </div>
-      
-      <div className="mt-4 text-center">
-        <p className="text-sm text-gray-600">
-          Админ?{" "}
-          <Link href="/auth/admin" className="text-blue-600 hover:underline">
-            Войти как админ
+          Обычный пользователь?{" "}
+          <Link href="/auth/signin" className="text-blue-600 hover:underline">
+            Войти как игрок
           </Link>
         </p>
       </div>

@@ -37,10 +37,10 @@ export default async function AdminPage() {
                 Управление людьми
               </Link>
               <Link
-                href="/admin/locations"
-                className="block w-full bg-orange-600 text-white text-center py-2 px-4 rounded hover:bg-orange-700"
+                href="/admin/photos"
+                className="block w-full bg-indigo-600 text-white text-center py-2 px-4 rounded hover:bg-indigo-700"
               >
-                Управление локациями
+                Управление фото
               </Link>
             </div>
           </div>

@@ -52,15 +52,16 @@ export function PhotoThumbnail({
   className?: string;
 }) {
   return (
-    <OptimizedPhoto
-      src={src}
-      alt={alt}
-      width={200}
-      height={160}
-      className={`object-cover rounded border border-white/10 group-hover:opacity-90 ${className}`}
-      sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 200px"
-      quality={60}
-    />
+    <div className="relative w-full h-40">
+      <OptimizedPhoto
+        src={src}
+        alt={alt}
+        fill
+        className={`object-cover rounded border border-white/10 group-hover:opacity-90 ${className}`}
+        sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 200px"
+        quality={60}
+      />
+    </div>
   );
 }
 

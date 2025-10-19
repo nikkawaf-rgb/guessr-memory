@@ -49,6 +49,7 @@ export async function POST(req: NextRequest) {
       currentPhotoIndex: 0 
     });
   } catch (e: unknown) {
+    console.error("Session start error:", e);
     const message = e instanceof Error ? e.message : "unknown";
     return NextResponse.json({ error: message }, { status: 500 });
   }
