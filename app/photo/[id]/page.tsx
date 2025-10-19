@@ -4,8 +4,9 @@ import Image from "next/image";
 import { revalidatePath } from "next/cache";
 import { likeComment, reportComment } from "@/app/photo/actions";
 
-export default async function PhotoPage({ params }: { params: { id: string } }) {
-  const photo = await prisma.photo.findUnique({ where: { id: params.id } });
+export default async function PhotoPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const photo = await prisma.photo.findUnique({ where: { id } });
   if (!photo) return <div className="p-6">Фото не найдено</div>;
   const comments = await prisma.comment.findMany({
     where: { photoId: photo.id, isHidden: false },

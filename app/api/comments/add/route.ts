@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
+import { withCommentRateLimit } from "@/app/lib/rateLimitMiddleware";
 
-export async function POST(req: NextRequest) {
+async function addComment(req: NextRequest) {
   try {
     const { photoId, content, authorName } = await req.json();
     if (!photoId || typeof content !== "string") {
@@ -27,5 +28,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
+
+export const POST = withCommentRateLimit(addComment);
 
 

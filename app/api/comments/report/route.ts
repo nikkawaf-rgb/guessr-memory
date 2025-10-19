@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
+import { withReportRateLimit } from "@/app/lib/rateLimitMiddleware";
 
-export async function POST(req: NextRequest) {
+async function reportComment(req: NextRequest) {
   try {
     const { commentId, reason } = await req.json();
     if (!commentId) return NextResponse.json({ error: "commentId required" }, { status: 400 });
@@ -13,5 +14,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
+
+export const POST = withReportRateLimit(reportComment);
 
 

@@ -1,10 +1,18 @@
 import { prisma } from "@/app/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { requireAdmin } from "@/app/lib/auth";
+import { redirect } from "next/navigation";
 
 export const revalidate = 0;
 
 async function createPerson(formData: FormData) {
   "use server";
+  try {
+    await requireAdmin();
+  } catch {
+    redirect("/api/auth/signin");
+  }
+  
   const name = String(formData.get("name") || "").trim();
   const aliases = String(formData.get("aliases") || "")
     .split(",")
@@ -16,6 +24,12 @@ async function createPerson(formData: FormData) {
 }
 
 export default async function AdminPeoplePage() {
+  try {
+    await requireAdmin();
+  } catch {
+    redirect("/api/auth/signin");
+  }
+
   const people = await prisma.person.findMany({ orderBy: { displayName: "asc" }, take: 500 });
   return (
     <div className="max-w-4xl mx-auto p-6">

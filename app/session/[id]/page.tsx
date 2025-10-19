@@ -1,14 +1,14 @@
 import { prisma } from "@/app/lib/prisma";
 import { photoPublicUrl } from "@/app/lib/publicUrl";
-import Image from "next/image";
 import { redirect } from "next/navigation";
 import { submitGuess } from "@/app/session/actions";
 import React from "react";
 import { TaggerField } from "@/app/session/_components/TaggerField";
 
-export default async function SessionPage({ params }: { params: { id: string } }) {
+export default async function SessionPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const session = await prisma.session.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       sessionPhotos: {
         include: { photo: { include: { zones: { include: { person: true } } } }, guesses: true },
@@ -17,9 +17,12 @@ export default async function SessionPage({ params }: { params: { id: string } }
     },
   });
   if (!session) return <div className="p-6">Сессия не найдена</div>;
-  // find first sessionPhoto without guesses
-  const current = session.sessionPhotos.find((sp) => sp.guesses.length === 0) || null;
-  if (!current) {
+  
+  // Use currentPhotoIndex to find current photo
+  const currentPhoto = session.sessionPhotos.find(sp => sp.orderIndex === session.currentPhotoIndex);
+  
+  if (!currentPhoto) {
+    // Session completed or invalid state
     const total = await prisma.guess.aggregate({ _sum: { scoreDelta: true }, where: { sessionPhotoId: { in: session.sessionPhotos.map((s) => s.id) } } });
     return (
       <div className="max-w-3xl mx-auto p-6">
@@ -29,25 +32,31 @@ export default async function SessionPage({ params }: { params: { id: string } }
     );
   }
 
-  const currentIndex = session.sessionPhotos.findIndex((sp) => sp.id === (current?.id || ""));
+  const currentIndex = session.currentPhotoIndex;
   return (
     <div className="max-w-3xl mx-auto p-6">
       <div className="text-sm opacity-70 mb-2">Фото {currentIndex + 1} из {session.photoCount}</div>
-      <div className="relative w-full h-auto">
-        <Image
-          src={photoPublicUrl(current.photo.storagePath)}
-          alt="photo"
-          width={1200}
-          height={800}
-          className="w-full h-auto rounded object-contain"
-        />
-      </div>
-      <GuessForm sessionId={session.id} sessionPhotoId={current.id} peopleOptions={(current.photo.zones || []).map((z) => z.person.displayName)} />
+      <GuessForm 
+        sessionId={session.id} 
+        sessionPhotoId={currentPhoto.id} 
+        peopleOptions={(currentPhoto.photo.zones || []).map((z) => z.person.displayName)}
+        imageSrc={photoPublicUrl(currentPhoto.photo.storagePath)}
+      />
     </div>
   );
 }
 
-function GuessForm({ sessionId, sessionPhotoId, peopleOptions }: { sessionId: string; sessionPhotoId: string; peopleOptions: string[] }) {
+function GuessForm({ 
+  sessionId, 
+  sessionPhotoId, 
+  peopleOptions, 
+  imageSrc 
+}: { 
+  sessionId: string; 
+  sessionPhotoId: string; 
+  peopleOptions: string[];
+  imageSrc: string;
+}) {
   // Client-side tagging UI + timer (div-based to satisfy ESLint restrictions on require/import)
 
   async function action(formData: FormData) {
@@ -57,14 +66,15 @@ function GuessForm({ sessionId, sessionPhotoId, peopleOptions }: { sessionId: st
     const guessedMonth = formData.get("month") ? Number(formData.get("month")) : null;
     const guessedDay = formData.get("day") ? Number(formData.get("day")) : null;
     const guessedPeopleNames = JSON.parse(String(formData.get("guessedPeopleNames") || "[]"));
+    const guessedPeopleCoords = JSON.parse(String(formData.get("guessedPeopleCoords") || "[]"));
     const timeSpentSec = Number(formData.get("timeSpentSec") || 0) || null;
-    await submitGuess({ sessionId, sessionPhotoId, guessedCity, guessedYear, guessedMonth, guessedDay, guessedPeopleNames, timeSpentSec });
+    await submitGuess({ sessionId, sessionPhotoId, guessedCity, guessedYear, guessedMonth, guessedDay, guessedPeopleNames, guessedPeopleCoords, timeSpentSec });
     redirect(`/session/${sessionId}`);
   }
 
   return (
     <form action={action} className="mt-4 space-y-3">
-      <TaggerField peopleOptions={peopleOptions} />
+      <TaggerField peopleOptions={peopleOptions} imageSrc={imageSrc} />
       <div className="flex gap-2 items-end">
         <div>
           <label className="block text-xs opacity-70">Город</label>

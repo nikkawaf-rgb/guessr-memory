@@ -130,6 +130,7 @@ model Session {
   mode         GameMode
   photoCount   Int
   durationSec  Int?
+  currentPhotoIndex Int   @default(0) // Track current photo in session
 
   userId       String
   user         User       @relation(fields: [userId], references: [id])
@@ -171,6 +172,9 @@ model Guess {
 
   // For tagging guessed people, we store array of person names or ids the user dropped
   guessedPeopleNames String[]
+  
+  // Coordinates of user clicks for geometry validation
+  guessedPeopleCoords Json? // array of {x: number, y: number, personName: string}
 
   // Results
   peopleHitAll  Boolean   @default(false)

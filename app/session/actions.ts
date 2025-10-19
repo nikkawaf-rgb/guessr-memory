@@ -1,6 +1,8 @@
 "use server";
 import { prisma } from "@/app/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { validatePeopleTagging, type GuessedPersonCoord } from "@/app/lib/geometry";
+import { checkAndAwardAchievements } from "@/app/lib/achievements";
 
 type SubmitGuessInput = {
   sessionId: string;
@@ -10,6 +12,7 @@ type SubmitGuessInput = {
   guessedMonth?: number | null;
   guessedYear?: number | null;
   guessedPeopleNames?: string[];
+  guessedPeopleCoords?: GuessedPersonCoord[];
   timeSpentSec?: number | null;
 };
 
@@ -37,14 +40,27 @@ export async function submitGuess(input: SubmitGuessInput) {
   const monthHit = !!exif && input.guessedMonth != null && exif.getUTCMonth() + 1 === input.guessedMonth;
   const dayHit = !!exif && input.guessedDay != null && exif.getUTCDate() === input.guessedDay;
 
-  // People check (MVP: require exact full set match by names)
+  // People check with geometry validation
   let peopleHitAll = false;
-  const targetPeople = (sessionPhoto.photo.zones || []).map((z) => z.person.displayName.toLowerCase());
-  const guessPeople = (input.guessedPeopleNames || []).map((n) => n.trim().toLowerCase()).filter(Boolean);
-  if (targetPeople.length > 0) {
-    const setA = new Set(targetPeople);
-    const setB = new Set(guessPeople);
-    peopleHitAll = setA.size === setB.size && [...setA].every((n) => setB.has(n));
+  const photoZones = (sessionPhoto.photo.zones || []).map(zone => ({
+    person: { displayName: zone.person.displayName },
+    shapeType: zone.shapeType as "rect" | "circle" | "polygon",
+    shapeData: zone.shapeData as any,
+    tolerancePx: zone.tolerancePx,
+  }));
+  
+  if (photoZones.length > 0 && input.guessedPeopleCoords) {
+    const validation = validatePeopleTagging(input.guessedPeopleCoords, photoZones);
+    peopleHitAll = validation.allHit;
+  } else {
+    // Fallback to name-only check if no coordinates provided
+    const targetPeople = photoZones.map((z) => z.person.displayName.toLowerCase());
+    const guessPeople = (input.guessedPeopleNames || []).map((n) => n.trim().toLowerCase()).filter(Boolean);
+    if (targetPeople.length > 0) {
+      const setA = new Set(targetPeople);
+      const setB = new Set(guessPeople);
+      peopleHitAll = setA.size === setB.size && [...setA].every((n) => setB.has(n));
+    }
   }
 
   const scoreDelta = (peopleHitAll ? 200 : 0) + (locationHit ? 200 : 0) + (yearHit ? 200 : 0) + (monthHit ? 200 : 0) + (dayHit ? 200 : 0);
@@ -56,7 +72,8 @@ export async function submitGuess(input: SubmitGuessInput) {
       guessedDay: input.guessedDay ?? null,
       guessedMonth: input.guessedMonth ?? null,
       guessedYear: input.guessedYear ?? null,
-      guessedPeopleNames: guessPeople,
+      guessedPeopleNames: input.guessedPeopleNames || [],
+      guessedPeopleCoords: input.guessedPeopleCoords || null,
       timeSpentSec: input.timeSpentSec ?? null,
       peopleHitAll,
       locationHit,
@@ -67,7 +84,36 @@ export async function submitGuess(input: SubmitGuessInput) {
     },
   });
 
+  // Update session progress
+  const currentIndex = sessionPhoto.orderIndex;
+  const nextIndex = currentIndex + 1;
+  
+  if (nextIndex >= sessionPhoto.session.photoCount) {
+    // Session completed
+    await prisma.session.update({
+      where: { id: input.sessionId },
+      data: { 
+        finishedAt: new Date(),
+        currentPhotoIndex: nextIndex 
+      },
+    });
+  } else {
+    // Move to next photo
+    await prisma.session.update({
+      where: { id: input.sessionId },
+      data: { currentPhotoIndex: nextIndex },
+    });
+  }
+
   revalidatePath(`/session/${input.sessionId}`);
+  
+  // Check for new achievements
+  try {
+    await checkAndAwardAchievements(sessionPhoto.session.userId);
+  } catch (error) {
+    console.error("Failed to check achievements:", error);
+  }
+  
   return { ok: true as const, scoreDelta };
 }
 
