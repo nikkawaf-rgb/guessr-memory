@@ -25,6 +25,7 @@ export const submitGuessSchema = z.object({
     y: z.number().int().min(0),
     personName: z.string().min(1),
   })).optional().default([]),
+  hintsUsed: z.array(z.enum(["location", "date", "people"])).optional().default([]),
   timeSpentSec: z.number().int().min(0).optional(),
 });
 

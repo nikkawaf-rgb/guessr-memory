@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { submitGuess } from "@/app/session/actions";
 import React from "react";
 import { TaggerField } from "@/app/session/_components/TaggerField";
+import HintsComponent from "@/app/session/_components/HintsComponent";
 
 export default async function SessionPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -41,6 +42,7 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
         sessionPhotoId={currentPhoto.id} 
         peopleOptions={(currentPhoto.photo.zones || []).map((z) => z.person.displayName)}
         imageSrc={photoPublicUrl(currentPhoto.photo.storagePath)}
+        mode={session.mode}
       />
     </div>
   );
@@ -50,12 +52,14 @@ function GuessForm({
   sessionId, 
   sessionPhotoId, 
   peopleOptions, 
-  imageSrc 
+  imageSrc,
+  mode
 }: { 
   sessionId: string; 
   sessionPhotoId: string; 
   peopleOptions: string[];
   imageSrc: string;
+  mode: "ranked" | "fun";
 }) {
   // Client-side tagging UI + timer (div-based to satisfy ESLint restrictions on require/import)
 
@@ -67,13 +71,21 @@ function GuessForm({
     const guessedDay = formData.get("day") ? Number(formData.get("day")) : null;
     const guessedPeopleNames = JSON.parse(String(formData.get("guessedPeopleNames") || "[]"));
     const guessedPeopleCoords = JSON.parse(String(formData.get("guessedPeopleCoords") || "[]"));
+    const hintsUsed = JSON.parse(String(formData.get("hintsUsed") || "[]"));
     const timeSpentSec = Number(formData.get("timeSpentSec") || 0) || null;
-    await submitGuess({ sessionId, sessionPhotoId, guessedCity, guessedYear, guessedMonth, guessedDay, guessedPeopleNames, guessedPeopleCoords, timeSpentSec });
+    await submitGuess({ sessionId, sessionPhotoId, guessedCity, guessedYear, guessedMonth, guessedDay, guessedPeopleNames, guessedPeopleCoords, hintsUsed, timeSpentSec });
     redirect(`/session/${sessionId}`);
   }
 
   return (
     <form action={action} className="mt-4 space-y-3">
+      <HintsComponent 
+        photoId={sessionPhotoId} 
+        mode={mode} 
+        onHintUsed={() => {
+          // This will be handled by the client-side component
+        }} 
+      />
       <TaggerField peopleOptions={peopleOptions} imageSrc={imageSrc} />
       <div className="flex gap-2 items-end">
         <div>
@@ -94,6 +106,7 @@ function GuessForm({
         </div>
         <button className="bg-black text-white rounded px-4 py-2">Ответить</button>
       </div>
+      <input type="hidden" name="hintsUsed" value="[]" />
       <p className="text-xs opacity-60">Внимание: не оставляйте спойлеры в комментариях к фото для других игроков.</p>
     </form>
   );

@@ -3,6 +3,7 @@ import { prisma } from "@/app/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { validatePeopleTagging, type GuessedPersonCoord } from "@/app/lib/geometry";
 import { checkAndAwardAchievements } from "@/app/lib/achievements";
+import { calculateScore } from "@/app/lib/scoring";
 
 type SubmitGuessInput = {
   sessionId: string;
@@ -13,6 +14,7 @@ type SubmitGuessInput = {
   guessedYear?: number | null;
   guessedPeopleNames?: string[];
   guessedPeopleCoords?: GuessedPersonCoord[];
+  hintsUsed?: string[];
   timeSpentSec?: number | null;
 };
 
@@ -63,7 +65,25 @@ export async function submitGuess(input: SubmitGuessInput) {
     }
   }
 
-  const scoreDelta = (peopleHitAll ? 200 : 0) + (locationHit ? 200 : 0) + (yearHit ? 200 : 0) + (monthHit ? 200 : 0) + (dayHit ? 200 : 0);
+  const scoreDelta = calculateScore(
+    {
+      guessedCity: input.guessedCity,
+      guessedDay: input.guessedDay ?? undefined,
+      guessedMonth: input.guessedMonth ?? undefined,
+      guessedYear: input.guessedYear ?? undefined,
+      guessedPeopleNames: input.guessedPeopleNames,
+      timeSpentSec: input.timeSpentSec ?? undefined,
+      hintsUsed: input.hintsUsed,
+    },
+    {
+      city: sessionPhoto.photo.location?.name || "",
+      day: exif?.getUTCDate() || 0,
+      month: exif ? exif.getUTCMonth() + 1 : 0,
+      year: exif?.getUTCFullYear() || 0,
+      people: photoZones.map(zone => ({ name: zone.person.displayName })),
+    },
+    sessionPhoto.session.mode
+  );
 
   await prisma.guess.create({
     data: {
@@ -74,6 +94,7 @@ export async function submitGuess(input: SubmitGuessInput) {
       guessedYear: input.guessedYear ?? null,
       guessedPeopleNames: input.guessedPeopleNames || [],
       guessedPeopleCoords: input.guessedPeopleCoords || undefined,
+      hintsUsed: input.hintsUsed || [],
       timeSpentSec: input.timeSpentSec ?? null,
       peopleHitAll,
       locationHit,

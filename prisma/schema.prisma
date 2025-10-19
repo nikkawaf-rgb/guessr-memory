@@ -176,6 +176,9 @@ model Guess {
   
   // Coordinates of user clicks for geometry validation
   guessedPeopleCoords Json? // array of {x: number, y: number, personName: string}
+  
+  // Hints used in fun mode
+  hintsUsed String[] // array of hint types: location, date, people
 
   // Results
   peopleHitAll  Boolean   @default(false)
