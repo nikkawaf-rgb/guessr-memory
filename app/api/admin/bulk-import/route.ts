@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { requireAdmin } from "@/app/lib/auth";
 import { validateRequestBody } from "@/app/lib/validation";
 import { z } from "zod";
@@ -53,7 +54,7 @@ export async function POST(request: NextRequest) {
         isActive: true,
         // We'll set these later when admin adds metadata
         exifTakenAt: null,
-        exifRaw: null,
+        exifRaw: Prisma.JsonNull,
         locationId: null,
       },
     });
