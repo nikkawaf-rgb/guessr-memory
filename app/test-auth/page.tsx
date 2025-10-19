@@ -23,7 +23,8 @@ export default function TestAuthPage() {
             <p>User ID: {session.user?.id}</p>
             <p>Name: {session.user?.name}</p>
             <p>Email: {session.user?.email}</p>
-            <p>Role: {session.user?.role}</p>
+            <p>Role: {session.user?.role || "undefined"}</p>
+            <p>Raw session: {JSON.stringify(session, null, 2)}</p>
           </div>
         )}
       </div>

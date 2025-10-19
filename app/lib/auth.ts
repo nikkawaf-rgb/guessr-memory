@@ -17,8 +17,13 @@ export async function requireAuth() {
 export async function requireAdmin() {
   const user = await requireAuth();
   
-  // For now, any authenticated user is considered admin
-  // In the future, we can check user.role === "admin" from database
+  console.log("requireAdmin - user:", user);
+  console.log("requireAdmin - user role:", user.role);
+  
+  if (user.role !== "admin") {
+    throw new Error("Admin access required");
+  }
+  
   return user;
 }
 
