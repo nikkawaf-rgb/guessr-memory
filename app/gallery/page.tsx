@@ -1,6 +1,8 @@
 import { prisma } from "@/app/lib/prisma";
 import { photoPublicUrl } from "@/app/lib/publicUrl";
-import Image from "next/image";
+import { PhotoThumbnail } from "@/app/components/OptimizedPhoto";
+import { PhotoGridSkeleton } from "@/app/components/Skeletons";
+import { Suspense } from "react";
 
 export const revalidate = 60;
 
@@ -22,12 +24,10 @@ export default async function GalleryPage() {
           .map((p: { id: string; storagePath: string; comments: { id: string }[] }) => (
             <a key={p.id} href={`/photo/${p.id}`} className="block group">
               <div className="relative w-full h-40">
-                <Image
-                  src={photoPublicUrl(p.storagePath)}
+                <PhotoThumbnail
+                  src={p.storagePath}
                   alt="photo"
-                  fill
-                  sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 200px"
-                  className="object-cover rounded border border-white/10 group-hover:opacity-90"
+                  className="group-hover:opacity-90"
                 />
               </div>
               <div className="text-xs mt-1 opacity-70">💬 {p.comments.length}</div>

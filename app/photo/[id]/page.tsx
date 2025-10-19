@@ -1,6 +1,8 @@
 import { prisma } from "@/app/lib/prisma";
 import { photoPublicUrl } from "@/app/lib/publicUrl";
-import Image from "next/image";
+import { PhotoDetail } from "@/app/components/OptimizedPhoto";
+import { CommentSkeleton } from "@/app/components/Skeletons";
+import { Suspense } from "react";
 import { revalidatePath } from "next/cache";
 import { likeComment, reportComment } from "@/app/photo/actions";
 
@@ -18,12 +20,9 @@ export default async function PhotoPage({ params }: { params: Promise<{ id: stri
   return (
     <div className="max-w-3xl mx-auto p-6">
       <div className="relative w-full h-auto">
-        <Image
-          src={photoPublicUrl(photo.storagePath)}
+        <PhotoDetail
+          src={photo.storagePath}
           alt="photo"
-          width={1200}
-          height={800}
-          className="w-full h-auto rounded mb-4 object-contain"
         />
       </div>
       <p className="text-sm mb-2">⚠️ Не раскрывайте ответы в комментариях! Не портите игру другим!</p>

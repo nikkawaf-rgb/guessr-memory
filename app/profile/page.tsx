@@ -1,4 +1,5 @@
-"use client";
+import { ProfileSkeleton } from "@/app/components/Skeletons";
+import { Suspense } from "react";
 import { useState, useEffect } from "react";
 
 interface UserProfile {
@@ -106,7 +107,8 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <Suspense fallback={<ProfileSkeleton />}>
+      <div className="max-w-4xl mx-auto p-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">{profile.name}</h1>
         {profile.title && (
@@ -232,5 +234,6 @@ export default function ProfilePage() {
         </div>
       </div>
     </div>
+    </Suspense>
   );
 }

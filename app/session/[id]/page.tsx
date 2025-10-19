@@ -1,5 +1,8 @@
 import { prisma } from "@/app/lib/prisma";
 import { photoPublicUrl } from "@/app/lib/publicUrl";
+import { GamePhoto } from "@/app/components/OptimizedPhoto";
+import { SessionSkeleton } from "@/app/components/Skeletons";
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { submitGuess } from "@/app/session/actions";
 import React from "react";
@@ -38,14 +41,20 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
   return (
     <div className="max-w-3xl mx-auto p-6">
       <div className="text-sm opacity-70 mb-2">Фото {currentIndex + 1} из {session.photoCount}</div>
-      <GuessForm 
-        sessionId={session.id} 
-        sessionPhotoId={currentPhoto.id} 
-        peopleOptions={(currentPhoto.photo.zones || []).map((z) => z.person.displayName)}
-        imageSrc={photoPublicUrl(currentPhoto.photo.storagePath)}
-        mode={session.mode}
-        photoId={currentPhoto.photo.id}
-      />
+      <Suspense fallback={<SessionSkeleton />}>
+        <GamePhoto
+          src={currentPhoto.photo.storagePath}
+          alt="game photo"
+        />
+        <GuessForm 
+          sessionId={session.id} 
+          sessionPhotoId={currentPhoto.id} 
+          peopleOptions={(currentPhoto.photo.zones || []).map((z) => z.person.displayName)}
+          imageSrc={photoPublicUrl(currentPhoto.photo.storagePath)}
+          mode={session.mode}
+          photoId={currentPhoto.photo.id}
+        />
+      </Suspense>
     </div>
   );
 }
