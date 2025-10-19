@@ -24,11 +24,22 @@ export async function GET(req: NextRequest) {
       },
       include: {
         sessionPhotos: {
-          include: { guesses: true },
+          include: { 
+            guesses: true,
+            photo: {
+              select: {
+                id: true,
+                storagePath: true,
+                location: {
+                  select: { name: true }
+                }
+              }
+            }
+          },
         },
       },
       orderBy: { finishedAt: "desc" },
-      take: 10, // Recent sessions
+      take: 20, // Recent sessions
     });
 
     // Calculate stats
@@ -38,12 +49,27 @@ export async function GET(req: NextRequest) {
         const photoScore = sp.guesses.reduce((guessSum, guess) => guessSum + guess.scoreDelta, 0);
         return sum + photoScore;
       }, 0);
+      
+      const photos = session.sessionPhotos.map(sp => {
+        const photoScore = sp.guesses.reduce((sum, guess) => sum + guess.scoreDelta, 0);
+        const hintsUsed = sp.guesses.reduce((sum, guess) => sum + (guess.hintsUsed?.length || 0), 0);
+        
+        return {
+          id: sp.photo.id,
+          location: sp.photo.location?.name || "Неизвестно",
+          score: photoScore,
+          hintsUsed,
+        };
+      });
+      
       return {
         id: session.id,
         mode: session.mode,
         score: sessionScore,
         photoCount: session.photoCount,
         finishedAt: session.finishedAt,
+        durationSec: session.durationSec,
+        photos,
       };
     });
 

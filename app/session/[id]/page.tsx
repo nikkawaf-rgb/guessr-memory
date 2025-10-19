@@ -5,6 +5,7 @@ import { submitGuess } from "@/app/session/actions";
 import React from "react";
 import { TaggerField } from "@/app/session/_components/TaggerField";
 import HintsComponent from "@/app/session/_components/HintsComponent";
+import InlineComment from "@/app/session/_components/InlineComment";
 
 export default async function SessionPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -43,6 +44,7 @@ export default async function SessionPage({ params }: { params: Promise<{ id: st
         peopleOptions={(currentPhoto.photo.zones || []).map((z) => z.person.displayName)}
         imageSrc={photoPublicUrl(currentPhoto.photo.storagePath)}
         mode={session.mode}
+        photoId={currentPhoto.photo.id}
       />
     </div>
   );
@@ -53,13 +55,15 @@ function GuessForm({
   sessionPhotoId, 
   peopleOptions, 
   imageSrc,
-  mode
+  mode,
+  photoId
 }: { 
   sessionId: string; 
   sessionPhotoId: string; 
   peopleOptions: string[];
   imageSrc: string;
   mode: "ranked" | "fun";
+  photoId: string;
 }) {
   // Client-side tagging UI + timer (div-based to satisfy ESLint restrictions on require/import)
 
@@ -108,6 +112,8 @@ function GuessForm({
       </div>
       <input type="hidden" name="hintsUsed" value="[]" />
       <p className="text-xs opacity-60">Внимание: не оставляйте спойлеры в комментариях к фото для других игроков.</p>
+      
+      <InlineComment photoId={photoId} />
     </form>
   );
 }

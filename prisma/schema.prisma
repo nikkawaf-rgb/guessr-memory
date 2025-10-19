@@ -50,6 +50,7 @@ model User {
   provider          String?     // e.g., google, vk
   role              UserRole    @default(player)
   title             String?     // Player title based on rank/achievements
+  passwordHash      String?     // For email/password auth
 
   sessions          Session[]
   comments          Comment[]

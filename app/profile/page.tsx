@@ -21,6 +21,13 @@ interface UserProfile {
     score: number;
     photoCount: number;
     finishedAt: string;
+    durationSec?: number;
+    photos: Array<{
+      id: string;
+      location: string;
+      score: number;
+      hintsUsed: number;
+    }>;
   }>;
   achievements: Array<{
     id: string;
@@ -137,19 +144,40 @@ export default function ProfilePage() {
         <div className="bg-white rounded-lg p-6 shadow">
           <h2 className="text-xl font-semibold mb-4">Последние игры</h2>
           {profile.recentSessions.length > 0 ? (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {profile.recentSessions.map((session) => (
-                <div key={session.id} className="flex justify-between items-center p-3 bg-gray-50 rounded">
-                  <div>
-                    <div className="font-medium">
-                      {session.mode === "ranked" ? "Рейтинговый" : "Фан"} режим
+                <div key={session.id} className="border rounded-lg p-4">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <div className="font-medium">
+                        {session.mode === "ranked" ? "Рейтинговый" : "Фан"} режим
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {session.photoCount} фото • {formatDate(session.finishedAt)}
+                        {session.durationSec && (
+                          <span> • {Math.round(session.durationSec / 60)} мин</span>
+                        )}
+                      </div>
                     </div>
-                    <div className="text-sm text-gray-600">
-                      {session.photoCount} фото • {formatDate(session.finishedAt)}
+                    <div className="text-lg font-bold text-green-600">
+                      {formatScore(session.score)}
                     </div>
                   </div>
-                  <div className="text-lg font-bold text-green-600">
-                    {formatScore(session.score)}
+                  
+                  {/* Photo breakdown */}
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
+                    {session.photos.map((photo, index) => (
+                      <div key={photo.id} className="bg-gray-50 p-2 rounded">
+                        <div className="font-medium">Фото {index + 1}</div>
+                        <div className="text-gray-600">{photo.location}</div>
+                        <div className="flex justify-between">
+                          <span className="text-green-600">{formatScore(photo.score)}</span>
+                          {photo.hintsUsed > 0 && (
+                            <span className="text-orange-600">💡{photo.hintsUsed}</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               ))}
