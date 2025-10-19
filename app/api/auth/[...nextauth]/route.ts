@@ -18,9 +18,15 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials.password) return null;
-        const ok = (adminHash && bcrypt.compareSync(credentials.password, adminHash)) || credentials.password === "neverwalkalone";
-        if (!ok) return null;
-        return { id: credentials.email, email: credentials.email, name: "Admin", role: "admin" };
+        
+        // Check if it's the admin email
+        if (credentials.email === "nik-radaev@yandex.ru") {
+          const ok = (adminHash && bcrypt.compareSync(credentials.password, adminHash)) || credentials.password === "neverwalkalone";
+          if (!ok) return null;
+          return { id: credentials.email, email: credentials.email, name: "Admin", role: "admin" };
+        }
+        
+        return null;
       },
     }),
     CredentialsProvider({

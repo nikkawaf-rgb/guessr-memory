@@ -9,8 +9,15 @@ export async function POST(req: NextRequest) {
 
     // Pick up to 10 random active photos
     const photos = await prisma.photo.findMany({ where: { isActive: true }, take: 200, orderBy: { createdAt: "desc" } });
-    if (!photos.length) return NextResponse.json({ error: "no photos" }, { status: 400 });
+    console.log(`Found ${photos.length} active photos`);
+    
+    if (!photos.length) {
+      console.error("No photos found in database");
+      return NextResponse.json({ error: "No photos available. Please contact admin to upload photos." }, { status: 400 });
+    }
+    
     const shuffled = [...photos].sort(() => Math.random() - 0.5).slice(0, Math.min(10, photos.length));
+    console.log(`Selected ${shuffled.length} photos for session`);
 
     let user;
     if (userId) {
