@@ -231,6 +231,8 @@ model Report {
   id          String       @id @default(cuid())
   createdAt   DateTime     @default(now())
   resolvedAt  DateTime?
+  resolved    Boolean      @default(false)
+  resolution  String?      // "hidden", "approved", "dismissed"
   status      ReportStatus @default(open)
   reason      String?
 

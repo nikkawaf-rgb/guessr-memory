@@ -19,6 +19,7 @@ export default async function AdminPage() {
           <Link className="underline" href="/admin/people">Люди</Link>
           <Link className="underline" href="/admin/locations">Локации</Link>
           <Link className="underline" href="/admin/zones">Зоны</Link>
+          <Link className="underline" href="/admin/moderation">Модерация</Link>
         </div>
       </div>
     </div>
