@@ -27,7 +27,13 @@ export async function GET(req: NextRequest) {
         createdAt: dateFilter,
       },
       include: {
-        user: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            title: true,
+          },
+        },
         sessionPhotos: {
           include: {
             guesses: true,
@@ -46,6 +52,7 @@ export async function GET(req: NextRequest) {
       return {
         userId: session.userId,
         userName: session.user.name || "Игрок",
+        userTitle: session.user.title,
         sessionId: session.id,
         score: totalScore,
         photoCount: session.photoCount,
@@ -58,6 +65,7 @@ export async function GET(req: NextRequest) {
     const userScores = new Map<string, {
       userId: string;
       userName: string;
+      userTitle: string | null;
       bestScore: number;
       totalSessions: number;
       avgScore: number;
@@ -71,6 +79,7 @@ export async function GET(req: NextRequest) {
         userScores.set(sessionScore.userId, {
           userId: sessionScore.userId,
           userName: sessionScore.userName,
+          userTitle: sessionScore.userTitle,
           bestScore: sessionScore.score,
           totalSessions: 1,
           avgScore: sessionScore.score,

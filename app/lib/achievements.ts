@@ -1,4 +1,5 @@
 import { prisma } from "@/app/lib/prisma";
+import { updateUserTitle } from "@/app/lib/titles";
 
 export interface AchievementCheckResult {
   achievementId: string;
@@ -158,6 +159,9 @@ export async function checkAndAwardAchievements(userId: string): Promise<Achieve
           achievementId: achievement.id,
         },
       });
+
+      // Update user title after awarding achievement
+      await updateUserTitle(userId);
 
       results.push({ achievementId: achievement.id, awarded: true });
     } else {

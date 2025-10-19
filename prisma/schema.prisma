@@ -49,6 +49,7 @@ model User {
   avatarUrl         String?
   provider          String?     // e.g., google, vk
   role              UserRole    @default(player)
+  title             String?     // Player title based on rank/achievements
 
   sessions          Session[]
   comments          Comment[]

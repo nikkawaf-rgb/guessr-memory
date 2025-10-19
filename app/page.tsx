@@ -54,6 +54,23 @@ export default function Home() {
           </Link>
         </div>
 
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
+          <Link 
+            href="/profile" 
+            className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow text-center group"
+          >
+            <div className="text-4xl mb-4 group-hover:scale-110 transition-transform">👤</div>
+            <h3 className="text-xl font-semibold mb-2">Профиль</h3>
+            <p className="text-gray-600">Ваша статистика, достижения и история игр</p>
+          </Link>
+
+          <div className="bg-white rounded-lg p-6 shadow-lg text-center">
+            <div className="text-4xl mb-4">📊</div>
+            <h3 className="text-xl font-semibold mb-2">Статистика</h3>
+            <p className="text-gray-600">Скоро: детальная аналитика ваших игр</p>
+          </div>
+        </div>
+
         <div className="bg-white rounded-lg p-8 shadow-lg">
           <h2 className="text-2xl font-semibold mb-4 text-center">Как играть</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

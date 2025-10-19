@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 interface LeaderboardEntry {
   userId: string;
   userName: string;
+  userTitle: string | null;
   bestScore: number;
   totalSessions: number;
   avgScore: number;
@@ -99,6 +100,9 @@ export default function Leaderboard() {
                   </div>
                   <div>
                     <div className="font-medium">{entry.userName}</div>
+                    {entry.userTitle && (
+                      <div className="text-sm text-blue-600 font-medium">{entry.userTitle}</div>
+                    )}
                     <div className="text-sm opacity-70">
                       Лучший результат: {formatScore(entry.bestScore)} • 
                       Игр: {entry.totalSessions} • 
