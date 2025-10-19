@@ -45,7 +45,7 @@ export async function submitGuess(input: SubmitGuessInput) {
   const photoZones = (sessionPhoto.photo.zones || []).map(zone => ({
     person: { displayName: zone.person.displayName },
     shapeType: zone.shapeType as "rect" | "circle" | "polygon",
-    shapeData: zone.shapeData as any,
+    shapeData: zone.shapeData as Record<string, unknown>,
     tolerancePx: zone.tolerancePx,
   }));
   
@@ -73,7 +73,7 @@ export async function submitGuess(input: SubmitGuessInput) {
       guessedMonth: input.guessedMonth ?? null,
       guessedYear: input.guessedYear ?? null,
       guessedPeopleNames: input.guessedPeopleNames || [],
-      guessedPeopleCoords: input.guessedPeopleCoords || null,
+      guessedPeopleCoords: input.guessedPeopleCoords || undefined,
       timeSpentSec: input.timeSpentSec ?? null,
       peopleHitAll,
       locationHit,

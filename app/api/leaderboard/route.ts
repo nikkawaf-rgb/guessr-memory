@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
     const period = searchParams.get("period") || "all"; // all, daily, weekly
     const mode = searchParams.get("mode") || "ranked"; // ranked, fun
 
-    let dateFilter: { gte?: Date } = {};
+    const dateFilter: { gte?: Date } = {};
     
     if (period === "daily") {
       const today = new Date();

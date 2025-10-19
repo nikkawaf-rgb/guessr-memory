@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 interface LeaderboardEntry {
   userId: string;
@@ -23,11 +23,7 @@ export default function Leaderboard() {
   const [period, setPeriod] = useState("all");
   const [mode, setMode] = useState("ranked");
 
-  useEffect(() => {
-    loadLeaderboard();
-  }, [period, mode]);
-
-  async function loadLeaderboard() {
+  const loadLeaderboard = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch(`/api/leaderboard?period=${period}&mode=${mode}`);
@@ -40,7 +36,11 @@ export default function Leaderboard() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [period, mode]);
+
+  useEffect(() => {
+    loadLeaderboard();
+  }, [period, mode, loadLeaderboard]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("ru-RU");

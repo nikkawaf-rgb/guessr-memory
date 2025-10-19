@@ -97,7 +97,7 @@ export function validatePeopleTagging(
   photoZones: Array<{
     person: { displayName: string };
     shapeType: "rect" | "circle" | "polygon";
-    shapeData: ShapeData;
+    shapeData: Record<string, unknown>;
     tolerancePx: number;
   }>
 ): {
@@ -119,7 +119,7 @@ export function validatePeopleTagging(
       
       // Check if person name matches and point is in zone
       return coordPersonName === personName && 
-             isPointInShape(point, zone.shapeData, zone.shapeType, zone.tolerancePx);
+             isPointInShape(point, zone.shapeData as ShapeData, zone.shapeType, zone.tolerancePx);
     });
 
     if (hit) {

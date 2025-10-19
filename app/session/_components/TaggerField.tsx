@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import Image from "next/image";
 import type { GuessedPersonCoord } from "@/app/lib/geometry";
 
 export function TaggerField({ 
@@ -53,9 +54,11 @@ export function TaggerField({
       
       {/* Clickable image for tagging */}
       <div className="relative">
-        <img
+        <Image
           src={imageSrc}
           alt="tagging-target"
+          width={800}
+          height={600}
           className="w-full h-auto rounded cursor-crosshair"
           onClick={handleImageClick}
           style={{ maxHeight: '400px', objectFit: 'contain' }}
@@ -67,8 +70,8 @@ export function TaggerField({
           if (!img) return null;
           
           const rect = img.getBoundingClientRect();
-          const x = (coord.x / img.naturalWidth) * rect.width;
-          const y = (coord.y / img.naturalHeight) * rect.height;
+          const x = (coord.x / (img.naturalWidth || 800)) * rect.width;
+          const y = (coord.y / (img.naturalHeight || 600)) * rect.height;
           
           return (
             <div
