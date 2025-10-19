@@ -20,8 +20,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate request body
-    const body = await validateRequestBody(request, bulkImportSchema);
-    if (body instanceof NextResponse) return body;
+    let body;
+    try {
+      const requestBody = await request.json();
+      body = validateRequestBody(bulkImportSchema, requestBody);
+    } catch (error) {
+      return NextResponse.json(
+        { error: error instanceof Error ? error.message : "Invalid request body" },
+        { status: 400 }
+      );
+    }
 
     // Check if photo already exists
     const existingPhoto = await prisma.photo.findFirst({

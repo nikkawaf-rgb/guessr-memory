@@ -1,7 +1,6 @@
 "use client";
 
 import { ProfileSkeleton } from "@/app/components/Skeletons";
-import { Suspense } from "react";
 import { useState, useEffect } from "react";
 
 interface UserProfile {

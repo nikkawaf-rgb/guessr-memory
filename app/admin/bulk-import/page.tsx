@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { createClient } from "@supabase/supabase-js";
-import { requireAdmin } from "@/app/lib/auth";
 import { redirect } from "next/navigation";
 import { useEffect } from "react";
 

@@ -1,5 +1,4 @@
 import { prisma } from "@/app/lib/prisma";
-import { photoPublicUrl } from "@/app/lib/publicUrl";
 import { PhotoDetail } from "@/app/components/OptimizedPhoto";
 import { revalidatePath } from "next/cache";
 import { likeComment, reportComment } from "@/app/photo/actions";

@@ -1,5 +1,4 @@
 import { prisma } from "@/app/lib/prisma";
-import { photoPublicUrl } from "@/app/lib/publicUrl";
 import { PhotoThumbnail } from "@/app/components/OptimizedPhoto";
 
 export const revalidate = 60;

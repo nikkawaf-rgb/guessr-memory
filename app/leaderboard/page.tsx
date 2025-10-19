@@ -1,7 +1,6 @@
 "use client";
 
 import { LeaderboardSkeleton } from "@/app/components/Skeletons";
-import { Suspense } from "react";
 import { useState, useEffect, useCallback } from "react";
 
 interface LeaderboardEntry {
