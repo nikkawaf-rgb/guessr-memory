@@ -86,6 +86,9 @@ model Photo {
   updatedAt    DateTime   @updatedAt
 
   storagePath  String     // path/key in Supabase Storage
+  originalName String?    // original filename
+  fileSize     Int?       // file size in bytes
+  mimeType     String?    // MIME type (image/jpeg, image/png, etc.)
   width        Int?
   height       Int?
   isActive     Boolean    @default(true)
