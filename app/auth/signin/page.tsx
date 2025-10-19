@@ -18,17 +18,23 @@ export default function SignInPage() {
     setError("");
     
     try {
+      console.log("Attempting login with name:", name.trim());
       const result = await signIn("Player", {
         name: name.trim(),
         redirect: false,
       });
       
+      console.log("SignIn result:", result);
+      
       if (result?.ok) {
+        console.log("Login successful, redirecting to profile");
         router.push("/profile");
       } else {
-        setError("Ошибка входа. Попробуйте еще раз.");
+        console.error("Login failed:", result?.error);
+        setError(`Ошибка входа: ${result?.error || "Неизвестная ошибка"}`);
       }
-    } catch {
+    } catch (err) {
+      console.error("Login error:", err);
       setError("Ошибка входа");
     } finally {
       setLoading(false);

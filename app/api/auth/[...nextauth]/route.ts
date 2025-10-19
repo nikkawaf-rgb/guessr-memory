@@ -7,7 +7,7 @@ import bcrypt from "bcryptjs";
 const adminHash = process.env.ADMIN_PASSWORD_HASH ?? "";
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  // adapter: PrismaAdapter(prisma), // Temporarily disabled for debugging
   session: { strategy: "jwt" },
   providers: [
     CredentialsProvider({
@@ -37,6 +37,8 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         if (!credentials?.name) return null;
         
+        console.log("Player login attempt:", credentials.name);
+        
         // Create or find user by name
         let user = await prisma.user.findFirst({
           where: { 
@@ -46,6 +48,7 @@ export const authOptions: NextAuthOptions = {
         });
         
         if (!user) {
+          console.log("Creating new user:", credentials.name);
           // Create new user with just name
           user = await prisma.user.create({ 
             data: { 
@@ -53,6 +56,8 @@ export const authOptions: NextAuthOptions = {
               role: "player"
             } 
           });
+        } else {
+          console.log("Found existing user:", user.id);
         }
         
         return {
