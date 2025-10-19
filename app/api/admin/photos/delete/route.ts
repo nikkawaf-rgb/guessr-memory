@@ -34,7 +34,6 @@ export async function DELETE(request: NextRequest) {
       include: {
         comments: true,
         sessionPhotos: true,
-        guesses: true,
         zones: true,
       },
     });
