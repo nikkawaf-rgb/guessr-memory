@@ -1,27 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 import { withCommentRateLimit } from "@/app/lib/rateLimitMiddleware";
+import { addCommentSchema, validateRequestBody } from "@/app/lib/validation";
 
 async function addComment(req: NextRequest) {
   try {
-    const { photoId, content, authorName } = await req.json();
-    if (!photoId || typeof content !== "string") {
-      return NextResponse.json({ error: "photoId and content are required" }, { status: 400 });
-    }
-    const text = content.trim();
-    if (!text || text.length > 200) {
-      return NextResponse.json({ error: "content length 1..200" }, { status: 400 });
-    }
-    const name = (authorName || "Гость").toString().slice(0, 50);
+    const body = await req.json().catch(() => ({}));
+    const { photoId, content, authorName } = validateRequestBody(addCommentSchema, body);
+
     // Create lightweight user without email (guest) if necessary
-    const user = await prisma.user.create({ data: { name } });
+    const user = await prisma.user.create({ 
+      data: { 
+        name: authorName || "Гость"
+      } 
+    });
+    
     const comment = await prisma.comment.create({
       data: {
         photoId,
         userId: user.id,
-        content: text,
+        content,
       },
     });
+    
     return NextResponse.json({ id: comment.id });
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : "unknown";

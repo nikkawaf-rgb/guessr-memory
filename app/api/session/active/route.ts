@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
+import { userIdSchema, validateQueryParams } from "@/app/lib/validation";
+import { z } from "zod";
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
-    
-    if (!userId) {
-      return NextResponse.json({ error: "userId required" }, { status: 400 });
-    }
+    const { userId } = validateQueryParams(z.object({ userId: userIdSchema }), searchParams);
 
     // Find active sessions (not finished) for the user
     const activeSessions = await prisma.session.findMany({

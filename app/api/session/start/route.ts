@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
+import { startSessionSchema, validateRequestBody } from "@/app/lib/validation";
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
-    const mode = (body?.mode === "fun" ? "fun" : "ranked") as "ranked" | "fun";
-    const userId = body?.userId; // Optional user ID for resuming sessions
+    const { mode, userId } = validateRequestBody(startSessionSchema, body);
 
     // Pick up to 10 random active photos
     const photos = await prisma.photo.findMany({ where: { isActive: true }, take: 200, orderBy: { createdAt: "desc" } });

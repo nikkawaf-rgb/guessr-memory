@@ -1,14 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
+import { achievementQuerySchema, validateQueryParams } from "@/app/lib/validation";
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
-    
-    if (!userId) {
-      return NextResponse.json({ error: "userId required" }, { status: 400 });
-    }
+    const { userId } = validateQueryParams(achievementQuerySchema, searchParams);
 
     // Get user's achievements
     const userAchievements = await prisma.userAchievement.findMany({

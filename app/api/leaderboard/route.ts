@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
+import { leaderboardQuerySchema, validateQueryParams } from "@/app/lib/validation";
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const period = searchParams.get("period") || "all"; // all, daily, weekly
-    const mode = searchParams.get("mode") || "ranked"; // ranked, fun
+    const { period, mode } = validateQueryParams(leaderboardQuerySchema, searchParams);
 
     const dateFilter: { gte?: Date } = {};
     

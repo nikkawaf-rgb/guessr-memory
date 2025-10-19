@@ -1,14 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
+import { profileQuerySchema, validateQueryParams } from "@/app/lib/validation";
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
-    
-    if (!userId) {
-      return NextResponse.json({ error: "userId required" }, { status: 400 });
-    }
+    const { userId } = validateQueryParams(profileQuerySchema, searchParams);
 
     // Get user info
     const user = await prisma.user.findUnique({
