@@ -68,14 +68,31 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
       console.log("JWT callback - user:", user);
       console.log("JWT callback - token:", token);
+      console.log("JWT callback - account:", account);
       
+      // On first sign in, user object is available
       if (user && 'role' in user) {
         token.role = user.role;
-        console.log("Setting token role:", user.role);
+        console.log("Setting token role from user:", user.role);
       }
+      
+      // On subsequent requests, check if role exists in token
+      if (!token.role && token.sub) {
+        console.log("Token missing role, fetching from database for:", token.sub);
+        // Fetch user role from database
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.sub },
+          select: { role: true }
+        });
+        if (dbUser) {
+          token.role = dbUser.role;
+          console.log("Setting token role from database:", dbUser.role);
+        }
+      }
+      
       return token;
     },
     async session({ session, token }) {
