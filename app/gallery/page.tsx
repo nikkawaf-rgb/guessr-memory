@@ -1,8 +1,6 @@
 import { prisma } from "@/app/lib/prisma";
 import { photoPublicUrl } from "@/app/lib/publicUrl";
 import { PhotoThumbnail } from "@/app/components/OptimizedPhoto";
-import { PhotoGridSkeleton } from "@/app/components/Skeletons";
-import { Suspense } from "react";
 
 export const revalidate = 60;
 
