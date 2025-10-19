@@ -9,7 +9,6 @@ export const commentIdSchema = z.string().min(1, "Comment ID is required");
 // Session schemas
 export const startSessionSchema = z.object({
   mode: z.enum(["ranked", "fun"]).optional().default("ranked"),
-  userId: userIdSchema.optional(),
 });
 
 export const submitGuessSchema = z.object({

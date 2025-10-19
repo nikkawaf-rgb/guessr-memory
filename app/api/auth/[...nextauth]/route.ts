@@ -32,26 +32,31 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: "Player",
       credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
+        name: { label: "Имя", type: "text" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials.password) return null;
+        if (!credentials?.name) return null;
         
-        // Find user by email
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
+        // Create or find user by name
+        let user = await prisma.user.findFirst({
+          where: { 
+            name: credentials.name,
+            role: "player"
+          },
         });
         
-        if (!user || !user.passwordHash) return null;
-        
-        // Verify password
-        const isValid = await bcrypt.compare(credentials.password, user.passwordHash);
-        if (!isValid) return null;
+        if (!user) {
+          // Create new user with just name
+          user = await prisma.user.create({ 
+            data: { 
+              name: credentials.name,
+              role: "player"
+            } 
+          });
+        }
         
         return {
           id: user.id,
-          email: user.email,
           name: user.name,
           role: user.role,
         };

@@ -66,22 +66,14 @@ export default function Home() {
 
           <div className="bg-white rounded-lg p-6 shadow-lg text-center">
             <div className="text-4xl mb-4">🔐</div>
-            <h3 className="text-xl font-semibold mb-2">Войти / Регистрация</h3>
-            <p className="text-gray-600 mb-4">Создайте аккаунт для сохранения прогресса</p>
-            <div className="flex gap-2 justify-center">
-              <Link 
-                href="/auth/signin" 
-                className="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700"
-              >
-                Войти
-              </Link>
-              <Link 
-                href="/auth/signup" 
-                className="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700"
-              >
-                Регистрация
-              </Link>
-            </div>
+            <h3 className="text-xl font-semibold mb-2">Войти в игру</h3>
+            <p className="text-gray-600 mb-4">Просто введите ваше имя и начинайте играть!</p>
+            <Link 
+              href="/auth/signin" 
+              className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 inline-block"
+            >
+              🎮 Начать играть
+            </Link>
           </div>
         </div>
 

@@ -14,11 +14,17 @@ export default function PlayPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mode: "ranked" }),
       });
-      if (!res.ok) throw new Error("Failed to start session");
+      if (!res.ok) {
+        const error = await res.json();
+        alert(`Ошибка: ${error.error}`);
+        return;
+      }
       const { id } = await res.json();
       router.push(`/session/${id}`);
     } catch (e) {
       console.error(e);
+      alert("Ошибка при запуске игры");
+    } finally {
       setLoading(false);
     }
   }

@@ -5,7 +5,7 @@ import { startSessionSchema, validateRequestBody } from "@/app/lib/validation";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
-    const { mode, userId } = validateRequestBody(startSessionSchema, body);
+    const { mode } = validateRequestBody(startSessionSchema, body);
 
     // Pick up to 10 random active photos
     const photos = await prisma.photo.findMany({ where: { isActive: true }, take: 200, orderBy: { createdAt: "desc" } });
@@ -19,23 +19,13 @@ export async function POST(req: NextRequest) {
     const shuffled = [...photos].sort(() => Math.random() - 0.5).slice(0, Math.min(10, photos.length));
     console.log(`Selected ${shuffled.length} photos for session`);
 
-    let user;
-    if (userId) {
-      // Try to find existing user or create with specific ID
-      user = await prisma.user.findUnique({ where: { id: userId } });
-      if (!user) {
-        // Create user with specific ID
-        user = await prisma.user.create({ 
-          data: { 
-            id: userId,
-            name: "Игрок" 
-          } 
-        });
-      }
-    } else {
-      // Create new guest user
-      user = await prisma.user.create({ data: { name: "Гость" } });
-    }
+    // Create guest user for anonymous sessions
+    const user = await prisma.user.create({ 
+      data: { 
+        name: `Гость_${Date.now()}`,
+        role: "player"
+      } 
+    });
 
     const session = await prisma.session.create({
       data: {
