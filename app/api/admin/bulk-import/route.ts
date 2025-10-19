@@ -53,9 +53,8 @@ export async function POST(request: NextRequest) {
         isActive: true,
         // We'll set these later when admin adds metadata
         exifTakenAt: null,
-        exifLocation: null,
-        exifCamera: null,
-        exifSettings: null,
+        exifRaw: null,
+        locationId: null,
       },
     });
 
