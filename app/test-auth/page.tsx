@@ -35,7 +35,7 @@ export default function TestAuthPage() {
             onClick={() => signIn("Player", { name: "тестер" })}
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
           >
-            Login as "тестер"
+            Login as &quot;тестер&quot;
           </button>
         </div>
       ) : (
