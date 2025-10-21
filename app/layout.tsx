@@ -34,10 +34,7 @@ export default function RootLayout({
             <nav className="max-w-6xl mx-auto p-4 flex gap-4 text-sm">
               <Link href="/" className="hover:underline">Главная</Link>
               <Link href="/play" className="hover:underline">Играть</Link>
-              <Link href="/gallery" className="hover:underline">Галерея</Link>
-              <Link href="/users" className="hover:underline">Участники</Link>
               <Link href="/leaderboard" className="hover:underline">Лидерборд</Link>
-              <Link href="/admin" className="ml-auto hover:underline">Админ</Link>
             </nav>
           </header>
           <main className="min-h-screen">{children}</main>

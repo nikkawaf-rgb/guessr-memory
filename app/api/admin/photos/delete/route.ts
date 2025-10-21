@@ -2,9 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,14 +32,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Удалить из Supabase Storage
-    const cleanPath = photo.storagePath.replace(/^photos\//, "");
-    const { error: storageError } = await supabase.storage
-      .from("photos")
-      .remove([cleanPath]);
+    // Удалить из Supabase Storage (если настроен)
+    if (supabaseUrl && supabaseServiceKey) {
+      try {
+        const supabase = createClient(supabaseUrl, supabaseServiceKey);
+        const cleanPath = photo.storagePath.replace(/^photos\//, "");
+        const { error: storageError } = await supabase.storage
+          .from("photos")
+          .remove([cleanPath]);
 
-    if (storageError) {
-      console.error("Error deleting from storage:", storageError);
+        if (storageError) {
+          console.error("Error deleting from storage:", storageError);
+        }
+      } catch (err) {
+        console.error("Supabase deletion failed:", err);
+        // Продолжаем даже если не удалось удалить из storage
+      }
     }
 
     // Удалить из базы данных (каскадное удаление удалит связанные записи)
@@ -51,8 +58,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting photo:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { error: "Failed to delete photo" },
+      { error: "Failed to delete photo", details: errorMessage },
       { status: 500 }
     );
   }
