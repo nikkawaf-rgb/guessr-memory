@@ -97,6 +97,9 @@ export async function POST(request: NextRequest) {
     // Создаем Set с ID фото, у которых есть спецвопросы
     const specialPhotoIds = new Set(selectedSpecial.map(p => p.id));
 
+    // Отслеживаем, сколько спецвопросов уже назначено
+    let specialQuestionsAssigned = 0;
+
     // Создать сессию
     const session = await prisma.session.create({
       data: {
@@ -105,12 +108,22 @@ export async function POST(request: NextRequest) {
         totalScore: 0,
         currentPhotoIndex: 0,
         sessionPhotos: {
-          create: finalShuffled.map((photo, index) => ({
-            photoId: photo.id,
-            orderIndex: index,
-            // showSpecial = true только для фото со спецвопросами
-            showSpecial: specialPhotoIds.has(photo.id),
-          })),
+          create: finalShuffled.map((photo, index) => {
+            // Проверяем, есть ли у фото спецвопрос И не превышен ли лимит
+            const hasSpecialQuestion = specialPhotoIds.has(photo.id);
+            const shouldShowSpecial = hasSpecialQuestion && specialQuestionsAssigned < SPECIAL_QUESTIONS_COUNT;
+            
+            if (shouldShowSpecial) {
+              specialQuestionsAssigned++;
+            }
+
+            return {
+              photoId: photo.id,
+              orderIndex: index,
+              // showSpecial = true только для первых 2 фото со спецвопросами
+              showSpecial: shouldShowSpecial,
+            };
+          }),
         },
       },
     });
