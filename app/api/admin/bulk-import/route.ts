@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
         mimeType: body.mimeType,
         isActive: true,
         exifTakenAt,
-        exifRaw: body.exifData ? (body.exifData as Prisma.JsonValue) : Prisma.JsonNull,
+        exifRaw: body.exifData ? body.exifData : Prisma.JsonNull,
       },
     });
 
