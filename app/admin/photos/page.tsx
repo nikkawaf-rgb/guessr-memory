@@ -73,8 +73,8 @@ export default function AdminPhotosPage() {
 
   const getPhotoUrl = (storagePath: string) => {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://jdrsmlnngkniwgwdrnok.supabase.co";
-    // storagePath already contains "photos/filename.jpg"
-    return `${supabaseUrl}/storage/v1/object/public/${storagePath}`;
+    // storagePath is just the filename, add the bucket "photos"
+    return `${supabaseUrl}/storage/v1/object/public/photos/${storagePath}`;
   };
 
   if (isAdmin === null || loading) {

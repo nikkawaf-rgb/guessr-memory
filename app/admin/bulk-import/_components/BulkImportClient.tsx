@@ -61,7 +61,8 @@ export default function BulkImportClient() {
         // Upload to Supabase Storage
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-        const filePath = `photos/${fileName}`;
+        // filePath should just be the filename, bucket is already "photos"
+        const filePath = fileName;
 
         const { error: uploadError } = await supabase.storage
           .from('photos')
