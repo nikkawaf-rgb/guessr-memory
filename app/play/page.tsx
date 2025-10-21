@@ -29,15 +29,18 @@ export default function PlayPage() {
         body: JSON.stringify({ playerName }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error("Failed to start session");
+        console.error("Server error:", data);
+        alert(data.error || "Ошибка при создании игры. Попробуйте еще раз.");
+        return;
       }
 
-      const data = await response.json();
       router.push(`/session/${data.sessionId}`);
     } catch (error) {
       console.error("Error starting game:", error);
-      alert("Ошибка при создании игры. Попробуйте еще раз.");
+      alert("Ошибка при создании игры. Проверьте консоль для деталей.");
     } finally {
       setLoading(false);
     }

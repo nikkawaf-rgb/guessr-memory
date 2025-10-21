@@ -89,8 +89,9 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error starting session:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { error: "Failed to start session" },
+      { error: "Failed to start session", details: errorMessage },
       { status: 500 }
     );
   }

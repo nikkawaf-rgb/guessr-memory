@@ -45,8 +45,6 @@ export default function AdminPhotosPage() {
   };
 
   const handleDelete = async (photoId: string) => {
-    if (!confirm("Вы уверены, что хотите удалить эту фотографию?")) return;
-
     try {
       const response = await fetch("/api/admin/photos/delete", {
         method: "POST",
@@ -56,7 +54,7 @@ export default function AdminPhotosPage() {
 
       if (!response.ok) throw new Error("Failed to delete photo");
 
-      alert("Фотография удалена");
+      // Просто перезагружаем список без уведомления
       loadPhotos();
     } catch (error) {
       console.error("Error deleting photo:", error);

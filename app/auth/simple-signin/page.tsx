@@ -18,8 +18,8 @@ export default function SimpleSignInPage() {
       // Сохраняем имя в localStorage
       localStorage.setItem("playerName", name.trim());
       
-      // Перенаправляем на главную
-      router.push("/");
+      // Перенаправляем на страницу игры
+      router.push("/play");
     } catch (error) {
       console.error("Error:", error);
       alert("Ошибка входа");
