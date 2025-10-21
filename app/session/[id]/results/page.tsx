@@ -76,7 +76,6 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
           <div className="space-y-4">
             {answeredPhotos.map((sp, index) => {
               const guess = sp.guess!;
-              const correctDate = new Date(sp.photo.exifTakenAt!);
               
               return (
                 <div key={sp.id} className="border border-gray-200 rounded-lg p-4">

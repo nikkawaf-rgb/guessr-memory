@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 interface GuessResult {
   yearHit: boolean;
@@ -54,7 +53,6 @@ export default function SessionGameClient({
   const [showResult, setShowResult] = useState(false);
   const [result, setResult] = useState<GuessResult | null>(null);
   const [newTotalScore, setNewTotalScore] = useState(session.totalScore);
-  const router = useRouter();
 
   const getPhotoUrl = (storagePath: string) => {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://jdrsmlnngkniwgwdrnok.supabase.co";

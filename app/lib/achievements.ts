@@ -145,7 +145,7 @@ async function getUserStats(userId: string) {
   let correctDays = 0;
   let correctSpecialQuestions = 0;
   let bestScore = 0;
-  let recentScores: number[] = [];
+  const recentScores: number[] = [];
   let recordBreaks = 0;
   let currentRecord = 0;
 
@@ -264,7 +264,7 @@ function checkHeadshot(correctDays: number): string | null {
   return correctDays >= 20 ? 'headshot' : null;
 }
 
-function checkAce(userStats: any): string | null {
+function checkAce(userStats: UserStats): string | null {
   return userStats.allAbove10k ? 'ace' : null;
 }
 
@@ -293,7 +293,7 @@ function checkFatality(stats: SessionStats): string | null {
   return null;
 }
 
-function checkRespawn(userStats: any): string | null {
+function checkRespawn(userStats: UserStats): string | null {
   return userStats.gamesToday >= 10 ? 'respawn' : null;
 }
 
@@ -340,7 +340,7 @@ function checkRenderComplete(totalGames: number): string | null {
   return totalGames >= 50 ? 'render_complete' : null;
 }
 
-function checkSubdivisionSurface(userStats: any): string | null {
+function checkSubdivisionSurface(userStats: UserStats): string | null {
   return userStats.recordBreaks >= 5 ? 'subdivision_surface' : null;
 }
 
@@ -364,7 +364,7 @@ function check3DProjection(stats: SessionStats): string | null {
   return combos >= 7 ? '3d_projection' : null;
 }
 
-function checkOrbitalSpeed(userStats: any): string | null {
+function checkOrbitalSpeed(userStats: UserStats): string | null {
   return userStats.allAbove8k ? 'orbital_speed' : null;
 }
 
@@ -372,7 +372,7 @@ function checkSoftLanding(stats: SessionStats): string | null {
   return (stats.totalScore >= 9500 && stats.totalScore <= 10500) ? 'soft_landing' : null;
 }
 
-function checkTrajectoryApogee(userStats: any): string | null {
+function checkTrajectoryApogee(userStats: UserStats): string | null {
   return userStats.recordBreaks >= 10 ? 'trajectory_apogee' : null;
 }
 
@@ -388,7 +388,7 @@ function checkPowderEngine(stats: SessionStats): string | null {
   return last3Score >= 3000 ? 'powder_engine' : null;
 }
 
-function checkStabilizers(userStats: any): string | null {
+function checkStabilizers(userStats: UserStats): string | null {
   return userStats.stableGames ? 'stabilizers' : null;
 }
 
