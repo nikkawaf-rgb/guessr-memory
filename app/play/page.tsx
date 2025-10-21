@@ -1,60 +1,88 @@
 "use client";
-import { useState } from "react";
+
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function PlayPage() {
-  const router = useRouter();
+  const [playerName, setPlayerName] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
-  async function start() {
+  useEffect(() => {
+    const name = localStorage.getItem("playerName");
+    if (!name) {
+      router.push("/auth/simple-signin");
+      return;
+    }
+    setPlayerName(name);
+  }, [router]);
+
+  const handleStartGame = async () => {
+    if (!playerName) return;
+
+    setLoading(true);
     try {
-      setLoading(true);
-      const res = await fetch("/api/session/start", {
+      const response = await fetch("/api/session/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mode: "ranked" }),
+        body: JSON.stringify({ playerName }),
       });
-      if (!res.ok) {
-        const error = await res.json();
-        alert(`Ошибка: ${error.error}`);
-        return;
+
+      if (!response.ok) {
+        throw new Error("Failed to start session");
       }
-      const { id } = await res.json();
-      router.push(`/session/${id}`);
-    } catch (e) {
-      console.error(e);
-      alert("Ошибка при запуске игры");
+
+      const data = await response.json();
+      router.push(`/session/${data.sessionId}`);
+    } catch (error) {
+      console.error("Error starting game:", error);
+      alert("Ошибка при создании игры. Попробуйте еще раз.");
     } finally {
       setLoading(false);
     }
+  };
+
+  if (playerName === null) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
-      <h1 className="text-2xl font-semibold mb-4">Играть</h1>
-      
-      <div className="text-center py-12">
-        <div className="mb-8">
-          <h2 className="text-xl font-medium mb-4">Memory Keeper</h2>
-          <p className="text-gray-600 mb-6">
-            Угадайте место, дату и людей на фотографиях из ваших воспоминаний
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
+      <div className="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full">
+        <h1 className="text-3xl font-bold text-center mb-4 text-gray-800">
+          Рейтинговая игра
+        </h1>
+        <p className="text-center text-gray-600 mb-8">
+          Угадайте даты на 10 фотографиях и заработайте очки
+        </p>
+
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+          <p className="text-sm text-yellow-800">
+            ⚠️ Если вы выйдете из игры до её завершения, ваш прогресс не сохранится
           </p>
         </div>
-        
-        <button 
-          disabled={loading} 
-          onClick={start} 
-          className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold py-4 px-8 rounded-lg shadow-lg hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+
+        <button
+          onClick={handleStartGame}
+          disabled={loading}
+          className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 px-6 rounded-lg font-bold text-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
         >
-          {loading ? "Запуск игры..." : "🎮 Начать новую игру"}
+          {loading ? "Подготовка игры..." : "Начать игру"}
         </button>
-        
-        <p className="text-sm text-gray-500 mt-4">
-          ⚠️ При выходе из игры ваш прогресс не сохранится
-        </p>
+
+        <div className="mt-6 text-center">
+          <a
+            href="/"
+            className="text-gray-600 hover:text-blue-600 transition-colors text-sm"
+          >
+            ← Вернуться на главную
+          </a>
+        </div>
       </div>
     </div>
   );
 }
-
-

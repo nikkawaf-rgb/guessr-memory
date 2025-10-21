@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 import { Prisma } from "@prisma/client";
-import { requireAdmin } from "@/app/lib/auth";
-import { validateRequestBody } from "@/app/lib/validation";
 import { z } from "zod";
 
 const bulkImportSchema = z.object({
@@ -10,21 +8,16 @@ const bulkImportSchema = z.object({
   originalName: z.string().min(1),
   fileSize: z.number().positive(),
   mimeType: z.string().min(1),
+  exifData: z.any().optional(), // EXIF data from client
 });
 
 export async function POST(request: NextRequest) {
   try {
-    // Check admin authentication
-    const admin = await requireAdmin();
-    if (!admin) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     // Validate request body
     let body;
     try {
       const requestBody = await request.json();
-      body = validateRequestBody(bulkImportSchema, requestBody);
+      body = bulkImportSchema.parse(requestBody);
     } catch (error) {
       return NextResponse.json(
         { error: error instanceof Error ? error.message : "Invalid request body" },
@@ -44,6 +37,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Parse EXIF date if available
+    let exifTakenAt: Date | null = null;
+    if (body.exifData) {
+      try {
+        // Try to parse date from various EXIF fields
+        const dateString = 
+          body.exifData.DateTimeOriginal ||
+          body.exifData.DateTime ||
+          body.exifData.CreateDate;
+        
+        if (dateString) {
+          // EXIF dates are in format "YYYY:MM:DD HH:MM:SS"
+          const parsed = dateString.replace(/^(\d{4}):(\d{2}):(\d{2})/, "$1-$2-$3");
+          exifTakenAt = new Date(parsed);
+          
+          // Validate the date
+          if (isNaN(exifTakenAt.getTime())) {
+            exifTakenAt = null;
+          }
+        }
+      } catch (error) {
+        console.error("Error parsing EXIF date:", error);
+      }
+    }
+
     // Create photo record
     const photo = await prisma.photo.create({
       data: {
@@ -52,17 +70,18 @@ export async function POST(request: NextRequest) {
         fileSize: body.fileSize,
         mimeType: body.mimeType,
         isActive: true,
-        // We'll set these later when admin adds metadata
-        exifTakenAt: null,
-        exifRaw: Prisma.JsonNull,
-        locationId: null,
+        exifTakenAt,
+        exifRaw: body.exifData ? (body.exifData as Prisma.JsonValue) : Prisma.JsonNull,
       },
     });
 
     return NextResponse.json({ 
       success: true, 
       photoId: photo.id,
-      message: "Photo imported successfully" 
+      hasDate: !!exifTakenAt,
+      message: exifTakenAt 
+        ? "Photo imported with EXIF date" 
+        : "Photo imported without date (won't be used in game)"
     });
 
   } catch (error) {

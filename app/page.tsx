@@ -1,106 +1,109 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-export default function Home() {
+export default function HomePage() {
+  const [playerName, setPlayerName] = useState<string | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const name = localStorage.getItem("playerName");
+    setPlayerName(name);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("playerName");
+    setPlayerName(null);
+  };
+
+  if (playerName === null) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!playerName) {
+    router.push("/auth/simple-signin");
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="max-w-6xl mx-auto px-4 py-16">
-        <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">
-            Memory Keeper
-          </h1>
-          <p className="text-xl text-gray-600 mb-8">
-            Угадайте людей, места и даты на фотографиях
-          </p>
-          <p className="text-lg text-gray-500 max-w-2xl mx-auto">
-            Игра в стиле GeoGuessr с галереей фотографий. Тегируйте людей, угадывайте города и даты для получения очков.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-          <Link 
-            href="/play" 
-            className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow text-center group"
-          >
-            <div className="text-4xl mb-4 group-hover:scale-110 transition-transform">🎮</div>
-            <h3 className="text-xl font-semibold mb-2">Играть</h3>
-            <p className="text-gray-600">Начните новую игру или продолжите существующую сессию</p>
-          </Link>
-
-          <Link 
-            href="/gallery" 
-            className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow text-center group"
-          >
-            <div className="text-4xl mb-4 group-hover:scale-110 transition-transform">🖼️</div>
-            <h3 className="text-xl font-semibold mb-2">Галерея</h3>
-            <p className="text-gray-600">Просматривайте фотографии и оставляйте комментарии</p>
-          </Link>
-
-          <Link 
-            href="/leaderboard" 
-            className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow text-center group"
-          >
-            <div className="text-4xl mb-4 group-hover:scale-110 transition-transform">🏆</div>
-            <h3 className="text-xl font-semibold mb-2">Лидерборд</h3>
-            <p className="text-gray-600">Смотрите рейтинги лучших игроков</p>
-          </Link>
-
-          <Link 
-            href="/achievements" 
-            className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow text-center group"
-          >
-            <div className="text-4xl mb-4 group-hover:scale-110 transition-transform">🎖️</div>
-            <h3 className="text-xl font-semibold mb-2">Достижения</h3>
-            <p className="text-gray-600">Отслеживайте свои достижения и прогресс</p>
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
-          <Link 
-            href="/profile" 
-            className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow text-center group"
-          >
-            <div className="text-4xl mb-4 group-hover:scale-110 transition-transform">👤</div>
-            <h3 className="text-xl font-semibold mb-2">Профиль</h3>
-            <p className="text-gray-600">Ваша статистика, достижения и история игр</p>
-          </Link>
-
-          <div className="bg-white rounded-lg p-6 shadow-lg text-center">
-            <div className="text-4xl mb-4">🔐</div>
-            <h3 className="text-xl font-semibold mb-2">Войти в игру</h3>
-            <p className="text-gray-600 mb-4">Просто введите ваше имя и начинайте играть!</p>
-            <Link 
-              href="/auth/signin" 
-              className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 inline-block"
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-800">Memory Keeper</h1>
+              <p className="text-gray-600 mt-1">Привет, {playerName}!</p>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 text-sm bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
             >
-              🎮 Начать играть
-            </Link>
+              Выйти
+            </button>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg p-8 shadow-lg">
-          <h2 className="text-2xl font-semibold mb-4 text-center">Как играть</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Main Actions */}
+        <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          {/* Play Game */}
+          <Link
+            href="/play"
+            className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white p-8 rounded-xl shadow-xl hover:shadow-2xl transition-all transform hover:scale-105"
+          >
             <div className="text-center">
-              <div className="text-3xl mb-3">👥</div>
-              <h3 className="font-semibold mb-2">Тегируйте людей</h3>
-              <p className="text-gray-600">Кликайте на изображение, чтобы отметить людей и выбрать их имена</p>
+              <div className="text-5xl mb-4">🎮</div>
+              <h2 className="text-2xl font-bold mb-2">Играть</h2>
+              <p className="text-blue-100">
+                Начните новую рейтинговую игру и угадывайте даты на фотографиях
+              </p>
             </div>
+          </Link>
+
+          {/* Leaderboard */}
+          <Link
+            href="/leaderboard"
+            className="bg-gradient-to-br from-amber-500 to-orange-600 text-white p-8 rounded-xl shadow-xl hover:shadow-2xl transition-all transform hover:scale-105"
+          >
             <div className="text-center">
-              <div className="text-3xl mb-3">📍</div>
-              <h3 className="font-semibold mb-2">Угадайте место</h3>
-              <p className="text-gray-600">Введите название города, где была сделана фотография</p>
+              <div className="text-5xl mb-4">🏆</div>
+              <h2 className="text-2xl font-bold mb-2">Лидерборд</h2>
+              <p className="text-amber-100">
+                Посмотрите лучшие результаты игроков
+              </p>
             </div>
-            <div className="text-center">
-              <div className="text-3xl mb-3">📅</div>
-              <h3 className="font-semibold mb-2">Определите дату</h3>
-              <p className="text-gray-600">Укажите год, месяц и день съемки</p>
-            </div>
-          </div>
-          <div className="mt-6 text-center">
-            <p className="text-gray-600">
-              <strong>Система очков:</strong> Люди (200), Место (200), Год (200), Месяц (200), День (200) = максимум 1000 очков за фото
-            </p>
-          </div>
+          </Link>
+        </div>
+
+        {/* Rules */}
+        <div className="bg-white rounded-lg shadow-lg p-6 mt-8 max-w-4xl mx-auto">
+          <h3 className="text-xl font-bold text-gray-800 mb-4">Правила игры</h3>
+          <ul className="space-y-2 text-gray-700">
+            <li className="flex items-start">
+              <span className="text-blue-600 mr-2">•</span>
+              Вам будет показано 10 фотографий
+            </li>
+            <li className="flex items-start">
+              <span className="text-blue-600 mr-2">•</span>
+              Угадайте дату съемки: год, месяц и день
+            </li>
+            <li className="flex items-start">
+              <span className="text-blue-600 mr-2">•</span>
+              Чем точнее ответ, тем больше очков
+            </li>
+            <li className="flex items-start">
+              <span className="text-blue-600 mr-2">•</span>
+              Завершенные игры попадают в лидерборд
+            </li>
+          </ul>
         </div>
       </div>
     </div>

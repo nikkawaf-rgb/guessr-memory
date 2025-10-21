@@ -1,58 +1,176 @@
-import { prisma } from "@/app/lib/prisma";
-import { requireAdmin } from "@/app/lib/auth";
-import { redirect } from "next/navigation";
-import { PhotoThumbnail } from "@/app/components/OptimizedPhoto";
-import DeletePhotoButton from "./_components/DeletePhotoButton";
+"use client";
 
-export default async function ManagePhotosPage() {
-  try {
-    await requireAdmin();
-  } catch {
-    redirect("/api/auth/signin");
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+
+interface PhotoData {
+  id: string;
+  storagePath: string;
+  originalName: string | null;
+  exifTakenAt: string | null;
+  width: number | null;
+  height: number | null;
+  isActive: boolean;
+}
+
+export default function AdminPhotosPage() {
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [photos, setPhotos] = useState<PhotoData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    const adminFlag = localStorage.getItem("isAdmin");
+    if (adminFlag !== "true") {
+      router.push("/admin_enter");
+      return;
+    }
+    setIsAdmin(true);
+    loadPhotos();
+  }, [router]);
+
+  const loadPhotos = async () => {
+    try {
+      const response = await fetch("/api/admin/photos");
+      if (!response.ok) throw new Error("Failed to load photos");
+      const data = await response.json();
+      setPhotos(data.photos);
+    } catch (error) {
+      console.error("Error loading photos:", error);
+      alert("Ошибка загрузки фотографий");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (photoId: string) => {
+    if (!confirm("Вы уверены, что хотите удалить эту фотографию?")) return;
+
+    try {
+      const response = await fetch("/api/admin/photos/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ photoId }),
+      });
+
+      if (!response.ok) throw new Error("Failed to delete photo");
+
+      alert("Фотография удалена");
+      loadPhotos();
+    } catch (error) {
+      console.error("Error deleting photo:", error);
+      alert("Ошибка при удалении фотографии");
+    }
+  };
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return "Нет даты";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("ru-RU", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  const getPhotoUrl = (storagePath: string) => {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://jdrsmlnngkniwgwdrnok.supabase.co";
+    const cleanPath = storagePath.replace(/^photos\//, "");
+    return `${supabaseUrl}/storage/v1/object/public/photos/${cleanPath}`;
+  };
+
+  if (isAdmin === null || loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
   }
 
-  const photos = await prisma.photo.findMany({
-    where: { isActive: true },
-    include: { 
-      comments: { select: { id: true }, where: { isHidden: false } },
-      _count: {
-        select: {
-          comments: true,
-          sessionPhotos: true,
-          zones: true,
-        }
-      }
-    },
-    orderBy: { createdAt: "desc" },
-    take: 100,
-  });
-
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      <h1 className="text-2xl font-semibold mb-4">Управление фотографиями</h1>
-      <p className="text-sm mb-4">Всего активных фотографий: {photos.length}</p>
-      
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-        {photos.map((photo) => (
-          <div key={photo.id} className="border rounded p-3 bg-white/5">
-            <PhotoThumbnail
-              src={photo.storagePath}
-              alt="photo"
-              className="mb-2"
-            />
-            <div className="text-xs space-y-1">
-              <div>💬 {photo._count.comments}</div>
-              <div>🎮 {photo._count.sessionPhotos}</div>
-              <div>👥 {photo._count.zones}</div>
-              <div className="text-gray-400">
-                {photo.originalName || "Без имени"}
-              </div>
-            </div>
-            <div className="mt-2">
-              <DeletePhotoButton photoId={photo.id} />
-            </div>
+    <div className="min-h-screen bg-gray-100 py-8">
+      <div className="container mx-auto px-4">
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+          <div className="flex justify-between items-center">
+            <h1 className="text-3xl font-bold text-gray-800">📸 Фотографии</h1>
+            <a
+              href="/admin"
+              className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+            >
+              ← Назад
+            </a>
           </div>
-        ))}
+          <p className="text-gray-600 mt-2">
+            Всего фотографий: {photos.length}
+          </p>
+        </div>
+
+        {photos.length === 0 ? (
+          <div className="bg-white rounded-lg shadow-lg p-12 text-center">
+            <p className="text-gray-500 text-lg">Нет загруженных фотографий</p>
+            <a
+              href="/admin/bulk-import"
+              className="mt-4 inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Загрузить фотографии
+            </a>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {photos.map((photo) => (
+              <div key={photo.id} className="bg-white rounded-lg shadow-lg overflow-hidden">
+                <div className="relative w-full h-64 bg-gray-200">
+                  <Image
+                    src={getPhotoUrl(photo.storagePath)}
+                    alt={photo.originalName || "Photo"}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <div className="p-4">
+                  <div className="mb-2">
+                    <div className="text-sm text-gray-600">Название:</div>
+                    <div className="font-semibold text-gray-800 truncate">
+                      {photo.originalName || "Без названия"}
+                    </div>
+                  </div>
+                  <div className="mb-2">
+                    <div className="text-sm text-gray-600">Дата съемки:</div>
+                    <div className="font-semibold text-blue-600">
+                      {formatDate(photo.exifTakenAt)}
+                    </div>
+                  </div>
+                  {photo.width && photo.height && (
+                    <div className="mb-2">
+                      <div className="text-sm text-gray-600">Размер:</div>
+                      <div className="text-sm text-gray-800">
+                        {photo.width} × {photo.height}
+                      </div>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between mt-4">
+                    <span
+                      className={`px-2 py-1 text-xs rounded ${
+                        photo.isActive
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
+                      {photo.isActive ? "Активна" : "Неактивна"}
+                    </span>
+                    <button
+                      onClick={() => handleDelete(photo.id)}
+                      className="px-4 py-2 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors"
+                    >
+                      Удалить
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,113 +1,43 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
-import { leaderboardQuerySchema, validateQueryParams } from "@/app/lib/validation";
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
-    const { searchParams } = new URL(req.url);
-    const { period, mode } = validateQueryParams(leaderboardQuerySchema, searchParams);
-
-    const dateFilter: { gte?: Date } = {};
-    
-    if (period === "daily") {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      dateFilter.gte = today;
-    } else if (period === "weekly") {
-      const weekAgo = new Date();
-      weekAgo.setDate(weekAgo.getDate() - 7);
-      dateFilter.gte = weekAgo;
-    }
-
-    // Get completed sessions with scores
+    // Получить все завершенные сессии, отсортированные по очкам
     const sessions = await prisma.session.findMany({
       where: {
-        mode: mode as "ranked" | "fun",
-        finishedAt: { not: null },
-        createdAt: dateFilter,
+        finishedAt: {
+          not: null,
+        },
       },
       include: {
         user: {
           select: {
-            id: true,
             name: true,
-            title: true,
-          },
-        },
-        sessionPhotos: {
-          include: {
-            guesses: true,
           },
         },
       },
+      orderBy: [
+        { totalScore: "desc" },
+        { finishedAt: "asc" }, // При равных очках - кто раньше
+      ],
+      take: 100, // Топ-100
     });
 
-    // Calculate scores for each session
-    const sessionScores = sessions.map(session => {
-      const totalScore = session.sessionPhotos.reduce((sum, sp) => {
-        const sessionScore = sp.guesses.reduce((guessSum, guess) => guessSum + guess.scoreDelta, 0);
-        return sum + sessionScore;
-      }, 0);
-      
-      return {
-        userId: session.userId,
-        userName: session.user.name || "Игрок",
-        userTitle: session.user.title,
-        sessionId: session.id,
-        score: totalScore,
-        photoCount: session.photoCount,
-        finishedAt: session.finishedAt,
-        createdAt: session.createdAt,
-      };
-    });
+    const entries = sessions.map((session, index) => ({
+      rank: index + 1,
+      userName: session.user.name,
+      totalScore: session.totalScore,
+      finishedAt: session.finishedAt!.toISOString(),
+      sessionId: session.id,
+    }));
 
-    // Group by user and get best scores
-    const userScores = new Map<string, {
-      userId: string;
-      userName: string;
-      userTitle: string | null;
-      bestScore: number;
-      totalSessions: number;
-      avgScore: number;
-      lastPlayed: Date;
-    }>();
-
-    sessionScores.forEach(sessionScore => {
-      const existing = userScores.get(sessionScore.userId);
-      
-      if (!existing) {
-        userScores.set(sessionScore.userId, {
-          userId: sessionScore.userId,
-          userName: sessionScore.userName,
-          userTitle: sessionScore.userTitle,
-          bestScore: sessionScore.score,
-          totalSessions: 1,
-          avgScore: sessionScore.score,
-          lastPlayed: sessionScore.finishedAt || sessionScore.createdAt,
-        });
-      } else {
-        existing.bestScore = Math.max(existing.bestScore, sessionScore.score);
-        existing.totalSessions += 1;
-        existing.avgScore = (existing.avgScore * (existing.totalSessions - 1) + sessionScore.score) / existing.totalSessions;
-        if (sessionScore.finishedAt && sessionScore.finishedAt > existing.lastPlayed) {
-          existing.lastPlayed = sessionScore.finishedAt;
-        }
-      }
-    });
-
-    // Convert to array and sort by best score
-    const leaderboard = Array.from(userScores.values())
-      .sort((a, b) => b.bestScore - a.bestScore)
-      .slice(0, 100); // Top 100
-
-    return NextResponse.json({ 
-      leaderboard,
-      period,
-      mode,
-      totalPlayers: userScores.size,
-    });
-  } catch (e: unknown) {
-    const message = e instanceof Error ? e.message : "unknown";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ entries });
+  } catch (error) {
+    console.error("Error fetching leaderboard:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch leaderboard" },
+      { status: 500 }
+    );
   }
 }

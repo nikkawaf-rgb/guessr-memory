@@ -1,40 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
-import { requireAdmin } from "@/app/lib/auth";
-import { validateRequestBody } from "@/app/lib/validation";
-import { z } from "zod";
+import { createClient } from "@supabase/supabase-js";
 
-const deletePhotoSchema = z.object({
-  photoId: z.string().min(1, "Photo ID is required"),
-});
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-export async function DELETE(request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    // Check admin authentication
-    const admin = await requireAdmin();
-    if (!admin) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const body = await request.json();
+    const { photoId } = body;
 
-    // Validate request body
-    let body;
-    try {
-      const requestBody = await request.json();
-      body = validateRequestBody(deletePhotoSchema, requestBody);
-    } catch (error) {
+    if (!photoId) {
       return NextResponse.json(
-        { error: error instanceof Error ? error.message : "Invalid request body" },
+        { error: "Photo ID is required" },
         { status: 400 }
       );
     }
 
-    // Check if photo exists
+    // Получить информацию о фотографии
     const photo = await prisma.photo.findUnique({
-      where: { id: body.photoId },
-      include: {
-        comments: true,
-        sessionPhotos: true,
-        zones: true,
+      where: { id: photoId },
+      select: {
+        storagePath: true,
       },
     });
 
@@ -45,37 +33,26 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Delete related data first
-    await prisma.comment.deleteMany({
-      where: { photoId: body.photoId },
-    });
+    // Удалить из Supabase Storage
+    const cleanPath = photo.storagePath.replace(/^photos\//, "");
+    const { error: storageError } = await supabase.storage
+      .from("photos")
+      .remove([cleanPath]);
 
-    await prisma.guess.deleteMany({
-      where: { sessionPhotoId: { in: photo.sessionPhotos.map(sp => sp.id) } },
-    });
+    if (storageError) {
+      console.error("Error deleting from storage:", storageError);
+    }
 
-    await prisma.sessionPhoto.deleteMany({
-      where: { photoId: body.photoId },
-    });
-
-    await prisma.photoPeopleZone.deleteMany({
-      where: { photoId: body.photoId },
-    });
-
-    // Finally delete the photo
+    // Удалить из базы данных (каскадное удаление удалит связанные записи)
     await prisma.photo.delete({
-      where: { id: body.photoId },
+      where: { id: photoId },
     });
 
-    return NextResponse.json({ 
-      success: true,
-      message: "Photo deleted successfully" 
-    });
-
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Delete photo error:", error);
+    console.error("Error deleting photo:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Failed to delete photo" },
       { status: 500 }
     );
   }

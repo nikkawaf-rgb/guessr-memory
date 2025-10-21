@@ -1,141 +1,140 @@
 "use client";
 
-import { LeaderboardSkeleton } from "@/app/components/Skeletons";
-import { useState, useEffect, useCallback } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 
 interface LeaderboardEntry {
-  userId: string;
+  rank: number;
   userName: string;
-  userTitle: string | null;
-  bestScore: number;
-  totalSessions: number;
-  avgScore: number;
-  lastPlayed: string;
+  totalScore: number;
+  finishedAt: string;
+  sessionId: string;
 }
 
-interface LeaderboardData {
-  leaderboard: LeaderboardEntry[];
-  period: string;
-  mode: string;
-  totalPlayers: number;
-}
-
-export default function Leaderboard() {
-  const [data, setData] = useState<LeaderboardData | null>(null);
+export default function LeaderboardPage() {
+  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [period, setPeriod] = useState("all");
-  const [mode, setMode] = useState("ranked");
-
-  const loadLeaderboard = useCallback(async () => {
-    try {
-      setLoading(true);
-      const res = await fetch(`/api/leaderboard?period=${period}&mode=${mode}`);
-      if (res.ok) {
-        const leaderboardData = await res.json();
-        setData(leaderboardData);
-      }
-    } catch (e) {
-      console.error("Failed to load leaderboard:", e);
-    } finally {
-      setLoading(false);
-    }
-  }, [period, mode]);
 
   useEffect(() => {
     loadLeaderboard();
-  }, [period, mode, loadLeaderboard]);
+  }, []);
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("ru-RU");
+  const loadLeaderboard = async () => {
+    try {
+      const response = await fetch("/api/leaderboard");
+      if (!response.ok) throw new Error("Failed to load leaderboard");
+      const data = await response.json();
+      setEntries(data.entries);
+    } catch (error) {
+      console.error("Error loading leaderboard:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const formatScore = (score: number) => {
-    return score.toLocaleString("ru-RU");
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("ru-RU", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const getMedalEmoji = (rank: number) => {
+    if (rank === 1) return "🥇";
+    if (rank === 2) return "🥈";
+    if (rank === 3) return "🥉";
+    return "";
   };
 
   if (loading) {
-    return <LeaderboardSkeleton />;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-100">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600"></div>
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-2xl font-semibold mb-4">Лидерборд</h1>
-      
-      <div className="flex gap-4 mb-6">
-        <div>
-          <label className="block text-sm font-medium mb-1">Период:</label>
-          <select 
-            value={period} 
-            onChange={(e) => setPeriod(e.target.value)}
-            className="border rounded px-3 py-1"
-          >
-            <option value="all">Все время</option>
-            <option value="daily">За день</option>
-            <option value="weekly">За неделю</option>
-          </select>
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 py-8">
+      <div className="container mx-auto px-4 max-w-4xl">
+        {/* Header */}
+        <div className="bg-white rounded-lg shadow-xl p-8 mb-8 text-center">
+          <div className="text-5xl mb-4">🏆</div>
+          <h1 className="text-4xl font-bold text-gray-800 mb-2">Лидерборд</h1>
+          <p className="text-gray-600">Лучшие результаты завершенных игр</p>
         </div>
-        
-        <div>
-          <label className="block text-sm font-medium mb-1">Режим:</label>
-          <select 
-            value={mode} 
-            onChange={(e) => setMode(e.target.value)}
-            className="border rounded px-3 py-1"
-          >
-            <option value="ranked">Рейтинговый</option>
-            <option value="fun">Фан</option>
-          </select>
-        </div>
-      </div>
 
-      {loading ? (
-        <div className="text-center py-8">Загрузка...</div>
-      ) : data ? (
-        <div>
-          <div className="text-sm opacity-70 mb-4">
-            Всего игроков: {data.totalPlayers} • Режим: {mode === "ranked" ? "Рейтинговый" : "Фан"} • 
-            Период: {period === "all" ? "Все время" : period === "daily" ? "За день" : "За неделю"}
-          </div>
-          
-          <div className="space-y-2">
-            {data.leaderboard.map((entry, index) => (
-              <div key={entry.userId} className="border rounded p-4 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="text-2xl font-bold text-gray-400 w-8">
-                    {index + 1}
-                  </div>
-                  <div>
-                    <div className="font-medium">{entry.userName}</div>
-                    {entry.userTitle && (
-                      <div className="text-sm text-blue-600 font-medium">{entry.userTitle}</div>
-                    )}
-                    <div className="text-sm opacity-70">
-                      Лучший результат: {formatScore(entry.bestScore)} • 
-                      Игр: {entry.totalSessions} • 
-                      Средний: {formatScore(Math.round(entry.avgScore))}
+        {/* Leaderboard */}
+        <div className="bg-white rounded-lg shadow-xl overflow-hidden mb-8">
+          {entries.length === 0 ? (
+            <div className="p-12 text-center">
+              <div className="text-4xl mb-4">🎮</div>
+              <p className="text-gray-600 text-lg mb-6">
+                Пока никто не завершил игру
+              </p>
+              <Link
+                href="/play"
+                className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+              >
+                Стать первым!
+              </Link>
+            </div>
+          ) : (
+            <div className="divide-y divide-gray-200">
+              {entries.map((entry) => (
+                <div
+                  key={entry.sessionId}
+                  className={`p-4 hover:bg-gray-50 transition-colors ${
+                    entry.rank <= 3 ? "bg-amber-50" : ""
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center flex-1">
+                      <div className="w-12 text-2xl font-bold text-gray-400 mr-4 text-center">
+                        {getMedalEmoji(entry.rank) || `#${entry.rank}`}
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-semibold text-gray-800 text-lg">
+                          {entry.userName}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {formatDate(entry.finishedAt)}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-blue-600">
+                        {entry.totalScore}
+                      </div>
+                      <div className="text-xs text-gray-500">очков</div>
                     </div>
                   </div>
                 </div>
-                <div className="text-sm opacity-50">
-                  Последняя игра: {formatDate(entry.lastPlayed)}
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          {data.leaderboard.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
-              Нет данных для отображения
+              ))}
             </div>
           )}
         </div>
-      ) : (
-        <div className="text-center py-8 text-red-500">
-          Ошибка загрузки лидерборда
+
+        {/* Actions */}
+        <div className="flex gap-4">
+          <Link
+            href="/"
+            className="flex-1 bg-gray-500 text-white py-4 px-6 rounded-lg font-bold text-center hover:bg-gray-600 transition-colors shadow-lg"
+          >
+            На главную
+          </Link>
+          <Link
+            href="/play"
+            className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 px-6 rounded-lg font-bold text-center hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg"
+          >
+            Играть
+          </Link>
         </div>
-      )}
+      </div>
     </div>
   );
 }
-
-

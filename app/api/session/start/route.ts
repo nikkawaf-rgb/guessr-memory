@@ -1,55 +1,97 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
-import { startSessionSchema, validateRequestBody } from "@/app/lib/validation";
 
-export async function POST(req: NextRequest) {
+const PHOTOS_PER_SESSION = 10;
+
+export async function POST(request: NextRequest) {
   try {
-    const body = await req.json().catch(() => ({}));
-    const { mode } = validateRequestBody(startSessionSchema, body);
+    const body = await request.json();
+    const { playerName } = body;
 
-    // Pick up to 10 random active photos
-    const photos = await prisma.photo.findMany({ where: { isActive: true }, take: 200, orderBy: { createdAt: "desc" } });
-    console.log(`Found ${photos.length} active photos`);
-    
-    if (!photos.length) {
-      console.error("No photos found in database");
-      return NextResponse.json({ error: "No photos available. Please contact admin to upload photos." }, { status: 400 });
+    if (!playerName || typeof playerName !== "string") {
+      return NextResponse.json(
+        { error: "Player name is required" },
+        { status: 400 }
+      );
     }
-    
-    const shuffled = [...photos].sort(() => Math.random() - 0.5).slice(0, Math.min(10, photos.length));
-    console.log(`Selected ${shuffled.length} photos for session`);
 
-    // Create guest user for anonymous sessions
-    const user = await prisma.user.create({ 
-      data: { 
-        name: `Гость_${Date.now()}`,
-        role: "player"
-      } 
+    console.log("Starting game for player:", playerName);
+
+    // Найти или создать пользователя по имени
+    let user = await prisma.user.findFirst({
+      where: {
+        name: playerName.trim(),
+        role: "player",
+      },
     });
 
-    const session = await prisma.session.create({
-      data: {
-        mode,
-        photoCount: shuffled.length,
-        userId: user.id,
-        currentPhotoIndex: 0,
-        sessionPhotos: {
-          create: shuffled.map((p, idx) => ({ photoId: p.id, orderIndex: idx })),
+    if (!user) {
+      console.log("Creating new user:", playerName);
+      user = await prisma.user.create({
+        data: {
+          name: playerName.trim(),
+          role: "player",
+        },
+      });
+    }
+
+    console.log("User ID:", user.id);
+
+    // Получить случайные активные фото с датами
+    const availablePhotos = await prisma.photo.findMany({
+      where: {
+        isActive: true,
+        exifTakenAt: {
+          not: null,
         },
       },
-      include: { sessionPhotos: true },
+      select: {
+        id: true,
+      },
     });
 
-    return NextResponse.json({ 
-      id: session.id, 
-      userId: user.id,
-      currentPhotoIndex: 0 
+    console.log("Available photos:", availablePhotos.length);
+
+    if (availablePhotos.length < PHOTOS_PER_SESSION) {
+      return NextResponse.json(
+        { error: `Not enough photos with dates. Need at least ${PHOTOS_PER_SESSION}, found ${availablePhotos.length}` },
+        { status: 400 }
+      );
+    }
+
+    // Выбрать случайные фото
+    const shuffled = availablePhotos.sort(() => Math.random() - 0.5);
+    const selectedPhotos = shuffled.slice(0, PHOTOS_PER_SESSION);
+
+    // Создать сессию
+    const session = await prisma.session.create({
+      data: {
+        userId: user.id,
+        photoCount: PHOTOS_PER_SESSION,
+        totalScore: 0,
+        currentPhotoIndex: 0,
+        sessionPhotos: {
+          create: selectedPhotos.map((photo, index) => ({
+            photoId: photo.id,
+            orderIndex: index,
+          })),
+        },
+      },
     });
-  } catch (e: unknown) {
-    console.error("Session start error:", e);
-    const message = e instanceof Error ? e.message : "unknown";
-    return NextResponse.json({ error: message }, { status: 500 });
+
+    console.log("Session created:", session.id);
+
+    return NextResponse.json({
+      sessionId: session.id,
+      userId: user.id,
+      userName: user.name,
+      photoCount: PHOTOS_PER_SESSION,
+    });
+  } catch (error) {
+    console.error("Error starting session:", error);
+    return NextResponse.json(
+      { error: "Failed to start session" },
+      { status: 500 }
+    );
   }
 }
-
-
