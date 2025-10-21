@@ -27,6 +27,7 @@ model User {
   role      UserRole @default(player)
   
   sessions  Session[]
+  achievements UserAchievement[]
 }
 
 // Фотография с датой из EXIF
@@ -51,6 +52,11 @@ model Photo {
   specialQuestion     String?  // Текст спецвопроса
   specialAnswerCorrect String? // Правильный ответ
   
+  // Скрытое достижение за это фото (опционально)
+  hiddenAchievementTitle       String? // Название достижения
+  hiddenAchievementDescription String? // Описание достижения
+  hiddenAchievementIcon        String? // Иконка (emoji)
+  
   sessionPhotos SessionPhoto[]
 }
 
@@ -62,6 +68,7 @@ model Session {
   photoCount      Int       // количество фото в сессии
   totalScore      Int       @default(0) // итоговый счет
   currentPhotoIndex Int     @default(0) // текущее фото (0-based)
+  durationSeconds Int?      // Длительность игры в секундах
   
   userId          String
   user            User      @relation(fields: [userId], references: [id])
@@ -115,4 +122,42 @@ model Guess {
   timeSpentSec  Int?                     // время на ответ
   
   @@index([sessionPhotoId])
+}
+
+// Достижение (предустановленные)
+model Achievement {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  
+  key         String   @unique // Уникальный ключ (например: "yuri_gagarin")
+  title       String   // Название (например: "Юрий Гагарин")
+  description String   // Описание условия получения
+  icon        String   // Иконка (emoji)
+  category    String   // Категория (космос, аниме, игровые, и т.д.)
+  isHidden    Boolean  @default(false) // Скрытое достижение (показывается только если получено)
+  rarity      String   @default("common") // common, rare, epic, legendary
+  
+  users       UserAchievement[]
+  
+  @@index([key])
+  @@index([category])
+}
+
+// Связь пользователя и достижения
+model UserAchievement {
+  id            String   @id @default(cuid())
+  createdAt     DateTime @default(now())
+  
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  achievementId String
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  
+  // Для скрытых достижений (привязанных к фото)
+  photoId       String?  // ID фото, за которое получено (для скрытых достижений)
+  
+  @@unique([userId, achievementId])
+  @@index([userId])
+  @@index([achievementId])
 }
