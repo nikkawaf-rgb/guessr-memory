@@ -12,6 +12,8 @@ export async function GET() {
         width: true,
         height: true,
         isActive: true,
+        specialQuestion: true,
+        specialAnswerCorrect: true,
         createdAt: true,
       },
       orderBy: {

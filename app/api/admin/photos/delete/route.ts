@@ -36,10 +36,10 @@ export async function POST(request: NextRequest) {
     if (supabaseUrl && supabaseServiceKey) {
       try {
         const supabase = createClient(supabaseUrl, supabaseServiceKey);
-        const cleanPath = photo.storagePath.replace(/^photos\//, "");
+        // storagePath is just the filename, no need to clean
         const { error: storageError } = await supabase.storage
           .from("photos")
-          .remove([cleanPath]);
+          .remove([photo.storagePath]);
 
         if (storageError) {
           console.error("Error deleting from storage:", storageError);
