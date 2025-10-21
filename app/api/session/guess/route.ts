@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 
-// Функция для подсчета очков
+// Функция для подсчета очков с прогрессивной шкалой
 function calculateScore(
   correctDate: Date,
   guessedYear: number | null,
@@ -9,44 +9,95 @@ function calculateScore(
   guessedDay: number | null,
   specialCorrect: string | null,
   guessedSpecial: string | null
-): { yearHit: boolean; monthHit: boolean; dayHit: boolean; specialHit: boolean; score: number } {
+): {
+  yearHit: boolean;
+  monthHit: boolean;
+  dayHit: boolean;
+  specialHit: boolean;
+  score: number;
+  yearScore: number;
+  monthScore: number;
+  dayScore: number;
+  specialScore: number;
+  yearDiff: number;
+  monthDiff: number;
+  dayDiff: number;
+  isCombo: boolean;
+} {
   const correctYear = correctDate.getFullYear();
   const correctMonth = correctDate.getMonth() + 1; // 1-12
   const correctDay = correctDate.getDate();
 
-  const yearHit = guessedYear === correctYear;
-  const monthHit = guessedMonth === correctMonth;
-  const dayHit = guessedDay === correctDay;
+  const yearDiff = guessedYear !== null ? Math.abs(guessedYear - correctYear) : 999;
+  const monthDiff = guessedMonth !== null ? Math.abs(guessedMonth - correctMonth) : 12;
+  const dayDiff = guessedDay !== null ? Math.abs(guessedDay - correctDay) : 31;
+
+  const yearHit = yearDiff === 0;
+  const monthHit = monthDiff === 0;
+  const dayHit = dayDiff === 0;
   const specialHit = specialCorrect && guessedSpecial ? guessedSpecial.trim() === specialCorrect.trim() : false;
 
+  // Прогрессивная шкала для года (макс 100)
+  let yearScore = 0;
+  if (yearDiff === 0) yearScore = 100;
+  else if (yearDiff === 1) yearScore = 80;
+  else if (yearDiff === 2) yearScore = 60;
+  else if (yearDiff === 3) yearScore = 40;
+  else if (yearDiff >= 4) yearScore = 20;
+
+  // Прогрессивная шкала для месяца (макс 200)
+  let monthScore = 0;
+  if (monthDiff === 0) monthScore = 200;
+  else if (monthDiff === 1) monthScore = 150;
+  else if (monthDiff === 2) monthScore = 100;
+  else if (monthDiff === 3) monthScore = 60;
+  else if (monthDiff === 4) monthScore = 40;
+  else if (monthDiff >= 5) monthScore = 20;
+
+  // Прогрессивная шкала для дня (макс 300)
+  let dayScore = 0;
+  if (dayDiff === 0) dayScore = 300;
+  else if (dayDiff === 1) dayScore = 250;
+  else if (dayDiff === 2) dayScore = 200;
+  else if (dayDiff === 3) dayScore = 150;
+  else if (dayDiff === 4) dayScore = 120;
+  else if (dayDiff === 5) dayScore = 100;
+  else if (dayDiff <= 7) dayScore = 80;
+  else if (dayDiff <= 10) dayScore = 60;
+  else if (dayDiff <= 15) dayScore = 40;
+  else if (dayDiff >= 16) dayScore = 20;
+
+  // Проверка комбо
+  const isCombo = yearHit && monthHit && dayHit;
+
   let score = 0;
-
-  // Год: 100 очков
-  if (yearHit) {
-    score += 100;
-  }
-
-  // Месяц: 200 очков (независимо от года)
-  if (monthHit) {
-    score += 200;
-  }
-
-  // День: 300 очков (независимо от остального)
-  if (dayHit) {
-    score += 300;
-  }
-
-  // КОМБО: Если все три угаданы - бонус до 1000
-  if (yearHit && monthHit && dayHit) {
-    score = 1000; // Заменяем сумму на 1000
+  if (isCombo) {
+    // КОМБО! Все три правильно = 1000 очков (вместо 600)
+    score = 1000;
+  } else {
+    // Суммируем прогрессивные очки
+    score = yearScore + monthScore + dayScore;
   }
 
   // Спецвопрос: +1000 очков
-  if (specialHit) {
-    score += 1000;
-  }
+  const specialScore = specialHit ? 1000 : 0;
+  score += specialScore;
 
-  return { yearHit, monthHit, dayHit, specialHit, score };
+  return {
+    yearHit,
+    monthHit,
+    dayHit,
+    specialHit,
+    score,
+    yearScore: isCombo ? 100 : yearScore,
+    monthScore: isCombo ? 200 : monthScore,
+    dayScore: isCombo ? 300 : dayScore,
+    specialScore,
+    yearDiff,
+    monthDiff,
+    dayDiff,
+    isCombo,
+  };
 }
 
 export async function POST(request: NextRequest) {
@@ -145,9 +196,20 @@ export async function POST(request: NextRequest) {
         yearHit: result.yearHit,
         monthHit: result.monthHit,
         dayHit: result.dayHit,
+        specialHit: result.specialHit,
         score: result.score,
+        yearScore: result.yearScore,
+        monthScore: result.monthScore,
+        dayScore: result.dayScore,
+        specialScore: result.specialScore,
+        yearDiff: result.yearDiff,
+        monthDiff: result.monthDiff,
+        dayDiff: result.dayDiff,
+        isCombo: result.isCombo,
       },
-      correctDate: sessionPhoto.photo.exifTakenAt,
+      sessionTotalScore: updatedSession.totalScore,
+      currentPhotoIndex: updatedSession.currentPhotoIndex,
+      photoCount: updatedSession.photoCount,
     });
   } catch (error) {
     console.error("Error processing guess:", error);

@@ -4,6 +4,22 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
+interface GuessResult {
+  yearHit: boolean;
+  monthHit: boolean;
+  dayHit: boolean;
+  specialHit: boolean;
+  score: number;
+  yearScore: number;
+  monthScore: number;
+  dayScore: number;
+  specialScore: number;
+  yearDiff: number;
+  monthDiff: number;
+  dayDiff: number;
+  isCombo: boolean;
+}
+
 interface SessionGameClientProps {
   session: {
     id: string;
@@ -36,6 +52,9 @@ export default function SessionGameClient({
   const [day, setDay] = useState("");
   const [specialAnswer, setSpecialAnswer] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showResult, setShowResult] = useState(false);
+  const [result, setResult] = useState<GuessResult | null>(null);
+  const [newTotalScore, setNewTotalScore] = useState(session.totalScore);
   const router = useRouter();
 
   const getPhotoUrl = (storagePath: string) => {
@@ -65,8 +84,12 @@ export default function SessionGameClient({
         throw new Error("Failed to submit guess");
       }
 
-      // Перезагружаем страницу чтобы получить следующее фото
-      router.refresh();
+      const data = await response.json();
+      
+      // Показываем промежуточный результат
+      setResult(data.result);
+      setNewTotalScore(data.sessionTotalScore);
+      setShowResult(true);
     } catch (error) {
       console.error("Error submitting guess:", error);
       alert("Ошибка при отправке ответа");
@@ -74,6 +97,159 @@ export default function SessionGameClient({
       setLoading(false);
     }
   };
+
+  const handleContinue = () => {
+    // Переходим к следующему фото
+    router.refresh();
+  };
+
+  // Если показываем результат - рендерим модальное окно
+  if (showResult && result) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 flex items-center justify-center">
+        <div className="container mx-auto px-4 max-w-2xl">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 border-4 border-blue-500">
+            {/* Заголовок с результатом */}
+            <div className="text-center mb-6">
+              {result.isCombo ? (
+                <div className="mb-4">
+                  <div className="text-6xl mb-4">🎉</div>
+                  <h2 className="text-4xl font-bold text-green-600 mb-2">
+                    КОМБО!
+                  </h2>
+                  <p className="text-xl text-gray-700">
+                    Вы угадали всё идеально!
+                  </p>
+                </div>
+              ) : (
+                <div className="mb-4">
+                  <div className="text-5xl mb-4">📊</div>
+                  <h2 className="text-3xl font-bold text-blue-600 mb-2">
+                    Результат попытки
+                  </h2>
+                </div>
+              )}
+            </div>
+
+            {/* Детализация по пунктам */}
+            <div className="space-y-4 mb-6">
+              {/* Год */}
+              <div className={`p-4 rounded-lg border-2 ${
+                result.yearHit 
+                  ? "bg-green-50 border-green-500" 
+                  : "bg-orange-50 border-orange-500"
+              }`}>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <span className="font-bold text-gray-700">Год:</span>
+                    {result.yearHit ? (
+                      <span className="ml-2 text-green-700 font-bold">✓ Точно!</span>
+                    ) : (
+                      <span className="ml-2 text-orange-700">
+                        Ошибка на {result.yearDiff} {result.yearDiff === 1 ? "год" : result.yearDiff < 5 ? "года" : "лет"}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-2xl font-bold text-blue-600">
+                    +{result.yearScore}
+                  </span>
+                </div>
+              </div>
+
+              {/* Месяц */}
+              <div className={`p-4 rounded-lg border-2 ${
+                result.monthHit 
+                  ? "bg-green-50 border-green-500" 
+                  : "bg-orange-50 border-orange-500"
+              }`}>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <span className="font-bold text-gray-700">Месяц:</span>
+                    {result.monthHit ? (
+                      <span className="ml-2 text-green-700 font-bold">✓ Точно!</span>
+                    ) : (
+                      <span className="ml-2 text-orange-700">
+                        Ошибка на {result.monthDiff} {result.monthDiff === 1 ? "месяц" : result.monthDiff < 5 ? "месяца" : "месяцев"}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-2xl font-bold text-blue-600">
+                    +{result.monthScore}
+                  </span>
+                </div>
+              </div>
+
+              {/* День */}
+              <div className={`p-4 rounded-lg border-2 ${
+                result.dayHit 
+                  ? "bg-green-50 border-green-500" 
+                  : "bg-orange-50 border-orange-500"
+              }`}>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <span className="font-bold text-gray-700">День:</span>
+                    {result.dayHit ? (
+                      <span className="ml-2 text-green-700 font-bold">✓ Точно!</span>
+                    ) : (
+                      <span className="ml-2 text-orange-700">
+                        Ошибка на {result.dayDiff} {result.dayDiff === 1 ? "день" : result.dayDiff < 5 ? "дня" : "дней"}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-2xl font-bold text-blue-600">
+                    +{result.dayScore}
+                  </span>
+                </div>
+              </div>
+
+              {/* Спецвопрос (если был) */}
+              {result.specialScore > 0 && (
+                <div className={`p-4 rounded-lg border-2 ${
+                  result.specialHit 
+                    ? "bg-purple-50 border-purple-500" 
+                    : "bg-gray-50 border-gray-500"
+                }`}>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <span className="font-bold text-gray-700">🌟 Бонус:</span>
+                      {result.specialHit ? (
+                        <span className="ml-2 text-purple-700 font-bold">✓ Верно!</span>
+                      ) : (
+                        <span className="ml-2 text-gray-700">Неверно</span>
+                      )}
+                    </div>
+                    <span className="text-2xl font-bold text-purple-600">
+                      +{result.specialScore}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Итого */}
+            <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl p-6 mb-6">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-lg font-semibold">За эту попытку:</span>
+                <span className="text-4xl font-bold">+{result.score}</span>
+              </div>
+              <div className="flex justify-between items-center pt-4 border-t border-white/30">
+                <span className="text-lg font-semibold">Общий счёт:</span>
+                <span className="text-3xl font-bold">{newTotalScore}</span>
+              </div>
+            </div>
+
+            {/* Кнопка продолжить */}
+            <button
+              onClick={handleContinue}
+              className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-4 px-6 rounded-xl font-bold text-xl hover:from-green-600 hover:to-green-700 transition-all shadow-lg"
+            >
+              Продолжить →
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
@@ -227,7 +403,7 @@ export default function SessionGameClient({
 
           <div className="mt-4 text-center">
             <p className="text-xs text-gray-500">
-              💡 Очки: Год = 100 • Месяц = 200 • День = 300 • Комбо (всё) = 1000
+              💡 Чем точнее ответ, тем больше очков! Макс: Год=100 • Месяц=200 • День=300 • Комбо (всё)=1000
             </p>
           </div>
         </div>
