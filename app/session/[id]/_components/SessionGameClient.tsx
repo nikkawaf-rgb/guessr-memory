@@ -203,7 +203,7 @@ export default function SessionGameClient({
               </div>
 
               {/* Спецвопрос (если был) */}
-              {result.specialScore > 0 && (
+              {currentPhoto.specialQuestion && (
                 <div className={`p-4 rounded-lg border-2 ${
                   result.specialHit 
                     ? "bg-purple-50 border-purple-500" 
