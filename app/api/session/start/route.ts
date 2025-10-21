@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 
 const PHOTOS_PER_SESSION = 10;
+const SPECIAL_QUESTIONS_COUNT = 2; // Обязательно 2 спецвопроса в каждой игре
 
 export async function POST(request: NextRequest) {
   try {
@@ -37,8 +38,19 @@ export async function POST(request: NextRequest) {
 
     console.log("User ID:", user.id);
 
-    // Получить все активные фото с датами
-    const availablePhotos = await prisma.photo.findMany({
+    // Получить фото со спецвопросами
+    const photosWithSpecial = await prisma.photo.findMany({
+      where: {
+        isActive: true,
+        exifTakenAt: { not: null },
+        specialQuestion: { not: null },
+        specialAnswerCorrect: { not: null },
+      },
+      select: { id: true },
+    });
+
+    // Получить обычные фото (без спецвопросов)
+    const regularPhotos = await prisma.photo.findMany({
       where: {
         isActive: true,
         exifTakenAt: { not: null },
@@ -46,26 +58,44 @@ export async function POST(request: NextRequest) {
       select: { id: true },
     });
 
-    console.log("Available photos:", availablePhotos.length);
+    console.log("Photos with special questions:", photosWithSpecial.length);
+    console.log("Total available photos:", regularPhotos.length);
 
-    if (availablePhotos.length < PHOTOS_PER_SESSION) {
+    // Проверяем, что есть минимум 2 фото со спецвопросами
+    if (photosWithSpecial.length < SPECIAL_QUESTIONS_COUNT) {
       return NextResponse.json(
-        { error: `Not enough photos. Need ${PHOTOS_PER_SESSION}, found ${availablePhotos.length}` },
+        { 
+          error: `Not enough photos with special questions. Need ${SPECIAL_QUESTIONS_COUNT}, found ${photosWithSpecial.length}. Please add special questions to more photos.` 
+        },
         { status: 400 }
       );
     }
 
-    // Выбираем 10 случайных фото
-    const shuffled = availablePhotos.sort(() => Math.random() - 0.5);
-    const selectedPhotos = shuffled.slice(0, PHOTOS_PER_SESSION);
-
-    // Рандомно выбираем 2 индекса для показа спецвопросов
-    const specialIndices = new Set<number>();
-    while (specialIndices.size < 2 && specialIndices.size < PHOTOS_PER_SESSION) {
-      specialIndices.add(Math.floor(Math.random() * PHOTOS_PER_SESSION));
+    // Проверяем общее количество фото
+    if (regularPhotos.length < PHOTOS_PER_SESSION) {
+      return NextResponse.json(
+        { error: `Not enough photos. Need ${PHOTOS_PER_SESSION}, found ${regularPhotos.length}` },
+        { status: 400 }
+      );
     }
 
-    console.log("Special question indices:", Array.from(specialIndices));
+    // Выбираем 2 случайных фото со спецвопросами
+    const shuffledSpecial = photosWithSpecial.sort(() => Math.random() - 0.5);
+    const selectedSpecial = shuffledSpecial.slice(0, SPECIAL_QUESTIONS_COUNT);
+
+    // Выбираем 8 случайных обычных фото
+    const remainingCount = PHOTOS_PER_SESSION - SPECIAL_QUESTIONS_COUNT;
+    const shuffledRegular = regularPhotos.sort(() => Math.random() - 0.5);
+    const selectedRegular = shuffledRegular.slice(0, remainingCount);
+
+    // Объединяем и перемешиваем все фото
+    const allSelected = [...selectedSpecial, ...selectedRegular];
+    const finalShuffled = allSelected.sort(() => Math.random() - 0.5);
+
+    console.log("Selected photos with special questions:", selectedSpecial.map(p => p.id));
+
+    // Создаем Set с ID фото, у которых есть спецвопросы
+    const specialPhotoIds = new Set(selectedSpecial.map(p => p.id));
 
     // Создать сессию
     const session = await prisma.session.create({
@@ -75,10 +105,11 @@ export async function POST(request: NextRequest) {
         totalScore: 0,
         currentPhotoIndex: 0,
         sessionPhotos: {
-          create: selectedPhotos.map((photo, index) => ({
+          create: finalShuffled.map((photo, index) => ({
             photoId: photo.id,
             orderIndex: index,
-            showSpecial: specialIndices.has(index), // Помечаем 2 фото для показа спецвопроса
+            // showSpecial = true только для фото со спецвопросами
+            showSpecial: specialPhotoIds.has(photo.id),
           })),
         },
       },
