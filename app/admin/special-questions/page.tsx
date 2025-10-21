@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 
 interface PhotoData {
   id: string;
@@ -84,8 +83,31 @@ export default function SpecialQuestionsPage() {
 
   const getPhotoUrl = (storagePath: string) => {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://jdrsmlnngkniwgwdrnok.supabase.co";
-    const cleanPath = storagePath.replace(/^photos\//, "");
-    return `${supabaseUrl}/storage/v1/object/public/photos/${cleanPath}`;
+    // storagePath already contains "photos/filename.jpg"
+    return `${supabaseUrl}/storage/v1/object/public/${storagePath}`;
+  };
+
+  const handleRemove = async (photoId: string) => {
+    if (!confirm("Удалить спецвопрос с этого фото?")) return;
+    
+    try {
+      const response = await fetch("/api/admin/photos/special", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          photoId,
+          specialQuestion: null,
+          specialAnswerCorrect: null,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to remove");
+      
+      loadPhotos();
+    } catch (error) {
+      console.error("Error removing:", error);
+      alert("Ошибка при удалении спецвопроса");
+    }
   };
 
   if (isAdmin === null || loading) {
@@ -134,11 +156,10 @@ export default function SpecialQuestionsPage() {
             {photos.map((photo) => (
               <div key={photo.id} className="bg-white rounded-lg shadow-lg overflow-hidden">
                 <div className="relative w-full h-48 bg-gray-200">
-                  <Image
+                  <img
                     src={getPhotoUrl(photo.storagePath)}
                     alt={photo.originalName || "Photo"}
-                    fill
-                    className="object-cover"
+                    className="w-full h-full object-cover"
                   />
                 </div>
                 <div className="p-4">
@@ -209,12 +230,23 @@ export default function SpecialQuestionsPage() {
                           Нет спецвопроса
                         </div>
                       )}
-                      <button
-                        onClick={() => handleEdit(photo)}
-                        className="w-full bg-blue-500 text-white px-3 py-2 rounded text-sm hover:bg-blue-600"
-                      >
-                        {photo.specialQuestion ? "Редактировать" : "Добавить вопрос"}
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleEdit(photo)}
+                          className="flex-1 bg-blue-500 text-white px-3 py-2 rounded text-sm hover:bg-blue-600"
+                        >
+                          {photo.specialQuestion ? "✏️ Изменить" : "➕ Добавить"}
+                        </button>
+                        {photo.specialQuestion && (
+                          <button
+                            onClick={() => handleRemove(photo.id)}
+                            className="px-4 bg-red-500 text-white rounded text-sm hover:bg-red-600"
+                            title="Удалить спецвопрос"
+                          >
+                            🗑️
+                          </button>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>

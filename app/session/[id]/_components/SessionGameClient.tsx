@@ -58,8 +58,8 @@ export default function SessionGameClient({
 
   const getPhotoUrl = (storagePath: string) => {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://jdrsmlnngkniwgwdrnok.supabase.co";
-    const cleanPath = storagePath.replace(/^photos\//, "");
-    return `${supabaseUrl}/storage/v1/object/public/photos/${cleanPath}`;
+    // storagePath already contains "photos/filename.jpg"
+    return `${supabaseUrl}/storage/v1/object/public/${storagePath}`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -98,8 +98,8 @@ export default function SessionGameClient({
   };
 
   const handleContinue = () => {
-    // Переходим к следующему фото
-    router.refresh();
+    // Перезагружаем страницу чтобы получить следующее фото
+    window.location.reload();
   };
 
   // Если показываем результат - рендерим модальное окно

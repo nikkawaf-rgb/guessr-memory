@@ -73,8 +73,8 @@ export default function AdminPhotosPage() {
 
   const getPhotoUrl = (storagePath: string) => {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://jdrsmlnngkniwgwdrnok.supabase.co";
-    const cleanPath = storagePath.replace(/^photos\//, "");
-    return `${supabaseUrl}/storage/v1/object/public/photos/${cleanPath}`;
+    // storagePath already contains "photos/filename.jpg"
+    return `${supabaseUrl}/storage/v1/object/public/${storagePath}`;
   };
 
   if (isAdmin === null || loading) {
