@@ -37,31 +37,35 @@ export async function POST(request: NextRequest) {
 
     console.log("User ID:", user.id);
 
-    // Получить случайные активные фото с датами
+    // Получить все активные фото с датами
     const availablePhotos = await prisma.photo.findMany({
       where: {
         isActive: true,
-        exifTakenAt: {
-          not: null,
-        },
+        exifTakenAt: { not: null },
       },
-      select: {
-        id: true,
-      },
+      select: { id: true },
     });
 
     console.log("Available photos:", availablePhotos.length);
 
     if (availablePhotos.length < PHOTOS_PER_SESSION) {
       return NextResponse.json(
-        { error: `Not enough photos with dates. Need at least ${PHOTOS_PER_SESSION}, found ${availablePhotos.length}` },
+        { error: `Not enough photos. Need ${PHOTOS_PER_SESSION}, found ${availablePhotos.length}` },
         { status: 400 }
       );
     }
 
-    // Выбрать случайные фото
+    // Выбираем 10 случайных фото
     const shuffled = availablePhotos.sort(() => Math.random() - 0.5);
     const selectedPhotos = shuffled.slice(0, PHOTOS_PER_SESSION);
+
+    // Рандомно выбираем 2 индекса для показа спецвопросов
+    const specialIndices = new Set<number>();
+    while (specialIndices.size < 2 && specialIndices.size < PHOTOS_PER_SESSION) {
+      specialIndices.add(Math.floor(Math.random() * PHOTOS_PER_SESSION));
+    }
+
+    console.log("Special question indices:", Array.from(specialIndices));
 
     // Создать сессию
     const session = await prisma.session.create({
@@ -74,6 +78,7 @@ export async function POST(request: NextRequest) {
           create: selectedPhotos.map((photo, index) => ({
             photoId: photo.id,
             orderIndex: index,
+            showSpecial: specialIndices.has(index), // Помечаем 2 фото для показа спецвопроса
           })),
         },
       },

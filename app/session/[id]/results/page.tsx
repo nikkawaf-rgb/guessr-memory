@@ -88,33 +88,34 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
                       +{guess.scoreDelta} очков
                     </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-2 text-sm">
-                    <div>
-                      <div className="text-gray-600">Год:</div>
-                      <div className={guess.yearHit ? "text-green-600 font-semibold" : "text-red-600"}>
-                        {guess.guessedYear || "—"} {guess.yearHit ? "✓" : "✗"}
+                  <div className="flex items-center justify-between">
+                    <div className="flex gap-4 text-sm">
+                      <div>
+                        <span className="text-gray-600">Год: </span>
+                        <span className={guess.yearHit ? "text-green-600 font-semibold" : "text-gray-400"}>
+                          {guess.yearHit ? "✓" : "✗"}
+                        </span>
                       </div>
-                      <div className="text-gray-500 text-xs">
-                        Правильно: {correctDate.getFullYear()}
+                      <div>
+                        <span className="text-gray-600">Месяц: </span>
+                        <span className={guess.monthHit ? "text-green-600 font-semibold" : "text-gray-400"}>
+                          {guess.monthHit ? "✓" : "✗"}
+                        </span>
                       </div>
-                    </div>
-                    <div>
-                      <div className="text-gray-600">Месяц:</div>
-                      <div className={guess.monthHit ? "text-green-600 font-semibold" : "text-red-600"}>
-                        {guess.guessedMonth || "—"} {guess.monthHit ? "✓" : "✗"}
+                      <div>
+                        <span className="text-gray-600">День: </span>
+                        <span className={guess.dayHit ? "text-green-600 font-semibold" : "text-gray-400"}>
+                          {guess.dayHit ? "✓" : "✗"}
+                        </span>
                       </div>
-                      <div className="text-gray-500 text-xs">
-                        Правильно: {correctDate.getMonth() + 1}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-gray-600">День:</div>
-                      <div className={guess.dayHit ? "text-green-600 font-semibold" : "text-red-600"}>
-                        {guess.guessedDay || "—"} {guess.dayHit ? "✓" : "✗"}
-                      </div>
-                      <div className="text-gray-500 text-xs">
-                        Правильно: {correctDate.getDate()}
-                      </div>
+                      {sp.photo.specialQuestion && (
+                        <div>
+                          <span className="text-gray-600">Бонус: </span>
+                          <span className={guess.specialHit ? "text-purple-600 font-semibold" : "text-gray-400"}>
+                            {guess.specialHit ? "✓ +1000" : "✗"}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

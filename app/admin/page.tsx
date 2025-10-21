@@ -50,7 +50,7 @@ export default function AdminPage() {
         </div>
 
         {/* Admin Actions */}
-        <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
           {/* Bulk Upload */}
           <Link
             href="/admin/bulk-import"
@@ -89,6 +89,20 @@ export default function AdminPage() {
               <h2 className="text-xl font-bold mb-2">Статистика</h2>
               <p className="text-purple-100 text-sm">
                 Общая информация о системе
+              </p>
+            </div>
+          </Link>
+
+          {/* Special Questions */}
+          <Link
+            href="/admin/special-questions"
+            className="bg-gradient-to-br from-pink-500 to-rose-600 text-white p-6 rounded-xl shadow-xl hover:shadow-2xl transition-all transform hover:scale-105"
+          >
+            <div className="text-center">
+              <div className="text-4xl mb-3">🌟</div>
+              <h2 className="text-xl font-bold mb-2">Спецвопросы</h2>
+              <p className="text-pink-100 text-sm">
+                Добавить бонусные вопросы к фото
               </p>
             </div>
           </Link>

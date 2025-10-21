@@ -6,8 +6,10 @@ function calculateScore(
   correctDate: Date,
   guessedYear: number | null,
   guessedMonth: number | null,
-  guessedDay: number | null
-): { yearHit: boolean; monthHit: boolean; dayHit: boolean; score: number } {
+  guessedDay: number | null,
+  specialCorrect: string | null,
+  guessedSpecial: string | null
+): { yearHit: boolean; monthHit: boolean; dayHit: boolean; specialHit: boolean; score: number } {
   const correctYear = correctDate.getFullYear();
   const correctMonth = correctDate.getMonth() + 1; // 1-12
   const correctDay = correctDate.getDate();
@@ -15,6 +17,7 @@ function calculateScore(
   const yearHit = guessedYear === correctYear;
   const monthHit = guessedMonth === correctMonth;
   const dayHit = guessedDay === correctDay;
+  const specialHit = specialCorrect && guessedSpecial ? guessedSpecial.trim() === specialCorrect.trim() : false;
 
   let score = 0;
 
@@ -23,23 +26,33 @@ function calculateScore(
     score += 100;
   }
 
-  // Месяц: 50 очков (только если год правильный)
-  if (yearHit && monthHit) {
-    score += 50;
+  // Месяц: 200 очков (независимо от года)
+  if (monthHit) {
+    score += 200;
   }
 
-  // День: 50 очков (только если год и месяц правильные)
+  // День: 300 очков (независимо от остального)
+  if (dayHit) {
+    score += 300;
+  }
+
+  // КОМБО: Если все три угаданы - бонус до 1000
   if (yearHit && monthHit && dayHit) {
-    score += 50;
+    score = 1000; // Заменяем сумму на 1000
   }
 
-  return { yearHit, monthHit, dayHit, score };
+  // Спецвопрос: +1000 очков
+  if (specialHit) {
+    score += 1000;
+  }
+
+  return { yearHit, monthHit, dayHit, specialHit, score };
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { sessionPhotoId, guessedYear, guessedMonth, guessedDay } = body;
+    const { sessionPhotoId, guessedYear, guessedMonth, guessedDay, guessedSpecial } = body;
 
     if (!sessionPhotoId) {
       return NextResponse.json(
@@ -86,7 +99,9 @@ export async function POST(request: NextRequest) {
       sessionPhoto.photo.exifTakenAt,
       guessedYear,
       guessedMonth,
-      guessedDay
+      guessedDay,
+      sessionPhoto.photo.specialAnswerCorrect,
+      guessedSpecial
     );
 
     // Сохранить ответ
@@ -96,9 +111,11 @@ export async function POST(request: NextRequest) {
         guessedYear,
         guessedMonth,
         guessedDay,
+        guessedSpecial,
         yearHit: result.yearHit,
         monthHit: result.monthHit,
         dayHit: result.dayHit,
+        specialHit: result.specialHit,
         scoreDelta: result.score,
       },
     });

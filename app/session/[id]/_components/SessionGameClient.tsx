@@ -16,9 +16,12 @@ interface SessionGameClientProps {
     storagePath: string;
     width: number | null;
     height: number | null;
+    specialQuestion: string | null;
+    specialAnswerCorrect: string | null;
   };
   sessionPhotoId: string;
   hasGuess: boolean;
+  specialOptions: string[]; // 5 вариантов ответа для спецвопроса
 }
 
 export default function SessionGameClient({
@@ -26,10 +29,12 @@ export default function SessionGameClient({
   currentPhoto,
   sessionPhotoId,
   hasGuess,
+  specialOptions,
 }: SessionGameClientProps) {
   const [year, setYear] = useState("");
   const [month, setMonth] = useState("");
   const [day, setDay] = useState("");
+  const [specialAnswer, setSpecialAnswer] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -52,6 +57,7 @@ export default function SessionGameClient({
           guessedYear: year ? parseInt(year) : null,
           guessedMonth: month ? parseInt(month) : null,
           guessedDay: day ? parseInt(day) : null,
+          guessedSpecial: specialAnswer || null,
         }),
       });
 
@@ -178,6 +184,38 @@ export default function SessionGameClient({
               </div>
             </div>
 
+            {/* Special Question */}
+            {currentPhoto.specialQuestion && (
+              <div className="mb-6 p-4 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-300 rounded-lg">
+                <h3 className="text-lg font-bold text-purple-800 mb-3">
+                  🌟 Бонусный вопрос (+1000 очков!)
+                </h3>
+                <p className="text-gray-800 mb-4">{currentPhoto.specialQuestion}</p>
+                <div className="space-y-2">
+                  {specialOptions.map((option, index) => (
+                    <label
+                      key={index}
+                      className={`flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                        specialAnswer === option
+                          ? "border-purple-500 bg-purple-100"
+                          : "border-gray-300 hover:border-purple-300 hover:bg-purple-50"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="special"
+                        value={option}
+                        checked={specialAnswer === option}
+                        onChange={(e) => setSpecialAnswer(e.target.value)}
+                        className="mr-3"
+                      />
+                      <span className="text-gray-800">{option}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <button
               type="submit"
               disabled={loading || hasGuess}
@@ -188,8 +226,8 @@ export default function SessionGameClient({
           </form>
 
           <div className="mt-4 text-center">
-            <p className="text-sm text-gray-600">
-              💡 Совет: Обратите внимание на детали фотографии, они могут подсказать время года или год съемки
+            <p className="text-xs text-gray-500">
+              💡 Очки: Год = 100 • Месяц = 200 • День = 300 • Комбо (всё) = 1000
             </p>
           </div>
         </div>
@@ -197,4 +235,3 @@ export default function SessionGameClient({
     </div>
   );
 }
-

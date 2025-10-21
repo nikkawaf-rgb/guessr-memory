@@ -47,6 +47,10 @@ model Photo {
   exifTakenAt  DateTime? // дата из EXIF (YYYY:MM:DD HH:mm:ss)
   exifRaw      Json?     // полные EXIF данные для админа
   
+  // Спецвопрос (опционально)
+  specialQuestion     String?  // Текст спецвопроса
+  specialAnswerCorrect String? // Правильный ответ
+  
   sessionPhotos SessionPhoto[]
 }
 
@@ -80,6 +84,7 @@ model SessionPhoto {
   photo      Photo    @relation(fields: [photoId], references: [id])
   
   orderIndex Int      // порядковый номер фото в сессии
+  showSpecial Boolean @default(false) // Показывать ли спецвопрос для этого фото в этой игре
   
   guess      Guess?   // одна попытка на фото
   
@@ -99,11 +104,13 @@ model Guess {
   guessedYear   Int?
   guessedMonth  Int?
   guessedDay    Int?
+  guessedSpecial String? // Ответ на спецвопрос
   
   // Результаты
   yearHit       Boolean @default(false)  // год совпал
   monthHit      Boolean @default(false)  // месяц совпал
   dayHit        Boolean @default(false)  // день совпал
+  specialHit    Boolean @default(false)  // спецвопрос совпал
   scoreDelta    Int     @default(0)      // очки за это фото
   timeSpentSec  Int?                     // время на ответ
   
