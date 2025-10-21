@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 
 interface PhotoData {
   id: string;
@@ -119,11 +118,10 @@ export default function AdminPhotosPage() {
             {photos.map((photo) => (
               <div key={photo.id} className="bg-white rounded-lg shadow-lg overflow-hidden">
                 <div className="relative w-full h-64 bg-gray-200">
-                  <Image
+                  <img
                     src={getPhotoUrl(photo.storagePath)}
                     alt={photo.originalName || "Photo"}
-                    fill
-                    className="object-cover"
+                    className="w-full h-full object-cover"
                   />
                 </div>
                 <div className="p-4">

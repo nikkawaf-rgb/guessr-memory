@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 
 interface GuessResult {
   yearHit: boolean;
@@ -277,12 +276,10 @@ export default function SessionGameClient({
         {/* Photo */}
         <div className="bg-white rounded-lg shadow-xl overflow-hidden mb-6">
           <div className="relative w-full" style={{ paddingBottom: "75%" }}>
-            <Image
+            <img
               src={getPhotoUrl(currentPhoto.storagePath)}
               alt="Guess the date"
-              fill
-              className="object-contain"
-              priority
+              className="absolute inset-0 w-full h-full object-contain"
             />
           </div>
         </div>

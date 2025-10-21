@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@supabase/supabase-js";
+import exifr from "exifr";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -36,6 +37,27 @@ export default function BulkImportClient() {
       const file = files[i];
       
       try {
+        // Extract EXIF data before uploading
+        let exifData = null;
+        let imageWidth = null;
+        let imageHeight = null;
+        
+        try {
+          exifData = await exifr.parse(file, {
+            pick: ['DateTimeOriginal', 'DateTime', 'CreateDate', 'ImageWidth', 'ImageHeight', 'Make', 'Model'],
+          });
+          
+          // Get image dimensions
+          if (exifData) {
+            imageWidth = exifData.ImageWidth || null;
+            imageHeight = exifData.ImageHeight || null;
+          }
+          
+          console.log(`EXIF for ${file.name}:`, exifData);
+        } catch (exifError) {
+          console.warn(`Could not extract EXIF from ${file.name}:`, exifError);
+        }
+
         // Upload to Supabase Storage
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
@@ -50,7 +72,7 @@ export default function BulkImportClient() {
           continue;
         }
 
-        // Register in database
+        // Register in database with EXIF data
         const response = await fetch('/api/admin/bulk-import', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -59,6 +81,9 @@ export default function BulkImportClient() {
             originalName: file.name,
             fileSize: file.size,
             mimeType: file.type,
+            width: imageWidth,
+            height: imageHeight,
+            exifData: exifData,
           }),
         });
 
@@ -66,6 +91,11 @@ export default function BulkImportClient() {
           const errorData = await response.json();
           errors.push(`${file.name}: ${errorData.error}`);
           continue;
+        }
+
+        const responseData = await response.json();
+        if (!responseData.hasDate) {
+          errors.push(`${file.name}: ВНИМАНИЕ - нет EXIF даты, фото не будет использоваться в игре`);
         }
 
         successCount++;

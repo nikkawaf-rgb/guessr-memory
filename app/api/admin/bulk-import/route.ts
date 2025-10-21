@@ -8,6 +8,8 @@ const bulkImportSchema = z.object({
   originalName: z.string().min(1),
   fileSize: z.number().positive(),
   mimeType: z.string().min(1),
+  width: z.number().positive().optional().nullable(),
+  height: z.number().positive().optional().nullable(),
   exifData: z.any().optional(), // EXIF data from client
 });
 
@@ -69,6 +71,8 @@ export async function POST(request: NextRequest) {
         originalName: body.originalName,
         fileSize: body.fileSize,
         mimeType: body.mimeType,
+        width: body.width || null,
+        height: body.height || null,
         isActive: true,
         exifTakenAt,
         exifRaw: body.exifData ? body.exifData : Prisma.JsonNull,
