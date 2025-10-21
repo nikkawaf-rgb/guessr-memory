@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function AdminEnterPage() {
   const [password, setPassword] = useState("");
@@ -68,12 +69,12 @@ export default function AdminEnterPage() {
         </form>
         
         <div className="mt-6 text-center">
-          <a
+          <Link
             href="/"
             className="text-sm text-gray-400 hover:text-white transition-colors"
           >
             ← Вернуться на главную
-          </a>
+          </Link>
         </div>
       </div>
     </div>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function PlayPage() {
   const [playerName, setPlayerName] = useState<string | null>(null);
@@ -75,12 +76,12 @@ export default function PlayPage() {
         </button>
 
         <div className="mt-6 text-center">
-          <a
+          <Link
             href="/"
             className="text-gray-600 hover:text-blue-600 transition-colors text-sm"
           >
             ← Вернуться на главную
-          </a>
+          </Link>
         </div>
       </div>
     </div>

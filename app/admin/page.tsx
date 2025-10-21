@@ -98,7 +98,7 @@ export default function AdminPage() {
         <div className="bg-white rounded-lg shadow-lg p-6 mt-8 max-w-6xl mx-auto">
           <h3 className="text-xl font-bold text-gray-800 mb-4">Быстрые действия</h3>
           <div className="grid md:grid-cols-2 gap-4">
-            <a
+            <Link
               href="/"
               className="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
             >
@@ -107,8 +107,8 @@ export default function AdminPage() {
                 <div className="font-semibold text-gray-800">На главную</div>
                 <div className="text-sm text-gray-600">Вернуться на сайт</div>
               </div>
-            </a>
-            <a
+            </Link>
+            <Link
               href="/leaderboard"
               className="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
             >
@@ -117,7 +117,7 @@ export default function AdminPage() {
                 <div className="font-semibold text-gray-800">Лидерборд</div>
                 <div className="text-sm text-gray-600">Результаты игроков</div>
               </div>
-            </a>
+            </Link>
           </div>
         </div>
       </div>
