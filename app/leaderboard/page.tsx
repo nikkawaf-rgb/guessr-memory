@@ -22,6 +22,7 @@ interface LeaderboardEntry {
   bestSessionDate: string;
   achievements: Achievement[];
   hiddenAchievementsCount: number;
+  totalAchievementsCount: number;
 }
 
 export default function LeaderboardPage() {
@@ -136,6 +137,12 @@ export default function LeaderboardPage() {
                       </div>
                       <div>
                         <span className="font-semibold">Средний:</span> {entry.avgScore}
+                      </div>
+                      <div>
+                        <span className="font-semibold">Достижений получено:</span> {entry.totalAchievementsCount}
+                      </div>
+                      <div>
+                        <span className="font-semibold">Скрытых достижений:</span> {entry.hiddenAchievementsCount} из 8
                       </div>
                     </div>
                     

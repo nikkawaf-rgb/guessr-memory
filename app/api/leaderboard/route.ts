@@ -49,6 +49,8 @@ export async function GET() {
         const hiddenAchievementsCount = user.achievements.filter(
           ua => ua.achievement.category === 'скрытые'
         ).length;
+        
+        const totalAchievementsCount = user.achievements.length;
 
         return {
           userId: user.id,
@@ -66,6 +68,7 @@ export async function GET() {
             category: ua.achievement.category,
           })),
           hiddenAchievementsCount,
+          totalAchievementsCount,
         };
       })
       .filter((stat): stat is NonNullable<typeof stat> => stat !== null)
@@ -74,8 +77,8 @@ export async function GET() {
         if (b.bestScore !== a.bestScore) {
           return b.bestScore - a.bestScore;
         }
-        // При равных результатах - по дате достижения
-        return new Date(a.bestSessionDate).getTime() - new Date(b.bestSessionDate).getTime();
+        // При равных результатах - по количеству достижений
+        return b.totalAchievementsCount - a.totalAchievementsCount;
       });
 
     // Добавляем ранги
