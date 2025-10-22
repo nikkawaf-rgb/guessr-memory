@@ -51,10 +51,23 @@ export default function EFDGamePage() {
   const speedRef = useRef(3); // px/frame
   const obstaclesRef = useRef<Obstacle[]>([]);
   const animRef = useRef<number | null>(null);
+  const [awardedStart, setAwardedStart] = useState(false);
 
   useEffect(() => {
-    award("start");
-  }, []);
+    if (!awardedStart) {
+      award("start");
+      setAwardedStart(true);
+    }
+  }, [awardedStart]);
+
+  const handleRestart = () => {
+    setRunning(true);
+    setWon(false);
+    setDistance(0);
+    laneRef.current = 1;
+    speedRef.current = 3;
+    obstaclesRef.current = [];
+  };
 
   useEffect(() => {
     const cvs = canvasRef.current;
@@ -63,7 +76,7 @@ export default function EFDGamePage() {
     if (!ctx) return;
 
     let lastSpawn = 0;
-    const targetDistance = 4000; // сколько надо "проехать" для победы
+    const targetDistance = 1000; // сколько надо "проехать" для победы (~15 секунд)
 
     function spawnObstacle() {
       const lane = Math.floor(Math.random() * LANE_COUNT);
@@ -106,6 +119,15 @@ export default function EFDGamePage() {
       ctx.fillRect(x + 6, y + 8, TRUCK_W - 12, 12);
     }
 
+    function drawBomb(x: number, y: number, w: number, h: number) {
+      if (!ctx) return;
+      // рисуем бомбу emoji
+      ctx.font = `${Math.floor(h)}px Arial`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("💣", x + w / 2, y + h / 2);
+    }
+
     function rectsOverlap(a: { x: number; y: number; w: number; h: number }, b: { x: number; y: number; w: number; h: number }) {
       return !(a.x + a.w < b.x || b.x + b.w < a.x || a.y + a.h < b.y || b.y + b.h < a.y);
     }
@@ -123,14 +145,14 @@ export default function EFDGamePage() {
       const speed = speedRef.current;
       obstaclesRef.current.forEach((o) => {
         o.pos.y += speed;
-        // рисуем препятствие
-        drawTruck(o.pos.x, o.pos.y, "#fbbf24"); // желтый/оранжевый
+        // рисуем бомбу
+        drawBomb(o.pos.x, o.pos.y, o.w, o.h);
       });
       obstaclesRef.current = obstaclesRef.current.filter((o) => o.pos.y < HEIGHT + 40);
 
-      // спавн
+      // спавн (с увеличенным минимальным расстоянием)
       lastSpawn += speed;
-      if (lastSpawn > 120) {
+      if (lastSpawn > 200) { // было 120, теперь 200 - больше расстояния
         lastSpawn = 0;
         spawnObstacle();
       }
@@ -149,8 +171,8 @@ export default function EFDGamePage() {
       // прогресс и сложность
       setDistance((d) => {
         const nd = d + speed;
-        if (nd > 800 && speedRef.current < 4) speedRef.current = 4;
-        if (nd > 1600 && speedRef.current < 5) speedRef.current = 5;
+        if (nd > 400 && speedRef.current < 4) speedRef.current = 4;
+        if (nd > 700 && speedRef.current < 5) speedRef.current = 5;
         if (nd > targetDistance) {
           setWon(true);
           setRunning(false);
@@ -196,10 +218,26 @@ export default function EFDGamePage() {
             <div>Доехать до конца без столкновений. Скорость постепенно растет.</div>
             <div className="mt-4">Дистанция: <span className="font-bold">{distance}</span></div>
             {!running && !won && (
-              <div className="mt-4 text-red-300 font-bold">Столкновение! Обновите страницу, чтобы попробовать снова.</div>
+              <div className="mt-4">
+                <div className="text-red-300 font-bold mb-3">Столкновение!</div>
+                <button
+                  onClick={handleRestart}
+                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded font-bold transition"
+                >
+                  🔄 Рестарт
+                </button>
+              </div>
             )}
             {won && (
-              <div className="mt-4 text-green-300 font-bold text-lg">Вы победили!</div>
+              <div className="mt-4">
+                <div className="text-green-300 font-bold text-lg mb-3">Вы победили!</div>
+                <button
+                  onClick={handleRestart}
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-bold transition"
+                >
+                  🔄 Играть снова
+                </button>
+              </div>
             )}
           </div>
         </div>
