@@ -76,7 +76,7 @@ export default function EFDGamePage() {
     if (!ctx) return;
 
     let lastSpawn = 0;
-    const targetDistance = 1000; // сколько надо "проехать" для победы (~15 секунд)
+    const targetDistance = 20000; // финальная дистанция
 
     function spawnObstacle() {
       const lane = Math.floor(Math.random() * LANE_COUNT);
@@ -230,7 +230,11 @@ export default function EFDGamePage() {
             )}
             {won && (
               <div className="mt-4">
-                <div className="text-green-300 font-bold text-lg mb-3">Вы победили!</div>
+                <div className="text-green-300 font-bold text-lg mb-3">🎉 Вы победили!</div>
+                <div className="bg-yellow-900 border-2 border-yellow-500 rounded p-3 mb-3">
+                  <div className="text-yellow-300 font-bold text-center mb-1">🏁 Достижение получено!</div>
+                  <div className="text-yellow-100 text-sm text-center">Escape from Donbass</div>
+                </div>
                 <button
                   onClick={handleRestart}
                   className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-bold transition"
