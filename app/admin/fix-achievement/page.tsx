@@ -5,7 +5,16 @@ import Link from "next/link";
 
 export default function FixAchievementPage() {
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<{
+    success: boolean;
+    achievement: {
+      key: string;
+      title: string;
+      description: string;
+      icon: string;
+      rarity: string;
+    };
+  } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleFix = async () => {
@@ -42,7 +51,7 @@ export default function FixAchievementPage() {
 
           <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
             <p className="text-yellow-800">
-              <strong>Внимание:</strong> Эта страница обновит достижение "Escape from Donbass" в базе данных.
+              <strong>Внимание:</strong> Эта страница обновит достижение &quot;Escape from Donbass&quot; в базе данных.
             </p>
           </div>
 
