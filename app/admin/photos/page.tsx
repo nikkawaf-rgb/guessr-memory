@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 interface CommentData {
   id: string;
@@ -153,10 +154,12 @@ export default function AdminPhotosPage() {
             {photos.map((photo) => (
               <div key={photo.id} className="bg-white rounded-lg shadow-lg overflow-hidden">
                 <div className="relative w-full h-64 bg-gray-200">
-                  <img
+                  <Image
                     src={getPhotoUrl(photo.storagePath)}
                     alt={photo.originalName || "Photo"}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />
                 </div>
                 <div className="p-4">

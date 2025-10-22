@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import PhotoComments from "./PhotoComments";
 
 interface GuessResult {
@@ -275,10 +276,13 @@ export default function SessionGameClient({
         {/* Photo */}
         <div className="bg-white rounded-lg shadow-xl overflow-hidden mb-6">
           <div className="relative w-full" style={{ paddingBottom: "75%" }}>
-            <img
+            <Image
               src={getPhotoUrl(currentPhoto.storagePath)}
               alt="Guess the date"
-              className="absolute inset-0 w-full h-full object-contain"
+              fill
+              className="object-contain"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
+              priority
             />
           </div>
         </div>
