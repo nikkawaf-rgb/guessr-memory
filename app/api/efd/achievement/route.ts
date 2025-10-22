@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Bad request" }, { status: 400 });
     }
 
-    const def = ACHIEVEMENTS[type];
+    const def = ACHIEVEMENTS[type as keyof typeof ACHIEVEMENTS];
 
     // Гарантируем, что достижение существует
     let ach = await prisma.achievement.findUnique({ where: { key: def.key } });

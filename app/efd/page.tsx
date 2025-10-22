@@ -35,7 +35,9 @@ async function award(type: "start" | "win") {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId: user.id, type }),
     });
-  } catch (_) {}
+  } catch {
+    // ignore errors
+  }
 }
 
 export default function EFDGamePage() {

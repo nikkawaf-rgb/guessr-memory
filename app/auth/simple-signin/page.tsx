@@ -15,7 +15,6 @@ export default function SimpleSignInPage() {
     // Проверяем, есть ли сохраненный пользователь
     const savedUser = localStorage.getItem("currentUser");
     if (savedUser) {
-      const user = JSON.parse(savedUser);
       router.push("/");
     }
   }, [router]);
