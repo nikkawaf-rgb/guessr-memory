@@ -19,24 +19,42 @@ export default function PlayPage() {
   }, [router]);
 
   const handleStartGame = async () => {
-    if (!playerName) return;
+    if (!playerName) {
+      alert("Имя пользователя не найдено. Пожалуйста, войдите снова.");
+      router.push("/auth/simple-signin");
+      return;
+    }
 
     setLoading(true);
     try {
+      console.log("Starting game for player:", playerName);
+      
       const response = await fetch("/api/session/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ playerName }),
       });
 
+      console.log("Response status:", response.status);
       const data = await response.json();
+      console.log("Response data:", data);
 
       if (!response.ok) {
         console.error("Server error:", data);
+        
+        // Если пользователь не найден - перенаправляем на вход
+        if (response.status === 401) {
+          alert("Пользователь не найден. Пожалуйста, войдите снова.");
+          localStorage.removeItem("playerName");
+          router.push("/auth/simple-signin");
+          return;
+        }
+        
         alert(data.error || "Ошибка при создании игры. Попробуйте еще раз.");
         return;
       }
 
+      console.log("Redirecting to session:", data.sessionId);
       router.push(`/session/${data.sessionId}`);
     } catch (error) {
       console.error("Error starting game:", error);
@@ -60,9 +78,16 @@ export default function PlayPage() {
         <h1 className="text-3xl font-bold text-center mb-4 text-gray-800">
           Рейтинговая игра
         </h1>
-        <p className="text-center text-gray-600 mb-8">
+        <p className="text-center text-gray-600 mb-4">
           Угадайте даты на 10 фотографиях и заработайте очки
         </p>
+
+        {/* Отладочная информация */}
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-xs text-gray-700">
+            <strong>Игрок:</strong> {playerName || "не определен"}
+          </p>
+        </div>
 
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
           <p className="text-sm text-yellow-800">
