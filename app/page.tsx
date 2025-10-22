@@ -52,14 +52,17 @@ export default function HomePage() {
         <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
           {/* Play Game */}
           <Link
-            href="/auth/simple-signin"
+            href={currentUser ? "/play" : "/auth/simple-signin"}
             className="bg-red-600 text-white p-8 rounded-xl shadow-xl hover:bg-red-700 transition-all transform hover:scale-105"
           >
             <div className="text-center">
               <div className="text-5xl mb-4">🎮</div>
               <h2 className="text-2xl font-bold mb-2">Играть</h2>
               <p className="text-red-100">
-                Начните новую рейтинговую игру и угадывайте даты на фотографиях
+                {currentUser 
+                  ? "Начните новую рейтинговую игру и угадывайте даты на фотографиях"
+                  : "Войдите, чтобы начать играть"
+                }
               </p>
             </div>
           </Link>
