@@ -1,151 +1,447 @@
-# Memory Keeper — Roadmap (Draft)
+# Точка Роста GUESSER — Roadmap
 
-This is a living roadmap for the Memory Keeper project (GeoGuessr‑style memory game + social gallery). We’ll iterate and adjust as we go.
+> **Обновлено:** 22 октября 2025  
+> **Текущая версия:** v2.0 (полностью упрощенная)
 
-## Vision
-- Gallery of community photos with comments/likes (no spoilers).
-- Game sessions: each session shows 10 random photos; player identifies people (via tags), location (city), and date (day/month/year) for points.
-- Leaderboard, achievements, and profiles.
-- Admin tools for content management and moderation.
-- Supabase for storage and platform services; Prisma + Postgres for data models; Next.js App Router.
+## 📋 Описание проекта
 
-References: [Supabase — Postgres development platform](https://supabase.com/)
+**Точка Роста GUESSER** — образовательная игра на угадывание дат фотографий для учеников центра "Точка Роста" (Нижнеудинск, Иркутская область).
 
-## Scoring Rules (current spec)
-- People: 200 pts if all people are correctly identified via tags.
-- Location (city): 200 pts if correct.
-- Date: up to 600 pts — 200 for year, 200 for month, 200 for day.
-- Max per photo: 1000 pts.
+### Основная механика
+- Игрок смотрит фотографию
+- Угадывает **дату съёмки** (год, месяц, день)
+- Получает очки за точность
+- Может оставлять **комментарии** и ставить **лайки**
+- Зарабатывает **достижения**
+- Соревнуется в **лидерборде**
 
-## Current Status (from repo audit)
-- Auth: NextAuth credentials provider for admin is wired (`app/api/auth/[...nextauth]/route.ts`); Google/VK pending.
-- Upload & registration:
-  - Upload to Supabase Storage: `app/api/photos/upload/route.ts`.
-  - DB registration + EXIF date intake: `app/api/photos/register/route.ts`.
-  - Admin upload UI with EXIF parsing via `exifr`: `app/admin/upload/page.tsx`.
-- Data models (Prisma): Users, Photos (with `exifTakenAt`), People/Tagging zones, Sessions/Guesses, Comments/Likes/Reports, Achievements, AdminConfig, UserLabelPresets (`prisma/schema.prisma`).
-- Gallery: `app/gallery/page.tsx` (no spoilers; shows previews + comments count), detail page `app/photo/[id]/page.tsx` with comments and basic like/report actions.
-- Play/Leaderboard pages: placeholders exist (`app/play/page.tsx`, `app/leaderboard/page.tsx`).
-- Supabase helpers present in `app/lib/*`.
+### Технологический стек
+- **Frontend/Backend:** Next.js 15 (App Router)
+- **Database:** PostgreSQL (Neon)
+- **ORM:** Prisma
+- **Storage:** Supabase Storage
+- **Deployment:** Vercel
+- **Auth:** Simple name + password (custom)
 
-### Updates (Oct 2025)
-- Direct client upload to Supabase in admin to avoid 413 (`app/admin/upload/page.tsx`).
-- Session start API + session flow (`/api/session/start`, `app/session/[id]/page.tsx`).
-- Server action `submitGuess` with scoring (`app/session/actions.ts`).
-- Admin: People and Locations CRUD pages (`/admin/people`, `/admin/locations`).
-- Admin: Zones tool added — list and per-photo editor (`/admin/zones`, `/admin/zones/[photoId]`), basic rect helper.
-- Session page: minimal people tagger (client component), `guessedPeopleNames` + `timeSpentSec`, next-photo navigation.
-- Admin landing: added link to Zones; replaced anchors with Next `Link`; build passes on Vercel.
+---
 
-## Phase 0 — Foundations (in progress)
-- [x] Prisma schema for core entities
-- [x] Supabase Storage upload endpoint
-- [x] Photo registration endpoint with EXIF date intake
-- [x] Basic gallery and photo detail pages
-- [x] Comments + like/report endpoints
-- [x] Admin sign‑in (credentials)
-- [x] Admin upload with EXIF + direct Supabase upload (413 fixed)
-- [ ] Protect admin routes (middleware/role checks)
-- [ ] Rate limiting for comment/like/report
-- [ ] Migrations applied and synced with DB
+## ✅ Текущее состояние (Что уже работает)
 
-## Phase 1 — MVP Game (Ranked mode)
-- Game session core
-  - [x] Session creation (10 random active photos, per‑player randomized ordering)
-  - [ ] Session progress persistence (resume between sessions)
-  - [x] Per‑photo UI: minimal tagging UI (names list), city input, date input
-  - [ ] People tagging geometry check vs. `PhotoPeopleZone` (match inside shapes)
-  - [x] Location check vs. `Location` (with aliases)
-  - [x] Date check: year/month/day vs. `Photo.exifTakenAt` or admin override
-  - [x] Scoring service (200 people, 200 location, 200 each Y/M/D)
-  - [x] Time tracking per photo (for achievements later)
-- Comments during play
-  - [ ] Inline comment box on task screen; reminder: no spoilers
-  - [x] Persist and revalidate; visible later on photo page
-- Admin setup for answers
-  - [x] People directory (`Person`) CRUD
-  - [x] Photo tagging zones CRUD (`PhotoPeopleZone`), basic rect helper; polygon/circle UI pending
-  - [x] Locations CRUD with aliases
-  - [ ] Photo active/hide moderation, comment moderation
+### 🎮 Игровая механика
+- ✅ **Только рейтинговый режим** (Fun mode убран)
+- ✅ **10 фотографий на игру**
+- ✅ **Прогрессивная система очков:**
+  - Год правильно: 100 очков
+  - Месяц правильно: 200 очков
+  - День правильно: 300 очков
+  - Комбо (все три): 1000 очков (вместо 600)
+- ✅ **2 спецвопроса на игру** (фиксированно)
+  - 5 вариантов ответа
+  - +1000 очков за правильный ответ
+- ✅ **Промежуточные результаты** после каждого фото (без показа правильного ответа)
+- ✅ **Скрытая мини-игра EFD** (Escape from Donbass) - canvas-based игра на canvas
 
-## Phase 2 — Leaderboard, Profiles, Achievements
-- Leaderboard
-  - [ ] Ranked leaderboards (daily/weekly/all‑time)
-  - [ ] Titles (e.g., “Хранитель памяти”) based on rank/season
-- Profiles
-  - [ ] Player profile page: achievements, stats (ranked/fun), comment activity
-  - [ ] Session history and best scores
-- Achievements (initial set)
-  - [ ] “Перфекционист” — 1,000 pts on one photo
-  - [ ] “Комментатор” — 10+ comments
-  - [ ] “Популярный” — 20+ likes on comments
-  - [ ] “Активист” — comments on every photo in a session
-  - [ ] “Быстрый стрелок” — average answer < 10s
-  - [ ] “Снайпер” — 5 perfect tag hits in a row
-  - [ ] “Молния” — answer < 5s
-  - [ ] “Эрудит” — all dates correct in one game
-  - [ ] “Знаток лиц” — all people correct in 5 photos
-  - [ ] “Знаток мест” — 8 correct locations in a row
-  - [ ] “Историк” — 10 correct years
-  - [ ] “Ясновидящий” — exact day+month on 3 photos in a row
-  - [ ] Social: “Болтун”, “Душа компании”, “Товарищ”, “Рассказчик”, “Весельчак”
-  - [ ] Special: “Новичок”, “Повторитель”, “Марафонец”, “Циркач”, “Детектив”
+### 👥 Система пользователей
+- ✅ **Упрощённая регистрация:** имя + пароль (без email)
+- ✅ **Сессии:** localStorage для запоминания пользователя
+- ✅ **Уникальные имена** (с проверкой)
+- ✅ **Роли:** player / admin
+- ✅ **Админ:** может видеть пароли пользователей (для восстановления)
 
-## Phase 3 — Fun mode, UX, and Safety
-- Fun mode
-  - [ ] Alternate non‑ranked rules and relaxed scoring
-- UX & Accessibility
-  - [ ] Skeletons, error states, keyboard navigation
-  - [ ] Responsive tagging canvas with `react‑konva`
-- Safety & anti‑cheat
-  - [ ] Don’t leak answers in UI/requests
-  - [ ] Minimal metadata exposure; cache headers; server checks
-  - [ ] Basic anomaly detection (e.g., impossible fast solves)
+### 🏆 Система достижений (44 штуки)
+#### Категории:
+- **Космос** (8): Юрий Гагарин, Млечный Путь, Чёрная дыра, Луноход
+- **Аниме** (4): Наруто, Шаринган, Резина резиновая, Легенда Точки Роста
+- **Игровые** (7): Хедшот, Эйс, Флавлесс Виктори, Ультракомбо, Фаталити, Респавн, Снайпер
+- **Точность** (3): Календарь на память, Хронометр, Машина времени
+- **3D/CAD** (3): Полигональная сетка, Рендер завершён, Subdivision Surface
+- **Инженерия** (2): Допуск 0.01, 3D-проекция
+- **Ракеты** (6): Орбитальная скорость, Мягкая посадка, Апогей траектории, и др.
+- **Везение** (1): Везунчик
+- **EFD** (2): Я получил права, Escape from Donbass
+- **Социальные** (2): Писатель (первый комментарий), Не имей 500 рублей... (первый лайк)
+- **Скрытые** (8): Привязываются к конкретным фото за максимальный балл
+- **Легендарное** (1): Хокаге Точки Роста (все 36 остальных достижений)
 
-## Phase 4 — Admin & Moderation
-- [ ] Admin dashboard: reports queue, comment hide/unhide
-- [ ] Bulk photo import tool (drag‑drop + EXIF)
-- [ ] People/Locations management UI
-- [ ] Photo status and answer overrides (date/location)
+#### Система редкости:
+- **Common** (обычные): видны всегда
+- **Rare** (редкие): название видно, описание скрыто
+- **Epic** (эпические): название видно, описание скрыто
+- **Legendary** (легендарные): всё скрыто (???)
+- При получении достижения - **раскрывается полностью**
 
-## Phase 5 — Platform & Ops
-- Auth
-  - [ ] Email/password or magic link (easy) and/or VK OAuth
-- Performance
-  - [ ] Thumbnails, image optimization, caching
-  - [ ] Edge rendering where applicable
-- Reliability & Security
-  - [ ] Zod validation on all API routes
-  - [ ] CSRF for mutations, rate limiting
-  - [ ] Transactions for multi‑write operations
-- Observability & CI/CD
-  - [ ] Structured logs, basic tracing
-  - [ ] Lint/type/test checks in CI; preview envs
+### 💬 Система комментариев
+- ✅ **Комментарии к фотографиям** во время игры
+- ✅ **Лайки** на комментарии
+- ✅ **Предупреждение** о возможных спойлерах
+- ✅ **Уведомления** о новых достижениях при комментировании/лайках
+- ✅ **Админ видит все комментарии** под фото
+- ✅ **Админ может удалять** комментарии (без подтверждения)
 
-## Data & Entities Checklist
-- [x] `User`, `Photo`, `Comment`, `CommentLike`, `Report`
-- [x] `Person`, `PhotoPeopleZone`, `Location`
-- [x] `Session`, `SessionPhoto`, `Guess`
-- [x] `Achievement`, `UserAchievement`
-- [x] `AdminConfig`, `UserLabelPreset`
+### 📊 Лидерборд
+- ✅ **Один игрок = одна строка**
+- ✅ **Лучший результат** (крупно)
+- ✅ **Статистика:**
+  - Количество игр
+  - Всего очков
+  - Средний балл
+  - Достижений получено
+  - Скрытых достижений (X из 8)
+  - Комментариев написано
+  - Лайков поставлено
+- ✅ **Сортировка:** 1) по лучшему результату, 2) по кол-ву достижений
+- ✅ **Топ-5 последних достижений** игрока (иконки)
 
-## Open Questions
-- People tagging: allow free‑text tags and map to `Person` by admin review? or strict list?
-- Location granularity: city only vs. city + venue?
-- Allow hints (off by default) for fun mode?
-- Seasonality for leaderboards?
+### 🎨 Дизайн
+- ✅ **Фирменные цвета Точки Роста:**
+  - Красный (#E31E24)
+  - Чёрный (#1A1A1A)
+  - Белый (#FFFFFF)
+- ✅ **Улучшенная контрастность** текста
+- ✅ **Responsive дизайн**
 
-## Current Step (for Cursor to resume)
-1) People tagging geometry: implement shape comparison (rect/circle/polygon + tolerance) against `PhotoPeopleZone`; upgrade admin editor to `react‑konva` (circle/polygon tools).
-2) Ensure prod DB has migrations applied (`prisma migrate deploy` against Production `DATABASE_URL`).
-3) Admin route protection (middleware/role checks).
-4) Monitor upload in prod ("Invalid Compact JWS" should be gone after env/policies; switch to server‑side upload if повторится).
+### 🔧 Админ-панель
+#### Основные функции:
+- ✅ **Массовая загрузка фото** с EXIF
+- ✅ **Просмотр и удаление фото**
+- ✅ **Добавление спецвопросов** к фотографиям
+- ✅ **Управление скрытыми достижениями** (привязка к фото)
+- ✅ **Управление пользователями** (просмотр, удаление, пароли)
+- ✅ **Просмотр комментариев** под каждым фото
+- ✅ **Удаление комментариев**
+- ✅ **Информация о хранилище** (занятое место)
+- ✅ **Список всех достижений**
 
-## Next Steps
-- Add leaderboard and basic achievements.
-- Harden APIs with validation and rate limits.
-- Improve upload path: optional server-side upload using `SUPABASE_SERVICE_ROLE_KEY` to avoid client anon permissions.
+#### Служебные страницы:
+- ✅ `/admin` - главная админ-панель
+- ✅ `/admin/bulk-import` - массовая загрузка
+- ✅ `/admin/photos` - просмотр всех фото
+- ✅ `/admin/special-questions` - управление спецвопросами
+- ✅ `/admin/hidden-achievements` - скрытые достижения
+- ✅ `/admin/users` - управление пользователями
+- ✅ `/admin/storage-info` - информация о хранилище
+- ✅ `/admin/fix-achievement` - служебная страница (пересоздание EFD)
+- ✅ `/admin_enter` - скрытый вход для админа
 
-## Known Issues / Risks
-- Upload in Production fails with "Invalid Compact JWS" when `NEXT_PUBLIC_SUPABASE_ANON_KEY` is invalid/mismatched; verify env vars and Storage policies; consider moving to server-side upload.
-- Possible missing prod migrations cause server exceptions on `/admin/zones/[photoId]` and `/session/[id]`.
+### 🖼️ Оптимизация изображений
+- ✅ **Next.js Image** компонент
+- ✅ **Автоматическое сжатие** и WebP
+- ✅ **Адаптивные размеры** для разных устройств
+- ✅ **Lazy loading**
+- ✅ **CDN кэширование** (Vercel)
+- ✅ **UUID имена файлов** для новых загрузок (защита от утечки дат)
+
+### 📱 Основная структура сайта
+- ✅ Главная страница с приветствием
+- ✅ Кнопка "Играть" (→ `/play` или `/auth/simple-signin`)
+- ✅ Лидерборд (`/leaderboard`)
+- ✅ Достижения (`/achievements`)
+- ✅ Скрытый грузовик 🚚 для мини-игры EFD
+
+---
+
+## 🗂️ База данных (Prisma Schema)
+
+### Основные модели:
+
+```prisma
+User
+├── name (unique)
+├── password
+├── role (admin/player)
+├── sessions[]
+├── achievements[]
+├── comments[]
+└── likes[]
+
+Photo
+├── storagePath (UUID.ext для новых)
+├── originalName
+├── exifTakenAt (дата из EXIF)
+├── width, height
+├── specialQuestion
+├── specialAnswerCorrect
+├── hiddenAchievementTitle
+├── hiddenAchievementDescription
+├── hiddenAchievementIcon
+└── comments[]
+
+Session
+├── userId
+├── totalScore
+├── currentPhotoIndex
+├── photoCount
+├── durationSeconds
+├── finishedAt
+└── sessionPhotos[]
+
+SessionPhoto
+├── sessionId
+├── photoId
+├── orderIndex
+├── showSpecial (показывать ли спецвопрос)
+└── guess
+
+Guess
+├── sessionPhotoId
+├── guessedYear, guessedMonth, guessedDay
+├── guessedSpecial
+├── yearHit, monthHit, dayHit, specialHit
+├── scoreDelta
+└── timeSpentSec
+
+Achievement
+├── key (unique)
+├── title
+├── description
+├── icon (emoji)
+├── category
+├── rarity (common/rare/epic/legendary)
+└── isHidden
+
+UserAchievement
+├── userId
+├── achievementId
+└── photoId (для скрытых)
+
+Comment
+├── userId
+├── photoId
+├── content
+└── likes[]
+
+CommentLike
+├── userId
+└── commentId
+```
+
+---
+
+## 🎯 API Endpoints
+
+### Игровые
+- `POST /api/session/start` - создать новую игру
+- `POST /api/session/guess` - отправить ответ
+- `GET /api/leaderboard` - получить лидерборд
+- `GET /api/achievements` - получить список достижений
+
+### Комментарии
+- `GET /api/comments?photoId=...` - получить комментарии
+- `POST /api/comments` - создать комментарий
+- `POST /api/comments/like` - поставить/убрать лайк
+
+### Админ
+- `GET /api/admin/photos` - список фото с комментариями
+- `POST /api/admin/photos/delete` - удалить фото
+- `POST /api/admin/bulk-import` - импорт фото
+- `POST /api/admin/special-questions` - управление спецвопросами
+- `POST /api/admin/hidden-achievements` - управление скрытыми достижениями
+- `DELETE /api/admin/comments/delete` - удалить комментарий
+- `GET /api/admin/users` - список пользователей
+- `DELETE /api/admin/users` - удалить пользователя
+- `GET /api/admin/storage-info` - информация о хранилище
+
+### Аутентификация
+- `POST /api/auth/signin` - вход/регистрация
+
+### Спецвопросы
+- `POST /api/efd/achievement` - достижения за EFD игру
+
+---
+
+## 🔄 Текущие проблемы и известные баги
+
+### ✅ Исправлено:
+- ~~Фотографии медленно грузятся~~ → Next.js Image + оптимизация
+- ~~Достижение EFD отображается как ???~~ → исправлено через пересоздание
+- ~~Async/await ошибки в leaderboard API~~ → использован Promise.all
+- ~~Названия файлов могут раскрывать даты~~ → UUID для новых загрузок
+
+### 🔍 Требует внимания:
+- Старые 131 фото могут иметь даты в названиях (не критично)
+- Первая загрузка фото после деплоя может быть медленной (создаётся оптимизация)
+
+---
+
+## 📝 Следующие шаги (Backlog)
+
+### Высокий приоритет
+- [ ] Добавить больше фотографий (цель: 200+)
+- [ ] Тестирование с реальными школьниками
+- [ ] Сбор обратной связи
+
+### Средний приоритет
+- [ ] Добавить больше скрытых достижений
+- [ ] Создать сезонные события
+- [ ] Добавить фильтры в лидерборд (за неделю/месяц/всё время)
+- [ ] Статистика для игрока (график прогресса)
+
+### Низкий приоритет
+- [ ] Темная тема
+- [ ] Звуковые эффекты при получении достижений
+- [ ] Анимации переходов
+- [ ] PWA support (установка как приложение)
+- [ ] Экспорт результатов игрока (PDF)
+
+### Идеи для будущего
+- [ ] Турнирный режим (групповые соревнования)
+- [ ] Командная игра
+- [ ] Подсказки (за штраф в очках)
+- [ ] Ежедневные челленджи
+- [ ] Сезонные доски лидеров с призами
+
+---
+
+## 🚀 Как продолжить работу
+
+### Для нового разработчика:
+
+1. **Клонировать репозиторий:**
+   ```bash
+   git clone https://github.com/nikkawaf-rgb/guessr-memory.git
+   cd memory-keeper
+   ```
+
+2. **Установить зависимости:**
+   ```bash
+   npm install
+   ```
+
+3. **Настроить .env файл:**
+   ```env
+   DATABASE_URL="postgresql://..."
+   NEXT_PUBLIC_SUPABASE_URL="https://jdrsmlnngkniwgwdrnok.supabase.co"
+   NEXT_PUBLIC_SUPABASE_ANON_KEY="..."
+   ```
+
+4. **Применить миграции:**
+   ```bash
+   npx prisma db push
+   npx tsx prisma/seed-achievements.ts
+   ```
+
+5. **Создать админа:**
+   ```bash
+   npx tsx prisma/create-admin.ts
+   ```
+   (admin / admin123)
+
+6. **Запустить dev сервер:**
+   ```bash
+   npm run dev
+   ```
+
+7. **Открыть:**
+   - Сайт: http://localhost:3000
+   - Админка: http://localhost:3000/admin_enter
+
+### Важные файлы для понимания:
+
+**Игровая логика:**
+- `app/api/session/start/route.ts` - создание игры
+- `app/api/session/guess/route.ts` - обработка ответов и подсчёт очков
+- `app/session/[id]/_components/SessionGameClient.tsx` - UI игры
+
+**Достижения:**
+- `prisma/seed-achievements.ts` - список всех достижений
+- `app/lib/achievements.ts` - логика проверки и выдачи достижений
+- `app/session/[id]/results/page.tsx` - выдача достижений после игры
+
+**Комментарии:**
+- `app/api/comments/route.ts` - CRUD комментариев
+- `app/api/comments/like/route.ts` - лайки
+- `app/session/[id]/_components/PhotoComments.tsx` - UI комментариев
+
+**Админка:**
+- `app/admin/page.tsx` - главная админ-панель
+- `app/admin/bulk-import/_components/BulkImportClient.tsx` - загрузка фото
+- `app/api/admin/*` - все админские API
+
+### Структура проекта:
+```
+memory-keeper/
+├── app/
+│   ├── admin/              # Админ-панель
+│   ├── api/                # API endpoints
+│   ├── auth/               # Аутентификация
+│   ├── session/[id]/       # Игровая сессия
+│   ├── leaderboard/        # Лидерборд
+│   ├── achievements/       # Достижения
+│   ├── efd/                # Скрытая мини-игра
+│   └── lib/                # Утилиты (prisma, achievements)
+├── prisma/
+│   ├── schema.prisma       # Схема БД
+│   ├── seed-achievements.ts # Сид достижений
+│   └── create-admin.ts     # Создание админа
+├── public/                 # Статические файлы
+└── scripts/                # Служебные скрипты
+```
+
+---
+
+## 📚 Документация Supabase Storage
+
+**Bucket:** `photos`  
+**Policy:** Public read, Admin upload  
+**URL формат:** `https://[project].supabase.co/storage/v1/object/public/photos/[filename]`
+
+### Проверка места:
+1. Supabase Dashboard → Storage → photos
+2. Или: `/admin/storage-info`
+
+**Лимиты (Free tier):**
+- Storage: 1 GB
+- Database: 500 MB
+- Bandwidth: 2 GB/month
+
+---
+
+## 🎓 Контекст проекта
+
+**Целевая аудитория:** Школьники центра "Точка Роста" (Нижнеудинск, Иркутская область)
+
+**Интересы учеников:**
+- Аниме (One Piece, Naruto, One Punch Man)
+- 3D моделирование (Blender, КОМПАС-3D)
+- Ракетостроение (гидравлические и пороховые ракеты)
+- Компьютерные игры (CS, Mortal Kombat)
+- Астрономия
+- Местная культура (Сибирь, Иркутская область)
+
+**Педагогическая цель:**
+- Развитие внимания к деталям
+- Улучшение исторической памяти
+- Командное взаимодействие через комментарии
+- Геймификация обучения
+
+---
+
+## 🔐 Админ-доступ
+
+**Логин:** admin  
+**Пароль:** admin123  
+**Страница входа:** `/admin_enter`
+
+Админ может:
+- Загружать/удалять фото
+- Управлять спецвопросами
+- Управлять скрытыми достижениями
+- Видеть и удалять комментарии
+- Управлять пользователями
+- Видеть пароли игроков (для восстановления)
+
+---
+
+## 🌟 Заключение
+
+Проект находится в **стабильном рабочем состоянии**. Все основные функции реализованы и протестированы. Готов к использованию с реальными пользователями.
+
+**Текущее количество фото:** 131  
+**Текущее количество достижений:** 44  
+**Версия:** 2.0 (упрощённая и стабильная)
+
+**Последнее обновление:** 22 октября 2025, 20:00 MSK
+
+---
+
+*Разработано с ❤️ для учеников Точки Роста в Нижнеудинске*
