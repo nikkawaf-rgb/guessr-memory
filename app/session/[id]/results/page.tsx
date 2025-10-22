@@ -1,6 +1,7 @@
 import { prisma } from "@/app/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { checkAndGrantAchievements } from "@/app/lib/achievements";
 
 interface ResultsPageProps {
   params: Promise<{ id: string }>;
@@ -31,6 +32,53 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
 
   const answeredPhotos = session.sessionPhotos.filter((sp) => sp.guess);
 
+  // Проверяем и начисляем достижения, если игра завершена
+  let newAchievements: string[] = [];
+  let achievementDetails: Array<{ title: string; description: string; icon: string }> = [];
+  
+  if (session.finishedAt && session.durationSeconds) {
+    // Подготавливаем данные для проверки достижений
+    const stats = {
+      sessionId: session.id,
+      userId: session.userId,
+      totalScore: session.totalScore,
+      guesses: answeredPhotos.map((sp) => ({
+        yearHit: sp.guess!.yearHit,
+        monthHit: sp.guess!.monthHit,
+        dayHit: sp.guess!.dayHit,
+        specialHit: sp.guess!.specialHit,
+        scoreDelta: sp.guess!.scoreDelta,
+        guessedYear: sp.guess!.guessedYear,
+        guessedMonth: sp.guess!.guessedMonth,
+        guessedDay: sp.guess!.guessedDay,
+        photo: {
+          id: sp.photo.id,
+          exifTakenAt: sp.photo.exifTakenAt,
+          hiddenAchievementTitle: sp.photo.hiddenAchievementTitle,
+        },
+      })),
+      durationSeconds: session.durationSeconds,
+      createdAt: session.createdAt,
+    };
+
+    // Проверяем достижения
+    newAchievements = await checkAndGrantAchievements(stats);
+
+    // Получаем детали достижений для отображения
+    if (newAchievements.length > 0) {
+      const achievements = await prisma.achievement.findMany({
+        where: {
+          key: { in: newAchievements },
+        },
+      });
+      achievementDetails = achievements.map((a) => ({
+        title: a.title,
+        description: a.description,
+        icon: a.icon,
+      }));
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
       <div className="container mx-auto px-4 max-w-4xl">
@@ -47,6 +95,36 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
             Игрок: <span className="font-semibold">{session.user.name}</span>
           </div>
         </div>
+
+        {/* New Achievements */}
+        {achievementDetails.length > 0 && (
+          <div className="bg-gradient-to-r from-yellow-50 to-amber-50 border-2 border-yellow-400 rounded-lg shadow-xl p-6 mb-8">
+            <h2 className="text-3xl font-bold text-center text-amber-800 mb-4">
+              🏆 Новые достижения! 🏆
+            </h2>
+            <div className="space-y-3">
+              {achievementDetails.map((achievement, index) => (
+                <div
+                  key={index}
+                  className="bg-white rounded-lg p-4 shadow-md border-2 border-amber-300 hover:scale-105 transition-transform"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="text-4xl">{achievement.icon}</div>
+                    <div className="flex-1">
+                      <div className="font-bold text-lg text-gray-800">
+                        {achievement.title}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {achievement.description}
+                      </div>
+                    </div>
+                    <div className="text-2xl">✨</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Stats */}
         <div className="grid md:grid-cols-3 gap-4 mb-8">
@@ -124,24 +202,30 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
         </div>
 
         {/* Actions */}
-        <div className="flex gap-4">
-          <Link
-            href="/"
-            className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 px-6 rounded-lg font-bold text-center hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg"
-          >
-            На главную
-          </Link>
+        <div className="grid md:grid-cols-2 gap-4">
           <Link
             href="/play"
-            className="flex-1 bg-gradient-to-r from-green-600 to-green-700 text-white py-4 px-6 rounded-lg font-bold text-center hover:from-green-700 hover:to-green-800 transition-all shadow-lg"
+            className="bg-gradient-to-r from-green-600 to-green-700 text-white py-4 px-6 rounded-lg font-bold text-center hover:from-green-700 hover:to-green-800 transition-all shadow-lg"
           >
-            Играть еще
+            🎮 Играть еще
+          </Link>
+          <Link
+            href="/achievements"
+            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white py-4 px-6 rounded-lg font-bold text-center hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg"
+          >
+            🏆 Мои достижения
           </Link>
           <Link
             href="/leaderboard"
-            className="flex-1 bg-gradient-to-r from-amber-500 to-orange-600 text-white py-4 px-6 rounded-lg font-bold text-center hover:from-amber-600 hover:to-orange-700 transition-all shadow-lg"
+            className="bg-gradient-to-r from-amber-500 to-orange-600 text-white py-4 px-6 rounded-lg font-bold text-center hover:from-amber-600 hover:to-orange-700 transition-all shadow-lg"
           >
-            Лидерборд
+            🥇 Лидерборд
+          </Link>
+          <Link
+            href="/"
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 px-6 rounded-lg font-bold text-center hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg"
+          >
+            🏠 На главную
           </Link>
         </div>
       </div>

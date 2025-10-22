@@ -50,7 +50,7 @@ export default function AdminPage() {
         </div>
 
         {/* Admin Actions */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
           {/* Bulk Upload */}
           <Link
             href="/admin/bulk-import"
@@ -79,6 +79,34 @@ export default function AdminPage() {
             </div>
           </Link>
 
+          {/* Special Questions */}
+          <Link
+            href="/admin/special-questions"
+            className="bg-gradient-to-br from-pink-500 to-rose-600 text-white p-6 rounded-xl shadow-xl hover:shadow-2xl transition-all transform hover:scale-105"
+          >
+            <div className="text-center">
+              <div className="text-4xl mb-3">🌟</div>
+              <h2 className="text-xl font-bold mb-2">Спецвопросы</h2>
+              <p className="text-pink-100 text-sm">
+                Добавить бонусные вопросы к фото
+              </p>
+            </div>
+          </Link>
+
+          {/* Hidden Achievements */}
+          <Link
+            href="/admin/hidden-achievements"
+            className="bg-gradient-to-br from-amber-500 to-orange-600 text-white p-6 rounded-xl shadow-xl hover:shadow-2xl transition-all transform hover:scale-105"
+          >
+            <div className="text-center">
+              <div className="text-4xl mb-3">🎖️</div>
+              <h2 className="text-xl font-bold mb-2">Скрытые достижения</h2>
+              <p className="text-amber-100 text-sm">
+                Привязать достижения к фото
+              </p>
+            </div>
+          </Link>
+
           {/* Stats */}
           <Link
             href="/admin/stats"
@@ -93,16 +121,16 @@ export default function AdminPage() {
             </div>
           </Link>
 
-          {/* Special Questions */}
+          {/* Achievements List */}
           <Link
-            href="/admin/special-questions"
-            className="bg-gradient-to-br from-pink-500 to-rose-600 text-white p-6 rounded-xl shadow-xl hover:shadow-2xl transition-all transform hover:scale-105"
+            href="/achievements"
+            className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-6 rounded-xl shadow-xl hover:shadow-2xl transition-all transform hover:scale-105"
           >
             <div className="text-center">
-              <div className="text-4xl mb-3">🌟</div>
-              <h2 className="text-xl font-bold mb-2">Спецвопросы</h2>
-              <p className="text-pink-100 text-sm">
-                Добавить бонусные вопросы к фото
+              <div className="text-4xl mb-3">🏆</div>
+              <h2 className="text-xl font-bold mb-2">Все достижения</h2>
+              <p className="text-indigo-100 text-sm">
+                Посмотреть список всех достижений
               </p>
             </div>
           </Link>

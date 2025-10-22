@@ -1,0 +1,270 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import Link from "next/link";
+
+interface Photo {
+  id: string;
+  storagePath: string;
+  exifTakenAt: Date | null;
+  width: number | null;
+  height: number | null;
+  hiddenAchievementTitle: string | null;
+  hiddenAchievementDescription: string | null;
+  hiddenAchievementIcon: string | null;
+}
+
+export default function HiddenAchievementsPage() {
+  const [photos, setPhotos] = useState<Photo[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [icon, setIcon] = useState("");
+
+  const getPhotoUrl = (storagePath: string) => {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://jdrsmlnngkniwgwdrnok.supabase.co";
+    return `${supabaseUrl}/storage/v1/object/public/photos/${storagePath}`;
+  };
+
+  useEffect(() => {
+    fetchPhotos();
+  }, []);
+
+  const fetchPhotos = async () => {
+    try {
+      const response = await fetch("/api/admin/photos");
+      if (response.ok) {
+        const data = await response.json();
+        setPhotos(data.photos);
+      }
+    } catch (error) {
+      console.error("Error fetching photos:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEdit = (photo: Photo) => {
+    setEditingId(photo.id);
+    setTitle(photo.hiddenAchievementTitle || "");
+    setDescription(photo.hiddenAchievementDescription || "");
+    setIcon(photo.hiddenAchievementIcon || "🎖️");
+  };
+
+  const handleSave = async (photoId: string) => {
+    try {
+      const response = await fetch("/api/admin/hidden-achievements", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          photoId,
+          title: title.trim(),
+          description: description.trim(),
+          icon: icon.trim(),
+        }),
+      });
+
+      if (response.ok) {
+        await fetchPhotos();
+        setEditingId(null);
+        setTitle("");
+        setDescription("");
+        setIcon("");
+      } else {
+        alert("Ошибка при сохранении");
+      }
+    } catch (error) {
+      console.error("Error saving achievement:", error);
+      alert("Ошибка при сохранении");
+    }
+  };
+
+  const handleRemove = async (photoId: string) => {
+    try {
+      const response = await fetch("/api/admin/hidden-achievements", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ photoId }),
+      });
+
+      if (response.ok) {
+        await fetchPhotos();
+      } else {
+        alert("Ошибка при удалении");
+      }
+    } catch (error) {
+      console.error("Error removing achievement:", error);
+      alert("Ошибка при удалении");
+    }
+  };
+
+  const handleCancel = () => {
+    setEditingId(null);
+    setTitle("");
+    setDescription("");
+    setIcon("");
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-100 p-8">
+        <div className="text-center">Загрузка...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-100 p-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-800">🎖️ Скрытые достижения для фото</h1>
+          <Link
+            href="/admin"
+            className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg transition"
+          >
+            ← Назад в админку
+          </Link>
+        </div>
+
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <p className="text-sm text-blue-800">
+            💡 <strong>Как это работает:</strong> Когда игрок набирает максимум очков (1000 за дату + 1000 за спецвопрос = 2000) на фото со скрытым достижением, он получает это уникальное достижение!
+          </p>
+        </div>
+
+        {photos.length === 0 ? (
+          <div className="text-center py-12 bg-white rounded-lg shadow">
+            <p className="text-gray-600">Нет загруженных фотографий</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {photos.map((photo) => (
+              <div
+                key={photo.id}
+                className={`bg-white rounded-lg shadow-lg overflow-hidden ${
+                  photo.hiddenAchievementTitle ? "border-2 border-yellow-400" : ""
+                }`}
+              >
+                <div className="relative h-48 bg-gray-200">
+                  <img
+                    src={getPhotoUrl(photo.storagePath)}
+                    alt="Фото"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                <div className="p-4">
+                  {/* Информация о фото */}
+                  <div className="text-sm text-gray-600 mb-3">
+                    {photo.exifTakenAt
+                      ? new Date(photo.exifTakenAt).toLocaleDateString("ru-RU")
+                      : "Дата неизвестна"}
+                    {photo.width && photo.height && (
+                      <span className="ml-2">• {photo.width}×{photo.height}</span>
+                    )}
+                  </div>
+
+                  {/* Существующее достижение */}
+                  {photo.hiddenAchievementTitle && editingId !== photo.id && (
+                    <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-3 mb-3">
+                      <div className="flex items-start gap-2">
+                        <div className="text-2xl">{photo.hiddenAchievementIcon}</div>
+                        <div className="flex-1">
+                          <div className="font-bold text-gray-800">{photo.hiddenAchievementTitle}</div>
+                          <div className="text-sm text-gray-600">{photo.hiddenAchievementDescription}</div>
+                        </div>
+                      </div>
+                      <div className="flex gap-2 mt-3">
+                        <button
+                          onClick={() => handleEdit(photo)}
+                          className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm"
+                        >
+                          ✏️ Изменить
+                        </button>
+                        <button
+                          onClick={() => handleRemove(photo.id)}
+                          className="flex-1 bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
+                        >
+                          🗑️ Удалить
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Форма редактирования */}
+                  {editingId === photo.id && (
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Иконка (emoji)
+                        </label>
+                        <input
+                          type="text"
+                          value={icon}
+                          onChange={(e) => setIcon(e.target.value)}
+                          placeholder="🎖️"
+                          className="w-full border border-gray-300 rounded px-3 py-2"
+                          maxLength={4}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Название
+                        </label>
+                        <input
+                          type="text"
+                          value={title}
+                          onChange={(e) => setTitle(e.target.value)}
+                          placeholder="Например: Точка отсчёта"
+                          className="w-full border border-gray-300 rounded px-3 py-2"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Описание
+                        </label>
+                        <textarea
+                          value={description}
+                          onChange={(e) => setDescription(e.target.value)}
+                          placeholder="Например: Получить максимум на первом фото проекта"
+                          className="w-full border border-gray-300 rounded px-3 py-2 min-h-[60px]"
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleSave(photo.id)}
+                          disabled={!title.trim() || !description.trim() || !icon.trim()}
+                          className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-3 py-2 rounded font-medium"
+                        >
+                          ✓ Сохранить
+                        </button>
+                        <button
+                          onClick={handleCancel}
+                          className="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded font-medium"
+                        >
+                          ✗ Отмена
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Кнопка добавления */}
+                  {!photo.hiddenAchievementTitle && editingId !== photo.id && (
+                    <button
+                      onClick={() => handleEdit(photo)}
+                      className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-4 py-2 rounded-lg font-medium"
+                    >
+                      ➕ Добавить скрытое достижение
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
