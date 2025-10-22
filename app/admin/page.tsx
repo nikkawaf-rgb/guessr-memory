@@ -148,6 +148,34 @@ export default function AdminPage() {
               </p>
             </div>
           </Link>
+
+          {/* Storage Info */}
+          <Link
+            href="/admin/storage-info"
+            className="bg-gradient-to-br from-cyan-500 to-teal-600 text-white p-6 rounded-xl shadow-xl hover:shadow-2xl transition-all transform hover:scale-105"
+          >
+            <div className="text-center">
+              <div className="text-4xl mb-3">💾</div>
+              <h2 className="text-xl font-bold mb-2">Хранилище</h2>
+              <p className="text-cyan-100 text-sm">
+                Информация о месте для фото
+              </p>
+            </div>
+          </Link>
+
+          {/* Fix EFD Achievement */}
+          <Link
+            href="/admin/fix-achievement"
+            className="bg-gradient-to-br from-red-500 to-red-700 text-white p-6 rounded-xl shadow-xl hover:shadow-2xl transition-all transform hover:scale-105"
+          >
+            <div className="text-center">
+              <div className="text-4xl mb-3">🔧</div>
+              <h2 className="text-xl font-bold mb-2">Пересоздать EFD</h2>
+              <p className="text-red-100 text-sm">
+                Исправить достижение
+              </p>
+            </div>
+          </Link>
         </div>
 
         {/* Quick Actions */}

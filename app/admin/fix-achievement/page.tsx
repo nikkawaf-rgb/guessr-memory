@@ -23,14 +23,14 @@ export default function FixAchievementPage() {
     setError(null);
 
     try {
-      const response = await fetch("/api/admin/fix-efd-achievement", {
+      const response = await fetch("/api/admin/recreate-efd", {
         method: "POST",
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Ошибка обновления");
+        throw new Error(data.error || "Ошибка пересоздания");
       }
 
       setResult(data);
@@ -46,12 +46,15 @@ export default function FixAchievementPage() {
       <div className="container mx-auto px-4 max-w-2xl">
         <div className="bg-white rounded-lg shadow-xl p-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">
-            🔧 Исправление достижения EFD
+            🔧 Пересоздание достижения EFD
           </h1>
 
           <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
             <p className="text-yellow-800">
-              <strong>Внимание:</strong> Эта страница обновит достижение &quot;Escape from Donbass&quot; в базе данных.
+              <strong>Внимание:</strong> Эта страница удалит и пересоздаст достижение &quot;Escape from Donbass&quot; с правильными данными.
+            </p>
+            <p className="text-yellow-800 mt-2 text-sm">
+              Все ранее полученные экземпляры этого достижения будут удалены.
             </p>
           </div>
 
@@ -62,10 +65,10 @@ export default function FixAchievementPage() {
               className={`px-8 py-4 text-white font-bold rounded-lg text-lg transition-colors ${
                 loading
                   ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700"
+                  : "bg-red-600 hover:bg-red-700"
               }`}
             >
-              {loading ? "Обновление..." : "🚀 Обновить достижение"}
+              {loading ? "Пересоздание..." : "🔄 Пересоздать достижение"}
             </button>
           </div>
 
