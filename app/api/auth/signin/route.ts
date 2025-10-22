@@ -44,6 +44,7 @@ export async function POST(request: NextRequest) {
         user: {
           id: user.id,
           name: user.name,
+          role: user.role,
         },
       });
     } else {
@@ -73,6 +74,7 @@ export async function POST(request: NextRequest) {
         user: {
           id: user.id,
           name: user.name,
+          role: user.role,
         },
       });
     }

@@ -45,8 +45,15 @@ export default function SimpleSignInPage() {
         localStorage.setItem("currentUser", JSON.stringify({
           name: data.user.name,
           id: data.user.id,
+          role: data.user.role,
         }));
         localStorage.setItem("playerName", data.user.name);
+        // Флаг администратора для админки
+        if (data.user.role === "admin") {
+          localStorage.setItem("isAdmin", "true");
+        } else {
+          localStorage.removeItem("isAdmin");
+        }
         
         // Перенаправляем на главную
         router.push("/");
