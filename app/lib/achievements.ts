@@ -18,6 +18,8 @@ interface SessionStats {
       id: string;
       exifTakenAt: Date | null;
       hiddenAchievementTitle: string | null;
+      hiddenAchievementDescription: string | null;
+      hiddenAchievementIcon: string | null;
     };
   }[];
   durationSeconds: number;

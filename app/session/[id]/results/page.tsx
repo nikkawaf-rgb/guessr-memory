@@ -55,6 +55,8 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
           id: sp.photo.id,
           exifTakenAt: sp.photo.exifTakenAt,
           hiddenAchievementTitle: sp.photo.hiddenAchievementTitle,
+          hiddenAchievementDescription: sp.photo.hiddenAchievementDescription,
+          hiddenAchievementIcon: sp.photo.hiddenAchievementIcon,
         },
       })),
       durationSeconds: session.durationSeconds,
