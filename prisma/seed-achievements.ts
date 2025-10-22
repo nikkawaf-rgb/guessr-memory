@@ -353,9 +353,9 @@ const achievements = [
   },
   {
     key: 'escape_from_donbass',
-    title: '???',
-    description: '???',
-    icon: '👻',
+    title: 'Escape from Donbass',
+    description: 'Доехать до конца!',
+    icon: '🏁',
     category: 'EFD',
     isHidden: true,
     rarity: 'legendary',
