@@ -121,7 +121,11 @@ export default function EFDGamePage() {
 
       // препятствия
       const speed = speedRef.current;
-      obstaclesRef.current.forEach((o) => (o.pos.y += speed));
+      obstaclesRef.current.forEach((o) => {
+        o.pos.y += speed;
+        // рисуем препятствие
+        drawTruck(o.pos.x, o.pos.y, "#fbbf24"); // желтый/оранжевый
+      });
       obstaclesRef.current = obstaclesRef.current.filter((o) => o.pos.y < HEIGHT + 40);
 
       // спавн
