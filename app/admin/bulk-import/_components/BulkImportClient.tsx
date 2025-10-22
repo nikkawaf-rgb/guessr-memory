@@ -58,9 +58,13 @@ export default function BulkImportClient() {
           console.warn(`Could not extract EXIF from ${file.name}:`, exifError);
         }
 
-        // Upload to Supabase Storage
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+        // Upload to Supabase Storage with UUID filename (защита от определения даты по имени)
+        const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+        // Генерируем UUID-подобное имя: случайная строка из 32 символов
+        const randomId = Array.from({ length: 32 }, () => 
+          Math.floor(Math.random() * 16).toString(16)
+        ).join('');
+        const fileName = `${randomId}.${fileExt}`;
         // filePath should just be the filename, bucket is already "photos"
         const filePath = fileName;
 
