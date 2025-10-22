@@ -260,9 +260,21 @@ function checkBlackHole(stats: SessionStats): string | null {
   return null;
 }
 
+function getHourInTimeZone(date: Date, timeZone: string): number {
+  // Используем Intl, чтобы корректно получить час в заданном часовом поясе
+  const parts = new Intl.DateTimeFormat('ru-RU', {
+    hour: '2-digit',
+    hour12: false,
+    timeZone,
+  }).formatToParts(date);
+  const hourPart = parts.find(p => p.type === 'hour');
+  return hourPart ? parseInt(hourPart.value, 10) : date.getUTCHours();
+}
+
 function checkMoonRover(stats: SessionStats): string | null {
-  const hour = stats.createdAt.getHours();
-  return (hour >= 0 && hour < 5) ? 'moon_rover' : null;
+  // По умолчанию считаем ночью по Иркутску (Asia/Irkutsk)
+  const hourIrkutsk = getHourInTimeZone(stats.createdAt, 'Asia/Irkutsk');
+  return (hourIrkutsk >= 0 && hourIrkutsk < 5) ? 'moon_rover' : null;
 }
 
 function checkNaruto(correctSpecialQuestions: number): string | null {
