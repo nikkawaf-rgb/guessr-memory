@@ -1,8 +1,27 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function HomePage() {
+  const [currentUser, setCurrentUser] = useState<{ name: string; id: string } | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem("currentUser");
+    if (savedUser) {
+      setCurrentUser(JSON.parse(savedUser));
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("currentUser");
+    localStorage.removeItem("playerName");
+    setCurrentUser(null);
+    router.push("/auth/simple-signin");
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="container mx-auto px-4 py-8">
@@ -12,7 +31,20 @@ export default function HomePage() {
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Точка Роста GUESSER</h1>
               <p className="text-gray-700 mt-1 font-medium">Игра на угадывание дат на фотографиях</p>
+              {currentUser && (
+                <p className="text-lg text-red-600 mt-2 font-bold">
+                  👋 С возвращением, {currentUser.name}!
+                </p>
+              )}
             </div>
+            {currentUser && (
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-bold transition"
+              >
+                Выйти
+              </button>
+            )}
           </div>
         </div>
 

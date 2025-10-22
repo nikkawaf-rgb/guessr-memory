@@ -18,22 +18,18 @@ export async function POST(request: NextRequest) {
 
     console.log("Starting game for player:", playerName);
 
-    // Найти или создать пользователя по имени
-    let user = await prisma.user.findFirst({
+    // Найти пользователя по имени
+    const user = await prisma.user.findUnique({
       where: {
         name: playerName.trim(),
-        role: "player",
       },
     });
 
     if (!user) {
-      console.log("Creating new user:", playerName);
-      user = await prisma.user.create({
-        data: {
-          name: playerName.trim(),
-          role: "player",
-        },
-      });
+      return NextResponse.json(
+        { error: "Пользователь не найден. Пожалуйста, войдите в систему." },
+        { status: 401 }
+      );
     }
 
     console.log("User ID:", user.id);

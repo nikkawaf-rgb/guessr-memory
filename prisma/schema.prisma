@@ -19,11 +19,12 @@ enum UserRole {
 
 // ===== Models =====
 
-// Пользователь - просто имя, без паролей и проверок
+// Пользователь с паролем и уникальным именем
 model User {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
-  name      String   // Имя пользователя (может повторяться)
+  name      String   @unique // Имя пользователя (уникальное)
+  password  String   // Простой пароль (не хешированный для удобства администратора)
   role      UserRole @default(player)
   
   sessions  Session[]
@@ -71,7 +72,7 @@ model Session {
   durationSeconds Int?      // Длительность игры в секундах
   
   userId          String
-  user            User      @relation(fields: [userId], references: [id])
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   sessionPhotos   SessionPhoto[]
   

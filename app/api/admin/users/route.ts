@@ -5,7 +5,12 @@ import { prisma } from "@/app/lib/prisma";
 export async function GET() {
   try {
     const users = await prisma.user.findMany({
-      include: {
+      select: {
+        id: true,
+        name: true,
+        password: true,
+        role: true,
+        createdAt: true,
         _count: {
           select: {
             sessions: true,

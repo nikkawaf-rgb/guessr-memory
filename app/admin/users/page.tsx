@@ -6,6 +6,7 @@ import Link from "next/link";
 interface User {
   id: string;
   name: string;
+  password: string;
   role: string;
   createdAt: string;
   _count: {
@@ -86,6 +87,7 @@ export default function UsersManagementPage() {
               <thead className="bg-red-600 text-white">
                 <tr>
                   <th className="px-6 py-3 text-left text-sm font-bold uppercase">Имя</th>
+                  <th className="px-6 py-3 text-left text-sm font-bold uppercase">Пароль</th>
                   <th className="px-6 py-3 text-left text-sm font-bold uppercase">Роль</th>
                   <th className="px-6 py-3 text-left text-sm font-bold uppercase">Игр</th>
                   <th className="px-6 py-3 text-left text-sm font-bold uppercase">Достижений</th>
@@ -98,6 +100,11 @@ export default function UsersManagementPage() {
                   <tr key={user.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4">
                       <span className="font-bold text-gray-900">{user.name}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="font-mono text-gray-900 bg-gray-100 px-2 py-1 rounded font-bold">
+                        {user.password}
+                      </span>
                     </td>
                     <td className="px-6 py-4">
                       <span className={`px-2 py-1 rounded text-sm font-semibold ${
