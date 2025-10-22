@@ -52,6 +52,15 @@ export async function GET() {
         
         const totalAchievementsCount = user.achievements.length;
 
+        // Подсчитываем комментарии и лайки
+        const commentsCount = await prisma.comment.count({
+          where: { userId: user.id },
+        });
+
+        const likesCount = await prisma.commentLike.count({
+          where: { userId: user.id },
+        });
+
         return {
           userId: user.id,
           userName: user.name,
@@ -69,6 +78,8 @@ export async function GET() {
           })),
           hiddenAchievementsCount,
           totalAchievementsCount,
+          commentsCount,
+          likesCount,
         };
       })
       .filter((stat): stat is NonNullable<typeof stat> => stat !== null)

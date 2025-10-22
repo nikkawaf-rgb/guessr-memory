@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import PhotoComments from "./PhotoComments";
 
 interface GuessResult {
   yearHit: boolean;
@@ -401,6 +402,14 @@ export default function SessionGameClient({
               💡 Чем точнее ответ, тем больше очков! Макс: Год=100 • Месяц=200 • День=300 • Комбо (всё)=1000
             </p>
           </div>
+        </div>
+
+        {/* Comments Section */}
+        <div className="mt-6">
+          <PhotoComments 
+            photoId={currentPhoto.id} 
+            playerName={typeof window !== 'undefined' ? localStorage.getItem('playerName') : null}
+          />
         </div>
       </div>
     </div>

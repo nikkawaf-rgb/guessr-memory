@@ -3,6 +3,16 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+interface CommentData {
+  id: string;
+  content: string;
+  createdAt: string;
+  user: {
+    name: string;
+  };
+  likes: { id: string }[];
+}
+
 interface PhotoData {
   id: string;
   storagePath: string;
@@ -11,6 +21,7 @@ interface PhotoData {
   width: number | null;
   height: number | null;
   isActive: boolean;
+  comments: CommentData[];
 }
 
 export default function AdminPhotosPage() {
@@ -40,6 +51,30 @@ export default function AdminPhotosPage() {
       alert("Ошибка загрузки фотографий");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string, photoId: string) => {
+    try {
+      const response = await fetch(`/api/admin/comments/delete?id=${commentId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) throw new Error("Failed to delete comment");
+
+      // Обновить список фотографий
+      setPhotos(photos.map(p => {
+        if (p.id === photoId) {
+          return {
+            ...p,
+            comments: p.comments.filter(c => c.id !== commentId),
+          };
+        }
+        return p;
+      }));
+    } catch (error) {
+      console.error("Error deleting comment:", error);
+      alert("Ошибка удаления комментария");
     }
   };
 
@@ -162,6 +197,37 @@ export default function AdminPhotosPage() {
                       Удалить
                     </button>
                   </div>
+
+                  {/* Comments Section */}
+                  {photo.comments && photo.comments.length > 0 && (
+                    <div className="mt-4 pt-4 border-t border-gray-200">
+                      <h4 className="font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                        💬 Комментарии ({photo.comments.length})
+                      </h4>
+                      <div className="space-y-2 max-h-48 overflow-y-auto">
+                        {photo.comments.map((comment) => (
+                          <div key={comment.id} className="bg-gray-50 rounded p-2 text-sm">
+                            <div className="flex justify-between items-start mb-1">
+                              <span className="font-semibold text-gray-800">{comment.user.name}</span>
+                              <div className="flex gap-2">
+                                <span className="text-xs text-gray-500">
+                                  👍 {comment.likes.length}
+                                </span>
+                                <button
+                                  onClick={() => handleDeleteComment(comment.id, photo.id)}
+                                  className="text-red-500 hover:text-red-700 text-xs"
+                                  title="Удалить комментарий"
+                                >
+                                  🗑️
+                                </button>
+                              </div>
+                            </div>
+                            <p className="text-gray-700">{comment.content}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

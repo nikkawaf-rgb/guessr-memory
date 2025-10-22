@@ -23,6 +23,8 @@ interface LeaderboardEntry {
   achievements: Achievement[];
   hiddenAchievementsCount: number;
   totalAchievementsCount: number;
+  commentsCount: number;
+  likesCount: number;
 }
 
 export default function LeaderboardPage() {
@@ -128,7 +130,7 @@ export default function LeaderboardPage() {
                     </div>
                     
                     {/* Статистика игрока */}
-                    <div className="ml-16 mb-2 flex gap-4 text-sm text-gray-600">
+                    <div className="ml-16 mb-2 flex flex-wrap gap-4 text-sm text-gray-600">
                       <div>
                         <span className="font-semibold">Игр:</span> {entry.gamesPlayed}
                       </div>
@@ -139,10 +141,16 @@ export default function LeaderboardPage() {
                         <span className="font-semibold">Средний:</span> {entry.avgScore}
                       </div>
                       <div>
-                        <span className="font-semibold">Достижений получено:</span> {entry.totalAchievementsCount}
+                        <span className="font-semibold">Достижений:</span> {entry.totalAchievementsCount}
                       </div>
                       <div>
-                        <span className="font-semibold">Скрытых достижений:</span> {entry.hiddenAchievementsCount} из 8
+                        <span className="font-semibold">Скрытых:</span> {entry.hiddenAchievementsCount} из 8
+                      </div>
+                      <div>
+                        <span className="font-semibold">💬 Комментариев:</span> {entry.commentsCount}
+                      </div>
+                      <div>
+                        <span className="font-semibold">👍 Лайков:</span> {entry.likesCount}
                       </div>
                     </div>
                     

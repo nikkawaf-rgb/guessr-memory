@@ -15,6 +15,26 @@ export async function GET() {
         specialQuestion: true,
         specialAnswerCorrect: true,
         createdAt: true,
+        comments: {
+          select: {
+            id: true,
+            content: true,
+            createdAt: true,
+            user: {
+              select: {
+                name: true,
+              },
+            },
+            likes: {
+              select: {
+                id: true,
+              },
+            },
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
       },
       orderBy: {
         createdAt: "desc",
