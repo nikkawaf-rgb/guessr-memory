@@ -152,45 +152,45 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
 
         {/* Detailed Results */}
         <div className="bg-white rounded-lg shadow-xl p-6 mb-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Детальные результаты</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Детальные результаты</h2>
           <div className="space-y-4">
             {answeredPhotos.map((sp, index) => {
               const guess = sp.guess!;
               
               return (
-                <div key={sp.id} className="border border-gray-200 rounded-lg p-4">
+                <div key={sp.id} className="border-2 border-gray-300 rounded-lg p-4">
                   <div className="flex justify-between items-start mb-2">
-                    <div className="font-semibold text-gray-800">
+                    <div className="font-bold text-gray-900 text-lg">
                       Фото {index + 1}
                     </div>
-                    <div className="text-lg font-bold text-blue-600">
+                    <div className="text-xl font-bold text-red-600">
                       +{guess.scoreDelta} очков
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
-                    <div className="flex gap-4 text-sm">
+                    <div className="flex gap-4 text-base">
                       <div>
-                        <span className="text-gray-600">Год: </span>
-                        <span className={guess.yearHit ? "text-green-600 font-semibold" : "text-gray-400"}>
+                        <span className="text-gray-900 font-bold">Год: </span>
+                        <span className={guess.yearHit ? "text-green-600 font-bold text-lg" : "text-gray-500 font-bold"}>
                           {guess.yearHit ? "✓" : "✗"}
                         </span>
                       </div>
                       <div>
-                        <span className="text-gray-600">Месяц: </span>
-                        <span className={guess.monthHit ? "text-green-600 font-semibold" : "text-gray-400"}>
+                        <span className="text-gray-900 font-bold">Месяц: </span>
+                        <span className={guess.monthHit ? "text-green-600 font-bold text-lg" : "text-gray-500 font-bold"}>
                           {guess.monthHit ? "✓" : "✗"}
                         </span>
                       </div>
                       <div>
-                        <span className="text-gray-600">День: </span>
-                        <span className={guess.dayHit ? "text-green-600 font-semibold" : "text-gray-400"}>
+                        <span className="text-gray-900 font-bold">День: </span>
+                        <span className={guess.dayHit ? "text-green-600 font-bold text-lg" : "text-gray-500 font-bold"}>
                           {guess.dayHit ? "✓" : "✗"}
                         </span>
                       </div>
                       {sp.photo.specialQuestion && (
                         <div>
-                          <span className="text-gray-600">Бонус: </span>
-                          <span className={guess.specialHit ? "text-purple-600 font-semibold" : "text-gray-400"}>
+                          <span className="text-gray-900 font-bold">Бонус: </span>
+                          <span className={guess.specialHit ? "text-purple-600 font-bold text-lg" : "text-gray-500 font-bold"}>
                             {guess.specialHit ? "✓ +1000" : "✗"}
                           </span>
                         </div>

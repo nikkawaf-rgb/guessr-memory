@@ -49,23 +49,23 @@ export default function HomePage() {
 
         {/* Rules */}
         <div className="bg-white rounded-lg shadow-lg p-6 mt-8 max-w-4xl mx-auto">
-          <h3 className="text-xl font-bold text-gray-900 mb-4">Правила игры</h3>
-          <ul className="space-y-2 text-gray-800">
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">Правила игры</h3>
+          <ul className="space-y-3">
             <li className="flex items-start">
-              <span className="text-red-600 mr-2 font-bold">•</span>
-              <span className="font-medium">Вам будет показано 10 фотографий</span>
+              <span className="text-red-600 mr-3 font-bold text-xl">•</span>
+              <span className="font-bold text-gray-900 text-lg">Вам будет показано 10 фотографий</span>
             </li>
             <li className="flex items-start">
-              <span className="text-red-600 mr-2 font-bold">•</span>
-              <span className="font-medium">Угадайте дату съемки: год, месяц и день</span>
+              <span className="text-red-600 mr-3 font-bold text-xl">•</span>
+              <span className="font-bold text-gray-900 text-lg">Угадайте дату съемки: год, месяц и день</span>
             </li>
             <li className="flex items-start">
-              <span className="text-red-600 mr-2 font-bold">•</span>
-              <span className="font-medium">Чем точнее ответ, тем больше очков</span>
+              <span className="text-red-600 mr-3 font-bold text-xl">•</span>
+              <span className="font-bold text-gray-900 text-lg">Чем точнее ответ, тем больше очков</span>
             </li>
             <li className="flex items-start">
-              <span className="text-red-600 mr-2 font-bold">•</span>
-              <span className="font-medium">Завершенные игры попадают в лидерборд</span>
+              <span className="text-red-600 mr-3 font-bold text-xl">•</span>
+              <span className="font-bold text-gray-900 text-lg">Завершенные игры попадают в лидерборд</span>
             </li>
           </ul>
         </div>

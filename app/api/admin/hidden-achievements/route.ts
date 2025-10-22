@@ -5,22 +5,22 @@ import { prisma } from "@/app/lib/prisma";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { photoId, title, description, icon } = body;
+    const { photoId, title, description } = body;
 
-    if (!photoId || !title || !description || !icon) {
+    if (!photoId || !title || !description) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
       );
     }
 
-    // Обновляем фото
+    // Обновляем фото (всегда используем иконку привидения)
     const photo = await prisma.photo.update({
       where: { id: photoId },
       data: {
         hiddenAchievementTitle: title,
         hiddenAchievementDescription: description,
-        hiddenAchievementIcon: icon,
+        hiddenAchievementIcon: "👻",
       },
     });
 

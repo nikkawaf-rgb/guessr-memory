@@ -134,6 +134,20 @@ export default function AdminPage() {
               </p>
             </div>
           </Link>
+
+          {/* Users Management */}
+          <Link
+            href="/admin/users"
+            className="bg-gradient-to-br from-gray-700 to-gray-900 text-white p-6 rounded-xl shadow-xl hover:shadow-2xl transition-all transform hover:scale-105"
+          >
+            <div className="text-center">
+              <div className="text-4xl mb-3">👥</div>
+              <h2 className="text-xl font-bold mb-2">Пользователи</h2>
+              <p className="text-gray-300 text-sm">
+                Управление пользователями
+              </p>
+            </div>
+          </Link>
         </div>
 
         {/* Quick Actions */}
