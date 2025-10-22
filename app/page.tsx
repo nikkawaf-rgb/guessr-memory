@@ -23,6 +23,7 @@ export default function HomePage() {
   };
 
   return (
+    <>
     <div className="min-h-screen bg-gray-100">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
@@ -112,5 +113,6 @@ export default function HomePage() {
         <span className="text-2xl" role="img" aria-label="truck">🚚</span>
       </Link>
     </div>
+    </>
   );
 }
