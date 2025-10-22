@@ -4,6 +4,80 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 const achievements = [
+  // 🎖️ Скрытые достижения (8) - создаются автоматически при привязке к фото
+  {
+    key: 'hidden_1',
+    title: '???',
+    description: 'Секретное достижение',
+    icon: '🎖️',
+    category: 'скрытые',
+    isHidden: true,
+    rarity: 'legendary',
+  },
+  {
+    key: 'hidden_2',
+    title: '???',
+    description: 'Секретное достижение',
+    icon: '🏅',
+    category: 'скрытые',
+    isHidden: true,
+    rarity: 'legendary',
+  },
+  {
+    key: 'hidden_3',
+    title: '???',
+    description: 'Секретное достижение',
+    icon: '🥇',
+    category: 'скрытые',
+    isHidden: true,
+    rarity: 'legendary',
+  },
+  {
+    key: 'hidden_4',
+    title: '???',
+    description: 'Секретное достижение',
+    icon: '🥈',
+    category: 'скрытые',
+    isHidden: true,
+    rarity: 'legendary',
+  },
+  {
+    key: 'hidden_5',
+    title: '???',
+    description: 'Секретное достижение',
+    icon: '🥉',
+    category: 'скрытые',
+    isHidden: true,
+    rarity: 'legendary',
+  },
+  {
+    key: 'hidden_6',
+    title: '???',
+    description: 'Секретное достижение',
+    icon: '🎗️',
+    category: 'скрытые',
+    isHidden: true,
+    rarity: 'legendary',
+  },
+  {
+    key: 'hidden_7',
+    title: '???',
+    description: 'Секретное достижение',
+    icon: '🏆',
+    category: 'скрытые',
+    isHidden: true,
+    rarity: 'legendary',
+  },
+  {
+    key: 'hidden_8',
+    title: '???',
+    description: 'Секретное достижение',
+    icon: '👑',
+    category: 'скрытые',
+    isHidden: true,
+    rarity: 'legendary',
+  },
+
   // 🌟 Космос и Астрономия (4)
   {
     key: 'yuri_gagarin',

@@ -131,37 +131,44 @@ export default function AchievementsPage() {
               {category}
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {items.map((achievement) => (
-                <div
-                  key={achievement.id}
-                  className={`bg-white rounded-lg shadow-lg p-4 border-2 transition-all ${
-                    achievement.unlocked
-                      ? "border-green-500"
-                      : "border-gray-300 opacity-60"
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="text-4xl">{achievement.unlocked ? achievement.icon : "🔒"}</div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-bold text-gray-800">
-                          {achievement.unlocked ? achievement.title : "???"}
-                        </h3>
-                        <span
-                          className={`text-xs px-2 py-1 rounded text-white bg-gradient-to-r ${
-                            rarityColors[achievement.rarity as keyof typeof rarityColors] || rarityColors.common
-                          }`}
-                        >
-                          {rarityNames[achievement.rarity as keyof typeof rarityNames] || rarityNames.common}
-                        </span>
+              {items.map((achievement) => {
+                // Определяем, что показывать в зависимости от редкости
+                const showIcon = achievement.unlocked || achievement.rarity === 'common';
+                const showTitle = achievement.unlocked || achievement.rarity === 'common' || achievement.rarity === 'rare' || achievement.rarity === 'epic';
+                const showDescription = achievement.unlocked || achievement.rarity === 'common';
+
+                return (
+                  <div
+                    key={achievement.id}
+                    className={`bg-white rounded-lg shadow-lg p-4 border-2 transition-all ${
+                      achievement.unlocked
+                        ? "border-green-500"
+                        : "border-gray-300 opacity-60"
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="text-4xl">{showIcon ? achievement.icon : "🔒"}</div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-bold text-gray-800">
+                            {showTitle ? achievement.title : "???"}
+                          </h3>
+                          <span
+                            className={`text-xs px-2 py-1 rounded text-white bg-gradient-to-r ${
+                              rarityColors[achievement.rarity as keyof typeof rarityColors] || rarityColors.common
+                            }`}
+                          >
+                            {rarityNames[achievement.rarity as keyof typeof rarityNames] || rarityNames.common}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-600">
+                          {showDescription ? achievement.description : "Достижение скрыто"}
+                        </p>
                       </div>
-                      <p className="text-sm text-gray-600">
-                        {achievement.unlocked ? achievement.description : "Достижение скрыто"}
-                      </p>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         ))}

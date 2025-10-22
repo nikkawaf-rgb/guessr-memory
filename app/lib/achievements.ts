@@ -423,8 +423,8 @@ async function checkHiddenAchievements(stats: SessionStats): Promise<string[]> {
   const granted: string[] = [];
 
   for (const guess of stats.guesses) {
-    // Комбо на фото со скрытым достижением
-    if (guess.yearHit && guess.monthHit && guess.dayHit && guess.photo.hiddenAchievementTitle) {
+    // Получить 2000 очков на фото со скрытым достижением (комбо 1000 + спецвопрос 1000)
+    if (guess.scoreDelta === 2000 && guess.photo.hiddenAchievementTitle) {
       // Создаём уникальный ключ для скрытого достижения
       const hiddenKey = `hidden_photo_${guess.photo.id}`;
       
@@ -439,11 +439,11 @@ async function checkHiddenAchievements(stats: SessionStats): Promise<string[]> {
           data: {
             key: hiddenKey,
             title: guess.photo.hiddenAchievementTitle,
-            description: `Получить комбо на фото "${guess.photo.hiddenAchievementTitle}"`,
-            icon: '🎖️',
+            description: guess.photo.hiddenAchievementDescription || `Секретное достижение за фото`,
+            icon: guess.photo.hiddenAchievementIcon || '🎖️',
             category: 'скрытые',
             isHidden: true,
-            rarity: 'epic',
+            rarity: 'legendary',
           },
         });
       }
