@@ -342,11 +342,30 @@ const achievements = [
     rarity: 'epic',
   },
 
+  // 🚚 EFD — Escape From Donbass (2)
+  {
+    key: 'efd_license',
+    title: 'Я получил права',
+    description: 'Найти и сыграть в скрытую игру EFD',
+    icon: '🚚',
+    category: 'EFD',
+    rarity: 'common',
+  },
+  {
+    key: 'escape_from_donbass',
+    title: '???',
+    description: '???',
+    icon: '👻',
+    category: 'EFD',
+    isHidden: true,
+    rarity: 'legendary',
+  },
+
   // 👑 Легендарное (1)
   {
     key: 'hokage_tochka_rosta',
     title: 'Хокаге Точки Роста',
-    description: 'Получить ВСЕ остальные достижения (32 из 32)',
+    description: 'Получить ВСЕ остальные достижения (34 из 34)',
     icon: '🏆',
     category: 'легендарное',
     rarity: 'legendary',

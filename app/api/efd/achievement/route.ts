@@ -29,20 +29,10 @@ export async function POST(req: NextRequest) {
 
     const def = ACHIEVEMENTS[type as keyof typeof ACHIEVEMENTS];
 
-    // Гарантируем, что достижение существует
-    let ach = await prisma.achievement.findUnique({ where: { key: def.key } });
+    // Находим достижение (оно должно быть создано через seed)
+    const ach = await prisma.achievement.findUnique({ where: { key: def.key } });
     if (!ach) {
-      ach = await prisma.achievement.create({
-        data: {
-          key: def.key,
-          title: def.title,
-          description: def.description,
-          icon: def.icon,
-          category: def.category,
-          rarity: def.rarity,
-          isHidden: false,
-        },
-      });
+      return NextResponse.json({ error: "Achievement not found" }, { status: 404 });
     }
 
     // Выдаём, если ещё не выдано
