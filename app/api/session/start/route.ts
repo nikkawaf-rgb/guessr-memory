@@ -82,10 +82,12 @@ export async function POST(request: NextRequest) {
     // Выбираем 2 случайных фото со спецвопросами
     const shuffledSpecial = photosWithSpecial.sort(() => Math.random() - 0.5);
     const selectedSpecial = shuffledSpecial.slice(0, SPECIAL_QUESTIONS_COUNT);
+    const selectedSpecialIds = new Set(selectedSpecial.map(p => p.id));
 
-    // Выбираем 8 случайных обычных фото
+    // Выбираем 8 случайных обычных фото (исключая уже выбранные со спецвопросами)
     const remainingCount = PHOTOS_PER_SESSION - SPECIAL_QUESTIONS_COUNT;
-    const shuffledRegular = regularPhotos.sort(() => Math.random() - 0.5);
+    const availableRegular = regularPhotos.filter(p => !selectedSpecialIds.has(p.id));
+    const shuffledRegular = availableRegular.sort(() => Math.random() - 0.5);
     const selectedRegular = shuffledRegular.slice(0, remainingCount);
 
     // Объединяем и перемешиваем все фото

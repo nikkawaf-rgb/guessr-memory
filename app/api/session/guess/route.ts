@@ -182,12 +182,18 @@ export async function POST(request: NextRequest) {
 
     // Проверить, закончилась ли игра
     if (updatedSession.currentPhotoIndex >= updatedSession.photoCount) {
+      const now = new Date();
+      const durationSeconds = Math.floor((now.getTime() - updatedSession.createdAt.getTime()) / 1000);
+      
       await prisma.session.update({
         where: { id: sessionPhoto.sessionId },
         data: {
-          finishedAt: new Date(),
+          finishedAt: now,
+          durationSeconds: durationSeconds,
         },
       });
+      
+      console.log(`[SESSION] Game finished! Duration: ${durationSeconds}s, Score: ${updatedSession.totalScore}`);
     }
 
     return NextResponse.json({
