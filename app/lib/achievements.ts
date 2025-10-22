@@ -24,6 +24,21 @@ interface SessionStats {
   createdAt: Date;
 }
 
+interface UserStats {
+  totalGames: number;
+  totalCombos: number;
+  correctYears: number;
+  correctMonths: number;
+  correctDays: number;
+  correctSpecialQuestions: number;
+  bestScore: number;
+  allAbove10k: boolean;
+  allAbove8k: boolean;
+  stableGames: boolean;
+  gamesToday: number;
+  recordBreaks: number;
+}
+
 // Проверка всех достижений для пользователя после игры
 export async function checkAndGrantAchievements(stats: SessionStats) {
   const achievements: string[] = [];
