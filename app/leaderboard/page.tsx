@@ -13,10 +13,13 @@ interface Achievement {
 
 interface LeaderboardEntry {
   rank: number;
+  userId: string;
   userName: string;
+  bestScore: number;
+  avgScore: number;
   totalScore: number;
-  finishedAt: string;
-  sessionId: string;
+  gamesPlayed: number;
+  bestSessionDate: string;
   achievements: Achievement[];
   hiddenAchievementsCount: number;
 }
@@ -48,8 +51,6 @@ export default function LeaderboardPage() {
       day: "numeric",
       month: "long",
       year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
     });
   };
 
@@ -97,7 +98,7 @@ export default function LeaderboardPage() {
             <div className="divide-y divide-gray-200">
               {entries.map((entry) => (
                 <div
-                  key={entry.sessionId}
+                  key={entry.userId}
                   className={`p-4 hover:bg-gray-50 transition-colors ${
                     entry.rank <= 3 ? "bg-amber-50" : ""
                   }`}
@@ -113,15 +114,28 @@ export default function LeaderboardPage() {
                             {entry.userName}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {formatDate(entry.finishedAt)}
+                            Лучший результат: {formatDate(entry.bestSessionDate)}
                           </div>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-2xl font-bold text-blue-600">
-                          {entry.totalScore}
+                        <div className="text-3xl font-bold text-blue-600">
+                          {entry.bestScore}
                         </div>
-                        <div className="text-xs text-gray-500">очков</div>
+                        <div className="text-xs text-gray-500">лучший результат</div>
+                      </div>
+                    </div>
+                    
+                    {/* Статистика игрока */}
+                    <div className="ml-16 mb-2 flex gap-4 text-sm text-gray-600">
+                      <div>
+                        <span className="font-semibold">Игр:</span> {entry.gamesPlayed}
+                      </div>
+                      <div>
+                        <span className="font-semibold">Всего очков:</span> {entry.totalScore.toLocaleString()}
+                      </div>
+                      <div>
+                        <span className="font-semibold">Средний:</span> {entry.avgScore}
                       </div>
                     </div>
                     

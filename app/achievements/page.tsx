@@ -132,7 +132,8 @@ export default function AchievementsPage() {
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
               {items.map((achievement) => {
-                // Определяем, что показывать в зависимости от редкости
+                // Если достижение получено - показываем всё
+                // Если не получено - скрываем в зависимости от редкости
                 const showIcon = achievement.unlocked || achievement.rarity === 'common';
                 const showTitle = achievement.unlocked || achievement.rarity === 'common' || achievement.rarity === 'rare' || achievement.rarity === 'epic';
                 const showDescription = achievement.unlocked || achievement.rarity === 'common';

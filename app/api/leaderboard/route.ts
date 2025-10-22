@@ -3,75 +3,85 @@ import { prisma } from "@/app/lib/prisma";
 
 export async function GET() {
   try {
-    // Получить все завершенные сессии, отсортированные по очкам
-    const sessions = await prisma.session.findMany({
-      where: {
-        finishedAt: {
-          not: null,
-        },
-      },
+    // Получить всех пользователей с их завершёнными сессиями
+    const users = await prisma.user.findMany({
       include: {
-        user: {
-          select: {
-            name: true,
-            achievements: {
-              include: {
-                achievement: {
-                  select: {
-                    icon: true,
-                    title: true,
-                    description: true,
-                    rarity: true,
-                    category: true,
-                  },
-                },
-              },
-              take: 5, // Показываем топ-5 достижений
-              orderBy: {
-                createdAt: 'desc',
+        sessions: {
+          where: {
+            finishedAt: {
+              not: null,
+            },
+          },
+          orderBy: {
+            totalScore: 'desc',
+          },
+        },
+        achievements: {
+          include: {
+            achievement: {
+              select: {
+                icon: true,
+                title: true,
+                description: true,
+                rarity: true,
+                category: true,
               },
             },
           },
+          orderBy: {
+            createdAt: 'desc',
+          },
         },
       },
-      orderBy: [
-        { totalScore: "desc" },
-        { finishedAt: "asc" }, // При равных очках - кто раньше
-      ],
-      take: 100, // Топ-100
     });
 
-    // Подсчитываем количество скрытых достижений для каждого игрока
-    const userIds = Array.from(new Set(sessions.map(s => s.userId)));
-    const hiddenCounts = await Promise.all(
-      userIds.map(async (userId) => {
-        const count = await prisma.userAchievement.count({
-          where: {
-            userId,
-            achievement: {
-              category: 'скрытые',
-            },
-          },
-        });
-        return { userId, count };
-      })
-    );
-    const hiddenCountMap = Object.fromEntries(hiddenCounts.map(h => [h.userId, h.count]));
+    // Формируем данные по каждому игроку
+    const playerStats = users
+      .map(user => {
+        const completedGames = user.sessions.length;
+        if (completedGames === 0) return null;
 
-    const entries = sessions.map((session, index) => ({
+        const bestScore = Math.max(...user.sessions.map(s => s.totalScore));
+        const totalScore = user.sessions.reduce((sum, s) => sum + s.totalScore, 0);
+        const avgScore = Math.round(totalScore / completedGames);
+        const bestSessionDate = user.sessions.find(s => s.totalScore === bestScore)?.finishedAt;
+
+        const hiddenAchievementsCount = user.achievements.filter(
+          ua => ua.achievement.category === 'скрытые'
+        ).length;
+
+        return {
+          userId: user.id,
+          userName: user.name,
+          bestScore,
+          avgScore,
+          totalScore,
+          gamesPlayed: completedGames,
+          bestSessionDate: bestSessionDate?.toISOString() || new Date().toISOString(),
+          achievements: user.achievements.slice(0, 5).map(ua => ({
+            icon: ua.achievement.icon,
+            title: ua.achievement.title,
+            description: ua.achievement.description,
+            rarity: ua.achievement.rarity,
+            category: ua.achievement.category,
+          })),
+          hiddenAchievementsCount,
+        };
+      })
+      .filter((stat): stat is NonNullable<typeof stat> => stat !== null)
+      .sort((a, b) => {
+        // Сортируем по лучшему результату
+        if (b.bestScore !== a.bestScore) {
+          return b.bestScore - a.bestScore;
+        }
+        // При равных результатах - по дате достижения
+        return new Date(a.bestSessionDate).getTime() - new Date(b.bestSessionDate).getTime();
+      });
+
+    // Добавляем ранги
+    const entries = playerStats.map((stat, index) => ({
       rank: index + 1,
-      userName: session.user.name,
-      totalScore: session.totalScore,
-      finishedAt: session.finishedAt!.toISOString(),
-      sessionId: session.id,
-      achievements: session.user.achievements.map(ua => ({
-        icon: ua.achievement.icon,
-        title: ua.achievement.title,
-        description: ua.achievement.description,
-        rarity: ua.achievement.rarity,
-        category: ua.achievement.category,
-      })),
-      hiddenAchievementsCount: hiddenCountMap[session.userId] || 0,
+      ...stat,
     }));
 
     return NextResponse.json({ entries });
