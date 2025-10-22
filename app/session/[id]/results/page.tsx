@@ -82,19 +82,19 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
+    <div className="min-h-screen bg-gray-100 py-8">
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-xl p-8 mb-8 text-center">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">
+        <div className="bg-white rounded-lg shadow-xl p-8 mb-8 text-center border-t-4 border-red-600">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
             {session.finishedAt ? "🎉 Игра завершена!" : "📊 Текущие результаты"}
           </h1>
-          <div className="text-6xl font-bold text-blue-600 mb-2">
+          <div className="text-6xl font-bold text-red-600 mb-2">
             {session.totalScore}
           </div>
-          <div className="text-gray-600 mb-4">очков</div>
-          <div className="text-lg text-gray-700">
-            Игрок: <span className="font-semibold">{session.user.name}</span>
+          <div className="text-gray-700 mb-4 font-medium">очков</div>
+          <div className="text-lg text-gray-900">
+            Игрок: <span className="font-bold">{session.user.name}</span>
           </div>
         </div>
 
@@ -131,22 +131,22 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
         {/* Stats */}
         <div className="grid md:grid-cols-3 gap-4 mb-8">
           <div className="bg-white rounded-lg shadow-lg p-6 text-center">
-            <div className="text-3xl font-bold text-green-600 mb-2">
+            <div className="text-3xl font-bold text-red-600 mb-2">
               {answeredPhotos.filter((sp) => sp.guess?.yearHit).length}
             </div>
-            <div className="text-sm text-gray-600">Лет угадано</div>
+            <div className="text-sm text-gray-800 font-medium">Лет угадано</div>
           </div>
           <div className="bg-white rounded-lg shadow-lg p-6 text-center">
-            <div className="text-3xl font-bold text-blue-600 mb-2">
+            <div className="text-3xl font-bold text-red-600 mb-2">
               {answeredPhotos.filter((sp) => sp.guess?.monthHit).length}
             </div>
-            <div className="text-sm text-gray-600">Месяцев угадано</div>
+            <div className="text-sm text-gray-800 font-medium">Месяцев угадано</div>
           </div>
           <div className="bg-white rounded-lg shadow-lg p-6 text-center">
-            <div className="text-3xl font-bold text-purple-600 mb-2">
+            <div className="text-3xl font-bold text-red-600 mb-2">
               {answeredPhotos.filter((sp) => sp.guess?.dayHit).length}
             </div>
-            <div className="text-sm text-gray-600">Дней угадано</div>
+            <div className="text-sm text-gray-800 font-medium">Дней угадано</div>
           </div>
         </div>
 
@@ -207,25 +207,25 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
         <div className="grid md:grid-cols-2 gap-4">
           <Link
             href="/play"
-            className="bg-gradient-to-r from-green-600 to-green-700 text-white py-4 px-6 rounded-lg font-bold text-center hover:from-green-700 hover:to-green-800 transition-all shadow-lg"
+            className="bg-red-600 text-white py-4 px-6 rounded-lg font-bold text-center hover:bg-red-700 transition-all shadow-lg"
           >
             🎮 Играть еще
           </Link>
           <Link
             href="/achievements"
-            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white py-4 px-6 rounded-lg font-bold text-center hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg"
+            className="bg-gray-900 text-white py-4 px-6 rounded-lg font-bold text-center hover:bg-black transition-all shadow-lg"
           >
             🏆 Мои достижения
           </Link>
           <Link
             href="/leaderboard"
-            className="bg-gradient-to-r from-amber-500 to-orange-600 text-white py-4 px-6 rounded-lg font-bold text-center hover:from-amber-600 hover:to-orange-700 transition-all shadow-lg"
+            className="bg-gray-900 text-white py-4 px-6 rounded-lg font-bold text-center hover:bg-black transition-all shadow-lg"
           >
             🥇 Лидерборд
           </Link>
           <Link
             href="/"
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 px-6 rounded-lg font-bold text-center hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg"
+            className="bg-red-600 text-white py-4 px-6 rounded-lg font-bold text-center hover:bg-red-700 transition-all shadow-lg"
           >
             🏠 На главную
           </Link>

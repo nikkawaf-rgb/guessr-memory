@@ -4,14 +4,14 @@ import Link from "next/link";
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gray-100">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-8 border-t-4 border-red-600">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold text-gray-800">Memory Keeper</h1>
-              <p className="text-gray-600 mt-1">Игра на угадывание дат на фотографиях</p>
+              <h1 className="text-3xl font-bold text-gray-900">Точка Роста GUESSER</h1>
+              <p className="text-gray-700 mt-1 font-medium">Игра на угадывание дат на фотографиях</p>
             </div>
           </div>
         </div>
@@ -21,12 +21,12 @@ export default function HomePage() {
           {/* Play Game */}
           <Link
             href="/auth/simple-signin"
-            className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white p-8 rounded-xl shadow-xl hover:shadow-2xl transition-all transform hover:scale-105"
+            className="bg-red-600 text-white p-8 rounded-xl shadow-xl hover:bg-red-700 transition-all transform hover:scale-105"
           >
             <div className="text-center">
               <div className="text-5xl mb-4">🎮</div>
               <h2 className="text-2xl font-bold mb-2">Играть</h2>
-              <p className="text-blue-100">
+              <p className="text-red-100">
                 Начните новую рейтинговую игру и угадывайте даты на фотографиях
               </p>
             </div>
@@ -35,12 +35,12 @@ export default function HomePage() {
           {/* Leaderboard */}
           <Link
             href="/leaderboard"
-            className="bg-gradient-to-br from-amber-500 to-orange-600 text-white p-8 rounded-xl shadow-xl hover:shadow-2xl transition-all transform hover:scale-105"
+            className="bg-gray-900 text-white p-8 rounded-xl shadow-xl hover:bg-black transition-all transform hover:scale-105"
           >
             <div className="text-center">
               <div className="text-5xl mb-4">🏆</div>
               <h2 className="text-2xl font-bold mb-2">Лидерборд</h2>
-              <p className="text-amber-100">
+              <p className="text-gray-300">
                 Посмотрите лучшие результаты игроков
               </p>
             </div>
@@ -49,23 +49,23 @@ export default function HomePage() {
 
         {/* Rules */}
         <div className="bg-white rounded-lg shadow-lg p-6 mt-8 max-w-4xl mx-auto">
-          <h3 className="text-xl font-bold text-gray-800 mb-4">Правила игры</h3>
-          <ul className="space-y-2 text-gray-700">
+          <h3 className="text-xl font-bold text-gray-900 mb-4">Правила игры</h3>
+          <ul className="space-y-2 text-gray-800">
             <li className="flex items-start">
-              <span className="text-blue-600 mr-2">•</span>
-              Вам будет показано 10 фотографий
+              <span className="text-red-600 mr-2 font-bold">•</span>
+              <span className="font-medium">Вам будет показано 10 фотографий</span>
             </li>
             <li className="flex items-start">
-              <span className="text-blue-600 mr-2">•</span>
-              Угадайте дату съемки: год, месяц и день
+              <span className="text-red-600 mr-2 font-bold">•</span>
+              <span className="font-medium">Угадайте дату съемки: год, месяц и день</span>
             </li>
             <li className="flex items-start">
-              <span className="text-blue-600 mr-2">•</span>
-              Чем точнее ответ, тем больше очков
+              <span className="text-red-600 mr-2 font-bold">•</span>
+              <span className="font-medium">Чем точнее ответ, тем больше очков</span>
             </li>
             <li className="flex items-start">
-              <span className="text-blue-600 mr-2">•</span>
-              Завершенные игры попадают в лидерборд
+              <span className="text-red-600 mr-2 font-bold">•</span>
+              <span className="font-medium">Завершенные игры попадают в лидерборд</span>
             </li>
           </ul>
         </div>

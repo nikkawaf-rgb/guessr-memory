@@ -45,8 +45,13 @@ interface UserStats {
 export async function checkAndGrantAchievements(stats: SessionStats) {
   const achievements: string[] = [];
 
+  console.log('[ACHIEVEMENTS] Checking achievements for session:', stats.sessionId);
+  console.log('[ACHIEVEMENTS] Total score:', stats.totalScore);
+  console.log('[ACHIEVEMENTS] Guesses count:', stats.guesses.length);
+
   // Получаем статистику пользователя
   const userStats = await getUserStats(stats.userId);
+  console.log('[ACHIEVEMENTS] User stats:', userStats);
 
   // Проверяем каждое достижение
   const checks = [
@@ -88,18 +93,26 @@ export async function checkAndGrantAchievements(stats: SessionStats) {
 
   for (const achievementKey of checks) {
     if (achievementKey) {
+      console.log('[ACHIEVEMENTS] Granting achievement:', achievementKey);
       const granted = await grantAchievement(stats.userId, achievementKey);
-      if (granted) achievements.push(achievementKey);
+      if (granted) {
+        console.log('[ACHIEVEMENTS] Successfully granted:', achievementKey);
+        achievements.push(achievementKey);
+      } else {
+        console.log('[ACHIEVEMENTS] Already has:', achievementKey);
+      }
     }
   }
 
   // Добавляем скрытые достижения
+  console.log('[ACHIEVEMENTS] Hidden achievements:', hiddenAchievements);
   achievements.push(...hiddenAchievements);
 
   // Проверяем Хокаге Точки Роста (все достижения)
   const hokage = await checkHokageTochkaRosta(stats.userId);
   if (hokage) achievements.push(hokage);
 
+  console.log('[ACHIEVEMENTS] Total new achievements:', achievements.length);
   return achievements;
 }
 
