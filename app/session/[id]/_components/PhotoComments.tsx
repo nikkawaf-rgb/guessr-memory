@@ -32,6 +32,7 @@ export default function PhotoComments({ photoId, playerName }: PhotoCommentsProp
 
   useEffect(() => {
     loadComments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [photoId, playerName]);
 
   const loadComments = async () => {

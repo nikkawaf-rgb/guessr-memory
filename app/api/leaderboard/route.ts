@@ -36,8 +36,8 @@ export async function GET() {
     });
 
     // Формируем данные по каждому игроку
-    const playerStats = users
-      .map(user => {
+    const playerStats = await Promise.all(users
+      .map(async (user) => {
         const completedGames = user.sessions.length;
         if (completedGames === 0) return null;
 
@@ -81,7 +81,7 @@ export async function GET() {
           commentsCount,
           likesCount,
         };
-      })
+      }))
       .filter((stat): stat is NonNullable<typeof stat> => stat !== null)
       .sort((a, b) => {
         // Сортируем по лучшему результату
