@@ -445,15 +445,25 @@ function checkLuckyNumber(stats: SessionStats): string | null {
   return stats.totalScore === 7777 ? 'lucky_number' : null;
 }
 
+function makeHiddenKeyFromTitle(title: string): string {
+  // Формируем стабильный ключ по названию: hidden_<slug>
+  const slug = title
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '_')
+    .replace(/[^a-z0-9а-яё_]+/gi, '');
+  return `hidden_${slug}`;
+}
+
 // Проверка скрытых достижений (привязанных к фото)
 async function checkHiddenAchievements(stats: SessionStats): Promise<string[]> {
   const granted: string[] = [];
 
   for (const guess of stats.guesses) {
-    // Получить 2000 очков на фото со скрытым достижением (комбо 1000 + спецвопрос 1000)
-    if (guess.scoreDelta === 2000 && guess.photo.hiddenAchievementTitle) {
-      // Создаём уникальный ключ для скрытого достижения
-      const hiddenKey = `hidden_photo_${guess.photo.id}`;
+    // Новая логика: комбо по дате (год+месяц+день) на фото со скрытым достижением
+    if (guess.yearHit && guess.monthHit && guess.dayHit && guess.photo.hiddenAchievementTitle) {
+      // Ключ теперь общий для всех фото с одинаковым названием скрытого достижения
+      const hiddenKey = makeHiddenKeyFromTitle(guess.photo.hiddenAchievementTitle);
       
       // Проверяем, есть ли уже такое достижение в базе
       let achievement = await prisma.achievement.findUnique({
@@ -475,7 +485,7 @@ async function checkHiddenAchievements(stats: SessionStats): Promise<string[]> {
         });
       }
 
-      // Выдаём достижение
+      // Выдаём достижение (уникальность по пользователю и achievementId уже гарантирует, что вторично не выдастся)
       const wasGranted = await grantAchievement(stats.userId, hiddenKey, guess.photo.id);
       if (wasGranted) granted.push(hiddenKey);
     }
