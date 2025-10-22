@@ -73,6 +73,7 @@ export default function EFDGamePage() {
     }
 
     function drawRoad() {
+      if (!ctx) return;
       // фон
       ctx.fillStyle = "#1f2937"; // серый
       ctx.fillRect(0, 0, WIDTH, HEIGHT);
@@ -97,6 +98,7 @@ export default function EFDGamePage() {
     }
 
     function drawTruck(x: number, y: number, color: string) {
+      if (!ctx) return;
       ctx.fillStyle = color;
       ctx.fillRect(x, y, TRUCK_W, TRUCK_H);
       // стекло
@@ -109,7 +111,7 @@ export default function EFDGamePage() {
     }
 
     function loop() {
-      if (!running) return;
+      if (!running || !ctx) return;
       drawRoad();
 
       // игрок
