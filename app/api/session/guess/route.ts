@@ -252,11 +252,12 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Проверяем скрытое достижение на этом фото
+    // Проверяем скрытое достижение на этом фото (БЕЗ учёта спецвопроса)
+    const scoreWithoutSpecial = result.score - result.specialScore;
     const newAchievement = await checkPhotoHiddenAchievement(
       sessionPhoto.session.userId,
       sessionPhoto.photo.id,
-      result.score,
+      scoreWithoutSpecial,
       sessionPhoto.photo.hiddenAchievementTitle,
       sessionPhoto.photo.hiddenAchievementDescription,
       sessionPhoto.photo.hiddenAchievementIcon
