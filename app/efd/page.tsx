@@ -214,6 +214,23 @@ export default function EFDGamePage() {
         <div className="grid md:grid-cols-[360px_1fr] gap-6 items-start">
           <div className="bg-gray-800 p-3 rounded-lg shadow-lg">
             <canvas ref={canvasRef} width={WIDTH} height={HEIGHT} className="block rounded" />
+            {/* Мобильные кнопки управления */}
+            <div className="flex gap-4 mt-4 md:hidden">
+              <button
+                onTouchStart={() => laneRef.current = Math.max(0, laneRef.current - 1)}
+                onClick={() => laneRef.current = Math.max(0, laneRef.current - 1)}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white py-4 rounded-lg text-2xl font-bold"
+              >
+                ← Влево
+              </button>
+              <button
+                onTouchStart={() => laneRef.current = Math.min(LANE_COUNT - 1, laneRef.current + 1)}
+                onClick={() => laneRef.current = Math.min(LANE_COUNT - 1, laneRef.current + 1)}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white py-4 rounded-lg text-2xl font-bold"
+              >
+                Вправо →
+              </button>
+            </div>
           </div>
           <div className="bg-gray-800 p-4 rounded-lg shadow-lg text-sm leading-6">
             {showStartAchievement && (
@@ -224,7 +241,8 @@ export default function EFDGamePage() {
               </div>
             )}
             <div className="mb-2 font-bold">Управление</div>
-            <div>← → или A / D — перестраиваться между полосами</div>
+            <div className="hidden md:block">← → или A / D — перестраиваться между полосами</div>
+            <div className="block md:hidden">Используйте кнопки ниже игры для управления</div>
             <div className="mt-4 mb-2 font-bold">Цель</div>
             <div>Доехать до конца без столкновений. Скорость постепенно растет.</div>
             <div className="mt-4">Дистанция: <span className="font-bold">{distance}</span></div>
