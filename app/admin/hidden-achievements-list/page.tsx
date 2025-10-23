@@ -117,7 +117,7 @@ export default function HiddenAchievementsListPage() {
             <p className="text-sm text-yellow-800">
               <strong>⚠️ Внимание:</strong> Удаление достижения удалит его у всех игроков и со всех фото!
               <br />
-              Ожидается максимум <strong>8 скрытых достижений</strong> в категории "скрытые".
+              Ожидается максимум <strong>8 скрытых достижений</strong> в категории &quot;скрытые&quot;.
             </p>
           </div>
         </div>

@@ -33,7 +33,6 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
   const answeredPhotos = session.sessionPhotos.filter((sp) => sp.guess);
 
   // Проверяем и начисляем достижения, если игра завершена
-  let newAchievements: string[] = [];
   let achievementDetails: Array<{ title: string; description: string; icon: string }> = [];
   
   if (session.finishedAt && session.durationSeconds) {
