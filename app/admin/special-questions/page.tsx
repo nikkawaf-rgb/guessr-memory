@@ -119,11 +119,13 @@ export default function SpecialQuestionsPage() {
     );
   }
 
+  const photosWithSpecialQuestions = photos.filter(p => p.specialQuestion).length;
+
   return (
     <div className="min-h-screen bg-gray-100 py-8">
       <div className="container mx-auto px-4">
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center mb-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-800">🌟 Спецвопросы</h1>
               <p className="text-gray-600 mt-2">
@@ -136,6 +138,22 @@ export default function SpecialQuestionsPage() {
             >
               ← Назад
             </a>
+          </div>
+
+          {/* Статистика */}
+          <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-200">
+            <div className="bg-purple-50 rounded-lg p-4 text-center">
+              <div className="text-3xl font-bold text-purple-600">{photosWithSpecialQuestions}</div>
+              <div className="text-sm text-purple-700 font-medium mt-1">Спецвопросов добавлено</div>
+            </div>
+            <div className="bg-blue-50 rounded-lg p-4 text-center">
+              <div className="text-3xl font-bold text-blue-600">{photos.length - photosWithSpecialQuestions}</div>
+              <div className="text-sm text-blue-700 font-medium mt-1">Без спецвопросов</div>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-4 text-center">
+              <div className="text-3xl font-bold text-gray-600">{photos.length}</div>
+              <div className="text-sm text-gray-700 font-medium mt-1">Всего фотографий</div>
+            </div>
           </div>
         </div>
 
