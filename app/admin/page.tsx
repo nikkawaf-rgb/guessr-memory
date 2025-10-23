@@ -107,6 +107,20 @@ export default function AdminPage() {
             </div>
           </Link>
 
+          {/* Hidden Achievements List */}
+          <Link
+            href="/admin/hidden-achievements-list"
+            className="bg-gradient-to-br from-purple-700 to-fuchsia-800 text-white p-6 rounded-xl shadow-xl hover:shadow-2xl transition-all transform hover:scale-105"
+          >
+            <div className="text-center">
+              <div className="text-4xl mb-3">🔍</div>
+              <h2 className="text-xl font-bold mb-2">Список скрытых</h2>
+              <p className="text-purple-100 text-sm">
+                Все скрытые достижения в БД
+              </p>
+            </div>
+          </Link>
+
           {/* Stats */}
           <Link
             href="/admin/stats"
