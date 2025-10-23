@@ -40,10 +40,16 @@ export default function HiddenAchievementsPage() {
 
   const fetchPhotos = async () => {
     try {
+      console.log("Fetching photos...");
       const response = await fetch("/api/admin/photos");
       if (response.ok) {
         const data = await response.json();
+        console.log("Photos fetched:", data.photos.length);
+        const photosWithHidden = data.photos.filter((p: Photo) => p.hiddenAchievementTitle);
+        console.log("Photos with hidden achievements:", photosWithHidden.length);
         setPhotos(data.photos);
+      } else {
+        console.error("Failed to fetch photos:", response.status);
       }
     } catch (error) {
       console.error("Error fetching photos:", error);
@@ -60,7 +66,13 @@ export default function HiddenAchievementsPage() {
   };
 
   const handleSave = async (photoId: string) => {
+    if (!title.trim() || !description.trim()) {
+      alert("Пожалуйста, заполните название и описание");
+      return;
+    }
+
     try {
+      console.log("Saving hidden achievement:", { photoId, title, description });
       const response = await fetch("/api/admin/hidden-achievements", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -68,22 +80,27 @@ export default function HiddenAchievementsPage() {
           photoId,
           title: title.trim(),
           description: description.trim(),
-          icon: icon.trim(),
+          icon: "👻",
         }),
       });
 
       if (response.ok) {
+        const data = await response.json();
+        console.log("Save successful:", data);
         await fetchPhotos();
         setEditingId(null);
         setTitle("");
         setDescription("");
         setIcon("");
+        alert("✅ Скрытое достижение добавлено!");
       } else {
-        alert("Ошибка при сохранении");
+        const errorData = await response.json();
+        console.error("Save failed:", errorData);
+        alert("Ошибка при сохранении: " + (errorData.error || "Неизвестная ошибка"));
       }
     } catch (error) {
       console.error("Error saving achievement:", error);
-      alert("Ошибка при сохранении");
+      alert("Ошибка при сохранении: " + error);
     }
   };
 
@@ -138,6 +155,13 @@ export default function HiddenAchievementsPage() {
 
   const hiddenAchievements = getHiddenAchievementsSummary();
   const photosWithAchievements = photos.filter(p => p.hiddenAchievementTitle).length;
+
+  console.log("Current state:", {
+    totalPhotos: photos.length,
+    photosWithAchievements,
+    uniqueHiddenAchievements: hiddenAchievements.length,
+    hiddenAchievements
+  });
 
   if (loading) {
     return (
@@ -311,7 +335,7 @@ export default function HiddenAchievementsPage() {
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleSave(photo.id)}
-                          disabled={!title.trim() || !description.trim() || !icon.trim()}
+                          disabled={!title.trim() || !description.trim()}
                           className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-3 py-2 rounded font-medium"
                         >
                           ✓ Сохранить
