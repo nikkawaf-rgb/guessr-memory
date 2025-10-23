@@ -108,9 +108,9 @@ export default function HomePage() {
       </div>
     </div>
     {/* Скрытый вход в мини-игру EFD */}
-    <div className="fixed bottom-2 right-3 opacity-40 hover:opacity-100 transition-opacity">
+    <div className="fixed bottom-1 right-1 opacity-20 hover:opacity-100 active:opacity-100 transition-opacity">
       <Link href="/efd" aria-label="hidden">
-        <span className="text-2xl" role="img" aria-label="truck">🚚</span>
+        <span className="text-xs" role="img" aria-label="truck">🚚</span>
       </Link>
     </div>
     </>
