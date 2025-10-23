@@ -130,7 +130,7 @@ export default function HiddenAchievementsPage() {
 
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <p className="text-sm text-blue-800">
-            💡 <strong>Как это работает:</strong> Когда игрок набирает максимум очков (1000 за дату + 1000 за спецвопрос = 2000) на фото со скрытым достижением, он получает это уникальное достижение!
+            💡 <strong>Как это работает:</strong> Когда игрок набирает <strong>500+ очков</strong> на фото со скрытым достижением, он получает это уникальное достижение! Несколько фото могут иметь одинаковое название — достижение выдастся только один раз.
           </p>
         </div>
 
@@ -148,10 +148,12 @@ export default function HiddenAchievementsPage() {
                 }`}
               >
                 <div className="relative h-48 bg-gray-200">
-                  <img
+                  <Image
                     src={getPhotoUrl(photo.storagePath)}
                     alt="Фото"
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
+                    unoptimized
                   />
                 </div>
 
