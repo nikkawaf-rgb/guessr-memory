@@ -15,6 +15,13 @@ interface Photo {
   hiddenAchievementIcon: string | null;
 }
 
+interface HiddenAchievementSummary {
+  title: string;
+  description: string;
+  icon: string;
+  photoCount: number;
+}
+
 export default function HiddenAchievementsPage() {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -107,6 +114,32 @@ export default function HiddenAchievementsPage() {
     setIcon("");
   };
 
+  // Получить список уникальных скрытых достижений
+  const getHiddenAchievementsSummary = (): HiddenAchievementSummary[] => {
+    const map = new Map<string, HiddenAchievementSummary>();
+    
+    photos.forEach((photo) => {
+      if (photo.hiddenAchievementTitle) {
+        const existing = map.get(photo.hiddenAchievementTitle);
+        if (existing) {
+          existing.photoCount++;
+        } else {
+          map.set(photo.hiddenAchievementTitle, {
+            title: photo.hiddenAchievementTitle,
+            description: photo.hiddenAchievementDescription || "",
+            icon: photo.hiddenAchievementIcon || "👻",
+            photoCount: 1,
+          });
+        }
+      }
+    });
+    
+    return Array.from(map.values()).sort((a, b) => a.title.localeCompare(b.title));
+  };
+
+  const hiddenAchievements = getHiddenAchievementsSummary();
+  const photosWithAchievements = photos.filter(p => p.hiddenAchievementTitle).length;
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-100 p-8">
@@ -133,6 +166,44 @@ export default function HiddenAchievementsPage() {
             💡 <strong>Как это работает:</strong> Когда игрок набирает <strong>500+ очков</strong> на фото со скрытым достижением, он получает это уникальное достижение! Несколько фото могут иметь одинаковое название — достижение выдастся только один раз.
           </p>
         </div>
+
+        {/* Статистика и список созданных достижений */}
+        {hiddenAchievements.length > 0 && (
+          <div className="bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-300 rounded-lg p-6 mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-gray-900">
+                🎖️ Созданные скрытые достижения ({hiddenAchievements.length} из 8)
+              </h2>
+              <div className="text-sm text-gray-700 bg-white px-4 py-2 rounded-lg border border-purple-200">
+                📸 Фото с достижениями: <strong>{photosWithAchievements}</strong> из <strong>{photos.length}</strong>
+              </div>
+            </div>
+            
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {hiddenAchievements.map((achievement) => (
+                <div
+                  key={achievement.title}
+                  className="bg-white border-2 border-purple-200 rounded-lg p-4 hover:shadow-lg transition"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="text-3xl">{achievement.icon}</div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-bold text-gray-900 text-lg truncate">
+                        {achievement.title}
+                      </div>
+                      <div className="text-sm text-gray-600 mt-1 line-clamp-2">
+                        {achievement.description}
+                      </div>
+                      <div className="text-xs text-purple-600 font-medium mt-2">
+                        📸 Привязано к {achievement.photoCount} {achievement.photoCount === 1 ? 'фото' : 'фотографиям'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {photos.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-lg shadow">
