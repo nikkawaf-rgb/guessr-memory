@@ -123,7 +123,10 @@ async function grantAchievement(userId: string, achievementKey: string, photoId?
       where: { key: achievementKey },
     });
 
-    if (!achievement) return false;
+    if (!achievement) {
+      console.log('[ACHIEVEMENTS] Achievement not found in DB:', achievementKey);
+      return false;
+    }
 
     // Проверяем, нет ли уже этого достижения
     const existing = await prisma.userAchievement.findUnique({
@@ -460,10 +463,16 @@ async function checkHiddenAchievements(stats: SessionStats): Promise<string[]> {
   const granted: string[] = [];
 
   for (const guess of stats.guesses) {
+    console.log('[HIDDEN] Checking photo:', {
+      scoreDelta: guess.scoreDelta,
+      hiddenTitle: guess.photo.hiddenAchievementTitle
+    });
+
     // Новая логика: 500+ очков на фото со скрытым достижением (без учёта спецвопроса)
     if (guess.scoreDelta >= 500 && guess.photo.hiddenAchievementTitle) {
       // Ключ теперь общий для всех фото с одинаковым названием скрытого достижения
       const hiddenKey = makeHiddenKeyFromTitle(guess.photo.hiddenAchievementTitle);
+      console.log('[HIDDEN] Eligible for achievement:', guess.photo.hiddenAchievementTitle, '-> key:', hiddenKey);
       
       // Проверяем, есть ли уже такое достижение в базе
       let achievement = await prisma.achievement.findUnique({
@@ -472,6 +481,7 @@ async function checkHiddenAchievements(stats: SessionStats): Promise<string[]> {
 
       // Если нет - создаём
       if (!achievement) {
+        console.log('[HIDDEN] Creating new achievement:', hiddenKey);
         achievement = await prisma.achievement.create({
           data: {
             key: hiddenKey,
@@ -483,11 +493,18 @@ async function checkHiddenAchievements(stats: SessionStats): Promise<string[]> {
             rarity: 'legendary',
           },
         });
+        console.log('[HIDDEN] Achievement created:', achievement);
+      } else {
+        console.log('[HIDDEN] Achievement exists in DB:', achievement.title);
       }
 
       // Выдаём достижение (уникальность по пользователю и achievementId уже гарантирует, что вторично не выдастся)
       const wasGranted = await grantAchievement(stats.userId, hiddenKey, guess.photo.id);
-      if (wasGranted) granted.push(hiddenKey);
+      console.log('[HIDDEN] Grant result for', hiddenKey, ':', wasGranted);
+      if (wasGranted) {
+        granted.push(hiddenKey);
+        console.log('[HIDDEN] Added to granted list:', hiddenKey);
+      }
     }
   }
 
