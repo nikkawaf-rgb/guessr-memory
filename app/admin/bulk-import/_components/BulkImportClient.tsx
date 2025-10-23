@@ -11,6 +11,7 @@ const supabase = createClient(
 
 interface ImportResult {
   success: number;
+  duplicates: number;
   errors: string[];
 }
 
@@ -32,6 +33,7 @@ export default function BulkImportClient() {
     setProgress(0);
     const errors: string[] = [];
     let successCount = 0;
+    let duplicateCount = 0;
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
@@ -94,7 +96,13 @@ export default function BulkImportClient() {
 
         if (!response.ok) {
           const errorData = await response.json();
-          errors.push(`${file.name}: ${errorData.error}`);
+          // Проверяем, является ли ошибка дубликатом
+          if (response.status === 409) {
+            duplicateCount++;
+            console.log(`Duplicate photo: ${file.name}`);
+          } else {
+            errors.push(`${file.name}: ${errorData.error}`);
+          }
           continue;
         }
 
@@ -111,7 +119,7 @@ export default function BulkImportClient() {
       setProgress(Math.round(((i + 1) / files.length) * 100));
     }
 
-    setResult({ success: successCount, errors });
+    setResult({ success: successCount, duplicates: duplicateCount, errors });
     setIsUploading(false);
   };
 
@@ -162,16 +170,26 @@ export default function BulkImportClient() {
         {result && (
           <div className="space-y-4">
             <div className="bg-green-50 border border-green-200 rounded p-4">
-              <h3 className="font-semibold text-green-800 mb-2">Результат загрузки</h3>
-              <p className="text-green-700">
-                Успешно загружено: {result.success} из {files?.length || 0} файлов
-              </p>
+              <h3 className="font-semibold text-green-800 mb-2">✅ Результат загрузки</h3>
+              <div className="space-y-1">
+                <p className="text-green-700">
+                  <strong>Успешно загружено:</strong> {result.success} {result.success === 1 ? 'фотография' : 'фотографий'}
+                </p>
+                {result.duplicates > 0 && (
+                  <p className="text-yellow-700">
+                    <strong>Пропущено дубликатов:</strong> {result.duplicates} {result.duplicates === 1 ? 'фотография' : 'фотографий'} (уже есть в базе)
+                  </p>
+                )}
+                <p className="text-gray-700 text-sm mt-2">
+                  Всего обработано: {files?.length || 0} {(files?.length || 0) === 1 ? 'файл' : 'файлов'}
+                </p>
+              </div>
             </div>
 
             {result.errors.length > 0 && (
               <div className="bg-red-50 border border-red-200 rounded p-4">
-                <h3 className="font-semibold text-red-800 mb-2">Ошибки:</h3>
-                <ul className="text-red-700 space-y-1">
+                <h3 className="font-semibold text-red-800 mb-2">❌ Ошибки ({result.errors.length}):</h3>
+                <ul className="text-red-700 space-y-1 max-h-60 overflow-y-auto">
                   {result.errors.map((error, index) => (
                     <li key={index} className="text-sm">{error}</li>
                   ))}
