@@ -460,8 +460,8 @@ async function checkHiddenAchievements(stats: SessionStats): Promise<string[]> {
   const granted: string[] = [];
 
   for (const guess of stats.guesses) {
-    // Новая логика: комбо по дате (год+месяц+день) на фото со скрытым достижением
-    if (guess.yearHit && guess.monthHit && guess.dayHit && guess.photo.hiddenAchievementTitle) {
+    // Новая логика: 500+ очков на фото со скрытым достижением (без учёта спецвопроса)
+    if (guess.scoreDelta >= 500 && guess.photo.hiddenAchievementTitle) {
       // Ключ теперь общий для всех фото с одинаковым названием скрытого достижения
       const hiddenKey = makeHiddenKeyFromTitle(guess.photo.hiddenAchievementTitle);
       
