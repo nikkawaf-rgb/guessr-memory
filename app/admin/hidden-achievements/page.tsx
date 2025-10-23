@@ -167,17 +167,22 @@ export default function HiddenAchievementsPage() {
         </div>
 
         {/* Статистика и список созданных достижений */}
-        {hiddenAchievements.length > 0 && (
-          <div className="bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-300 rounded-lg p-6 mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-gray-900">
-                🎖️ Созданные скрытые достижения ({hiddenAchievements.length} из 8)
-              </h2>
-              <div className="text-sm text-gray-700 bg-white px-4 py-2 rounded-lg border border-purple-200">
-                📸 Фото с достижениями: <strong>{photosWithAchievements}</strong> из <strong>{photos.length}</strong>
-              </div>
+        <div className="bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-300 rounded-lg p-6 mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-gray-900">
+              🎖️ Созданные скрытые достижения ({hiddenAchievements.length} из 8)
+            </h2>
+            <div className="text-sm text-gray-700 bg-white px-4 py-2 rounded-lg border border-purple-200">
+              📸 Фото с достижениями: <strong>{photosWithAchievements}</strong> из <strong>{photos.length}</strong>
             </div>
-            
+          </div>
+          
+          {hiddenAchievements.length === 0 ? (
+            <div className="text-center py-8 text-gray-600">
+              <div className="text-4xl mb-2">👻</div>
+              <p>Скрытых достижений пока нет. Добавьте их к фотографиям ниже!</p>
+            </div>
+          ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
               {hiddenAchievements.map((achievement) => (
                 <div
@@ -201,8 +206,8 @@ export default function HiddenAchievementsPage() {
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {photos.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-lg shadow">
@@ -224,6 +229,9 @@ export default function HiddenAchievementsPage() {
                     alt="Фото"
                     className="w-full h-full object-cover"
                     loading="lazy"
+                    width={photo.width || 400}
+                    height={photo.height || 300}
+                    style={{ maxWidth: '100%', height: 'auto' }}
                   />
                 </div>
 
