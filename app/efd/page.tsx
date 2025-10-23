@@ -242,9 +242,10 @@ export default function EFDGamePage() {
             {won && (
               <div className="mt-4">
                 <div className="text-green-300 font-bold text-lg mb-3">🎉 Вы победили!</div>
-                <div className="bg-yellow-900 border-2 border-yellow-500 rounded p-3 mb-3">
-                  <div className="text-yellow-300 font-bold text-center mb-1">🏁 Достижение получено!</div>
-                  <div className="text-yellow-100 text-sm text-center">Escape from Donbass</div>
+                <div className="bg-gradient-to-r from-yellow-900 to-orange-900 border-2 border-yellow-400 rounded p-3 mb-3 animate-pulse">
+                  <div className="text-yellow-300 font-bold text-center mb-1 text-lg">🏁 Легендарное достижение!</div>
+                  <div className="text-yellow-100 font-bold text-center">Escape from Donbass</div>
+                  <div className="text-yellow-200 text-xs text-center mt-1">Доехать до конца!</div>
                 </div>
                 <button
                   onClick={handleRestart}
