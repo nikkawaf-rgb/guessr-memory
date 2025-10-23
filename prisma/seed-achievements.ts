@@ -4,79 +4,8 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 const achievements = [
-  // 🎖️ Скрытые достижения (8) - создаются автоматически при привязке к фото
-  {
-    key: 'hidden_1',
-    title: '???',
-    description: 'Секретное достижение',
-    icon: '🎖️',
-    category: 'скрытые',
-    isHidden: true,
-    rarity: 'legendary',
-  },
-  {
-    key: 'hidden_2',
-    title: '???',
-    description: 'Секретное достижение',
-    icon: '🏅',
-    category: 'скрытые',
-    isHidden: true,
-    rarity: 'legendary',
-  },
-  {
-    key: 'hidden_3',
-    title: '???',
-    description: 'Секретное достижение',
-    icon: '🥇',
-    category: 'скрытые',
-    isHidden: true,
-    rarity: 'legendary',
-  },
-  {
-    key: 'hidden_4',
-    title: '???',
-    description: 'Секретное достижение',
-    icon: '🥈',
-    category: 'скрытые',
-    isHidden: true,
-    rarity: 'legendary',
-  },
-  {
-    key: 'hidden_5',
-    title: '???',
-    description: 'Секретное достижение',
-    icon: '🥉',
-    category: 'скрытые',
-    isHidden: true,
-    rarity: 'legendary',
-  },
-  {
-    key: 'hidden_6',
-    title: '???',
-    description: 'Секретное достижение',
-    icon: '🎗️',
-    category: 'скрытые',
-    isHidden: true,
-    rarity: 'legendary',
-  },
-  {
-    key: 'hidden_7',
-    title: '???',
-    description: 'Секретное достижение',
-    icon: '🏆',
-    category: 'скрытые',
-    isHidden: true,
-    rarity: 'legendary',
-  },
-  {
-    key: 'hidden_8',
-    title: '???',
-    description: 'Секретное достижение',
-    icon: '👑',
-    category: 'скрытые',
-    isHidden: true,
-    rarity: 'legendary',
-  },
+  // 🎖️ Скрытые достижения (до 8) - создаются АВТОМАТИЧЕСКИ при привязке к фото в админке
+  // НЕ создавайте их вручную! Система сама создаст их когда админ назначит скрытое достижение на фото
 
   // 🌟 Космос и Астрономия (4)
   {
@@ -383,7 +312,7 @@ const achievements = [
   {
     key: 'hokage_tochka_rosta',
     title: 'Хокаге Точки Роста',
-    description: 'Получить ВСЕ остальные достижения (36 из 36)',
+    description: 'Получить ВСЕ остальные достижения (28 обычных + 8 скрытых)',
     icon: '🏆',
     category: 'легендарное',
     rarity: 'legendary',
