@@ -77,14 +77,14 @@ export default function EFDGamePage() {
 
   const moveLeft = () => {
     const now = Date.now();
-    if (now - lastMoveRef.current < 200) return; // защита от спама (200мс)
+    if (now - lastMoveRef.current < 100) return; // защита от спама (100мс)
     lastMoveRef.current = now;
     laneRef.current = Math.max(0, laneRef.current - 1);
   };
 
   const moveRight = () => {
     const now = Date.now();
-    if (now - lastMoveRef.current < 200) return; // защита от спама (200мс)
+    if (now - lastMoveRef.current < 100) return; // защита от спама (100мс)
     lastMoveRef.current = now;
     laneRef.current = Math.min(LANE_COUNT - 1, laneRef.current + 1);
   };
