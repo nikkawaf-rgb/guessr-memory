@@ -63,22 +63,34 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
       createdAt: session.createdAt,
     };
 
-    // Проверяем достижения
+    // Проверяем достижения (могут быть уже выданы во время игры)
     newAchievements = await checkAndGrantAchievements(stats);
 
-    // Получаем детали достижений для отображения
-    if (newAchievements.length > 0) {
-      const achievements = await prisma.achievement.findMany({
-        where: {
-          key: { in: newAchievements },
+    // Получаем ВСЕ достижения, полученные во время этой сессии
+    // (включая те, что были выданы во время игры)
+    const sessionPhotoIds = answeredPhotos.map(sp => sp.photo.id);
+    const sessionStart = session.createdAt;
+    const sessionEnd = session.finishedAt;
+
+    const allSessionAchievements = await prisma.userAchievement.findMany({
+      where: {
+        userId: session.userId,
+        createdAt: {
+          gte: sessionStart,
+          lte: sessionEnd,
         },
-      });
-      achievementDetails = achievements.map((a) => ({
-        title: a.title,
-        description: a.description,
-        icon: a.icon,
-      }));
-    }
+      },
+      include: {
+        achievement: true,
+      },
+    });
+
+    // Формируем список для отображения
+    achievementDetails = allSessionAchievements.map((ua) => ({
+      title: ua.achievement.title,
+      description: ua.achievement.description,
+      icon: ua.achievement.icon,
+    }));
   }
 
   return (
