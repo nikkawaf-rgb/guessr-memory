@@ -19,7 +19,6 @@ export default function HiddenAchievementsListPage() {
   const [achievements, setAchievements] = useState<HiddenAchievement[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
-  const [deletingAll, setDeletingAll] = useState(false);
 
   useEffect(() => {
     loadAchievements();
@@ -38,7 +37,7 @@ export default function HiddenAchievementsListPage() {
   }
 
   async function handleDelete(id: string, title: string) {
-    const message = `Удалить скрытое достижение "${title}"?\n\nЭто также удалит его у всех игроков, которые его получили!`;
+    const message = `Удалить скрытое достижение "${title}"?\n\nЭто также удалит его у всех игроков, которые его получили, и отвяжет от всех фото!`;
     if (!confirm(message)) {
       return;
     }
@@ -62,43 +61,6 @@ export default function HiddenAchievementsListPage() {
     } finally {
       setDeleting(null);
     }
-  }
-
-  async function handleDeleteAllPlaceholders() {
-    const placeholders = achievements.filter(a => a.title === '???');
-    if (placeholders.length === 0) {
-      alert("Нет старых placeholder-ов для удаления");
-      return;
-    }
-
-    const message = `Удалить ВСЕ ${placeholders.length} старых placeholder-ов (с названием "???")??\n\nЭто необратимо!`;
-    if (!confirm(message)) {
-      return;
-    }
-
-    setDeletingAll(true);
-    let deleted = 0;
-    let errors = 0;
-
-    for (const ach of placeholders) {
-      try {
-        const res = await fetch(`/api/admin/hidden-achievements-list?id=${ach.id}`, {
-          method: "DELETE",
-        });
-        if (res.ok) {
-          deleted++;
-        } else {
-          errors++;
-        }
-      } catch (error) {
-        console.error("Error deleting:", error);
-        errors++;
-      }
-    }
-
-    setDeletingAll(false);
-    alert(`Удалено: ${deleted}\nОшибок: ${errors}`);
-    loadAchievements();
   }
 
   if (loading) {
@@ -163,29 +125,14 @@ export default function HiddenAchievementsListPage() {
         {/* Категория "скрытые" */}
         {hiddenCategory.length > 0 && (
           <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-purple-700">
-                👻 Категория &quot;скрытые&quot; ({hiddenCategory.length}/8)
-              </h2>
-              {hiddenCategory.some(a => a.title === '???') && (
-                <button
-                  onClick={handleDeleteAllPlaceholders}
-                  disabled={deletingAll}
-                  className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-bold transition disabled:opacity-50"
-                >
-                  {deletingAll ? "⏳ Удаление..." : `🗑️ Удалить все ${hiddenCategory.filter(a => a.title === '???').length} старых ???`}
-                </button>
-              )}
-            </div>
+            <h2 className="text-2xl font-bold text-purple-700 mb-4">
+              👻 Категория &quot;скрытые&quot; ({hiddenCategory.length}/8)
+            </h2>
             <div className="space-y-4">
               {hiddenCategory.map((ach) => (
                 <div
                   key={ach.id}
-                  className={`border-2 rounded-lg p-4 transition ${
-                    ach.title === '???' 
-                      ? 'border-red-300 bg-red-50 hover:bg-red-100' 
-                      : 'border-purple-200 hover:bg-purple-50'
-                  }`}
+                  className="border-2 border-purple-200 rounded-lg p-4 hover:bg-purple-50 transition"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -194,9 +141,9 @@ export default function HiddenAchievementsListPage() {
                         <div>
                           <div className="text-xl font-bold text-gray-800">
                             {ach.title}
-                            {ach.title === '???' && (
-                              <span className="ml-2 text-xs bg-red-600 text-white px-2 py-1 rounded font-bold">
-                                ⚠️ СТАРЫЙ PLACEHOLDER - УДАЛИТЬ!
+                            {ach.userCount === 0 && (
+                              <span className="ml-2 text-xs bg-gray-400 text-white px-2 py-1 rounded">
+                                Никто не получил
                               </span>
                             )}
                           </div>
@@ -223,13 +170,9 @@ export default function HiddenAchievementsListPage() {
                     <button
                       onClick={() => handleDelete(ach.id, ach.title)}
                       disabled={deleting === ach.id}
-                      className={`px-4 py-2 rounded transition disabled:opacity-50 text-white ${
-                        ach.title === '???' 
-                          ? 'bg-red-600 hover:bg-red-700' 
-                          : 'bg-red-500 hover:bg-red-600'
-                      }`}
+                      className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded transition disabled:opacity-50"
                     >
-                      {deleting === ach.id ? "⏳" : ach.title === '???' ? "🗑️ УДАЛИТЬ СТАРОЕ" : "🗑️ Удалить"}
+                      {deleting === ach.id ? "⏳" : "🗑️ Удалить"}
                     </button>
                   </div>
                 </div>
