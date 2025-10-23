@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 
 interface Photo {
   id: string;
@@ -219,12 +218,12 @@ export default function HiddenAchievementsPage() {
                 }`}
               >
                 <div className="relative h-48 bg-gray-200">
-                  <Image
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
                     src={getPhotoUrl(photo.storagePath)}
                     alt="Фото"
-                    fill
-                    className="object-cover"
-                    unoptimized
+                    className="w-full h-full object-cover"
+                    loading="lazy"
                   />
                 </div>
 
