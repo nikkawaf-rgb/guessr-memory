@@ -53,6 +53,7 @@ export default function EFDGamePage() {
   const obstaclesRef = useRef<Obstacle[]>([]);
   const animRef = useRef<number | null>(null);
   const [awardedStart, setAwardedStart] = useState(false);
+  const lastMoveRef = useRef(0); // для защиты от множественных нажатий
 
   useEffect(() => {
     if (!awardedStart) {
@@ -71,6 +72,21 @@ export default function EFDGamePage() {
     laneRef.current = 1;
     speedRef.current = 3;
     obstaclesRef.current = [];
+    lastMoveRef.current = 0;
+  };
+
+  const moveLeft = () => {
+    const now = Date.now();
+    if (now - lastMoveRef.current < 200) return; // защита от спама (200мс)
+    lastMoveRef.current = now;
+    laneRef.current = Math.max(0, laneRef.current - 1);
+  };
+
+  const moveRight = () => {
+    const now = Date.now();
+    if (now - lastMoveRef.current < 200) return; // защита от спама (200мс)
+    lastMoveRef.current = now;
+    laneRef.current = Math.min(LANE_COUNT - 1, laneRef.current + 1);
   };
 
   useEffect(() => {
@@ -217,16 +233,16 @@ export default function EFDGamePage() {
             {/* Мобильные кнопки управления */}
             <div className="flex gap-4 mt-4 md:hidden">
               <button
-                onTouchStart={() => laneRef.current = Math.max(0, laneRef.current - 1)}
-                onClick={() => laneRef.current = Math.max(0, laneRef.current - 1)}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white py-4 rounded-lg text-2xl font-bold"
+                onTouchStart={(e) => { e.preventDefault(); moveLeft(); }}
+                onClick={moveLeft}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white py-4 rounded-lg text-2xl font-bold select-none"
               >
                 ← Влево
               </button>
               <button
-                onTouchStart={() => laneRef.current = Math.min(LANE_COUNT - 1, laneRef.current + 1)}
-                onClick={() => laneRef.current = Math.min(LANE_COUNT - 1, laneRef.current + 1)}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white py-4 rounded-lg text-2xl font-bold"
+                onTouchStart={(e) => { e.preventDefault(); moveRight(); }}
+                onClick={moveRight}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white py-4 rounded-lg text-2xl font-bold select-none"
               >
                 Вправо →
               </button>
