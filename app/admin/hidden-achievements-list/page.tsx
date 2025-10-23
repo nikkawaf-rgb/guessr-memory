@@ -37,7 +37,8 @@ export default function HiddenAchievementsListPage() {
   }
 
   async function handleDelete(id: string, title: string) {
-    if (!confirm(`Удалить скрытое достижение "${title}"?\n\nЭто также удалит его у всех игроков, которые его получили!`)) {
+    const message = `Удалить скрытое достижение "${title}"?\n\nЭто также удалит его у всех игроков, которые его получили!`;
+    if (!confirm(message)) {
       return;
     }
 
@@ -96,7 +97,7 @@ export default function HiddenAchievementsListPage() {
               <div className="text-3xl font-bold text-purple-600">
                 {hiddenCategory.length}
               </div>
-              <div className="text-sm text-gray-600">Категория "скрытые"</div>
+              <div className="text-sm text-gray-600">Категория &quot;скрытые&quot;</div>
             </div>
             <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4 text-center">
               <div className="text-3xl font-bold text-blue-600">
@@ -125,7 +126,7 @@ export default function HiddenAchievementsListPage() {
         {hiddenCategory.length > 0 && (
           <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
             <h2 className="text-2xl font-bold text-purple-700 mb-4">
-              👻 Категория "скрытые" ({hiddenCategory.length}/8)
+              👻 Категория &quot;скрытые&quot; ({hiddenCategory.length}/8)
             </h2>
             <div className="space-y-4">
               {hiddenCategory.map((ach) => (
@@ -179,7 +180,7 @@ export default function HiddenAchievementsListPage() {
         {otherHidden.length > 0 && (
           <div className="bg-white rounded-lg shadow-lg p-6">
             <h2 className="text-2xl font-bold text-blue-700 mb-4">
-              🔒 Другие скрытые (isHidden=true, но категория ≠ "скрытые")
+              🔒 Другие скрытые (isHidden=true, но категория ≠ &quot;скрытые&quot;)
             </h2>
             <div className="space-y-4">
               {otherHidden.map((ach) => (

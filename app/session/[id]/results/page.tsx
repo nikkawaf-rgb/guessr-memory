@@ -64,11 +64,10 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
     };
 
     // Проверяем достижения (могут быть уже выданы во время игры)
-    newAchievements = await checkAndGrantAchievements(stats);
+    await checkAndGrantAchievements(stats);
 
     // Получаем ВСЕ достижения, полученные во время этой сессии
     // (включая те, что были выданы во время игры)
-    const sessionPhotoIds = answeredPhotos.map(sp => sp.photo.id);
     const sessionStart = session.createdAt;
     const sessionEnd = session.finishedAt;
 

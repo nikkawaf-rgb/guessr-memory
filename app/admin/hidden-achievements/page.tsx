@@ -27,7 +27,7 @@ export default function HiddenAchievementsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [icon, setIcon] = useState("");
+  const [, setIcon] = useState(""); // icon устанавливается автоматически в "👻"
 
   const getPhotoUrl = (storagePath: string) => {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://jdrsmlnngkniwgwdrnok.supabase.co";
