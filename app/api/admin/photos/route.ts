@@ -14,6 +14,9 @@ export async function GET() {
         isActive: true,
         specialQuestion: true,
         specialAnswerCorrect: true,
+        hiddenAchievementTitle: true,
+        hiddenAchievementDescription: true,
+        hiddenAchievementIcon: true,
         createdAt: true,
         comments: {
           select: {
