@@ -55,6 +55,11 @@ export default function SessionGameClient({
   const [showResult, setShowResult] = useState(false);
   const [result, setResult] = useState<GuessResult | null>(null);
   const [newTotalScore, setNewTotalScore] = useState(session.totalScore);
+  const [newAchievement, setNewAchievement] = useState<{
+    title: string;
+    description: string;
+    icon: string;
+  } | null>(null);
 
   const getPhotoUrl = (storagePath: string) => {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://jdrsmlnngkniwgwdrnok.supabase.co";
@@ -88,6 +93,7 @@ export default function SessionGameClient({
       // Показываем промежуточный результат
       setResult(data.result);
       setNewTotalScore(data.sessionTotalScore);
+      setNewAchievement(data.newAchievement || null);
       setShowResult(true);
     } catch (error) {
       console.error("Error submitting guess:", error);
@@ -236,6 +242,29 @@ export default function SessionGameClient({
                 <span className="text-3xl font-bold">{newTotalScore}</span>
               </div>
             </div>
+
+            {/* Новое достижение */}
+            {newAchievement && (
+              <div className="bg-gradient-to-r from-yellow-50 to-amber-50 border-2 border-yellow-400 rounded-xl p-6 mb-6 animate-pulse">
+                <h3 className="text-2xl font-bold text-center text-amber-800 mb-3">
+                  🏆 Новое достижение! 🏆
+                </h3>
+                <div className="bg-white rounded-lg p-4 shadow-md border-2 border-amber-300">
+                  <div className="flex items-center gap-4">
+                    <div className="text-5xl">{newAchievement.icon}</div>
+                    <div className="flex-1">
+                      <div className="font-bold text-xl text-gray-800">
+                        {newAchievement.title}
+                      </div>
+                      <div className="text-sm text-gray-600 mt-1">
+                        {newAchievement.description}
+                      </div>
+                    </div>
+                    <div className="text-3xl">✨</div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Кнопка продолжить */}
             <button

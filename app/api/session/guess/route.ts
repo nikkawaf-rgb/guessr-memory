@@ -1,6 +1,78 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 
+// Функция для проверки скрытого достижения на фото
+async function checkPhotoHiddenAchievement(
+  userId: string,
+  photoId: string,
+  scoreDelta: number,
+  hiddenAchievementTitle: string | null,
+  hiddenAchievementDescription: string | null,
+  hiddenAchievementIcon: string | null
+): Promise<{ key: string; title: string; description: string; icon: string } | null> {
+  if (scoreDelta < 500 || !hiddenAchievementTitle) {
+    return null;
+  }
+
+  // Генерируем ключ
+  const slug = hiddenAchievementTitle
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '_')
+    .replace(/[^a-z0-9а-яё_]+/gi, '');
+  const hiddenKey = `hidden_${slug}`;
+
+  // Проверяем, есть ли уже такое достижение в базе
+  let achievement = await prisma.achievement.findUnique({
+    where: { key: hiddenKey },
+  });
+
+  // Если нет - создаём
+  if (!achievement) {
+    achievement = await prisma.achievement.create({
+      data: {
+        key: hiddenKey,
+        title: hiddenAchievementTitle,
+        description: hiddenAchievementDescription || `Секретное достижение за фото`,
+        icon: hiddenAchievementIcon || '👻',
+        category: 'скрытые',
+        isHidden: true,
+        rarity: 'legendary',
+      },
+    });
+  }
+
+  // Проверяем, нет ли уже этого достижения у пользователя
+  const existing = await prisma.userAchievement.findUnique({
+    where: {
+      userId_achievementId: {
+        userId,
+        achievementId: achievement.id,
+      },
+    },
+  });
+
+  if (existing) {
+    return null; // Уже есть
+  }
+
+  // Выдаём достижение
+  await prisma.userAchievement.create({
+    data: {
+      userId,
+      achievementId: achievement.id,
+      photoId,
+    },
+  });
+
+  return {
+    key: hiddenKey,
+    title: achievement.title,
+    description: achievement.description,
+    icon: achievement.icon,
+  };
+}
+
 // Функция для подсчета очков с прогрессивной шкалой
 function calculateScore(
   correctDate: Date,
@@ -180,6 +252,20 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Проверяем скрытое достижение на этом фото
+    const newAchievement = await checkPhotoHiddenAchievement(
+      sessionPhoto.session.userId,
+      sessionPhoto.photo.id,
+      result.score,
+      sessionPhoto.photo.hiddenAchievementTitle,
+      sessionPhoto.photo.hiddenAchievementDescription,
+      sessionPhoto.photo.hiddenAchievementIcon
+    );
+
+    if (newAchievement) {
+      console.log('[HIDDEN] New achievement unlocked during gameplay:', newAchievement.title);
+    }
+
     // Проверить, закончилась ли игра
     if (updatedSession.currentPhotoIndex >= updatedSession.photoCount) {
       const now = new Date();
@@ -216,6 +302,7 @@ export async function POST(request: NextRequest) {
       sessionTotalScore: updatedSession.totalScore,
       currentPhotoIndex: updatedSession.currentPhotoIndex,
       photoCount: updatedSession.photoCount,
+      newAchievement: newAchievement || undefined,
     });
   } catch (error) {
     console.error("Error processing guess:", error);
