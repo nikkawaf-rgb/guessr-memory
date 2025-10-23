@@ -45,6 +45,7 @@ export default function EFDGamePage() {
   const [running, setRunning] = useState(true);
   const [won, setWon] = useState(false);
   const [distance, setDistance] = useState(0); // прогресс
+  const [showStartAchievement, setShowStartAchievement] = useState(false);
 
   // управление
   const laneRef = useRef(1); // 0..2
@@ -57,6 +58,9 @@ export default function EFDGamePage() {
     if (!awardedStart) {
       award("start");
       setAwardedStart(true);
+      setShowStartAchievement(true);
+      // Скрываем уведомление через 5 секунд
+      setTimeout(() => setShowStartAchievement(false), 5000);
     }
   }, [awardedStart]);
 
@@ -212,6 +216,13 @@ export default function EFDGamePage() {
             <canvas ref={canvasRef} width={WIDTH} height={HEIGHT} className="block rounded" />
           </div>
           <div className="bg-gray-800 p-4 rounded-lg shadow-lg text-sm leading-6">
+            {showStartAchievement && (
+              <div className="mb-4 bg-blue-900 border-2 border-blue-400 rounded p-3 animate-pulse">
+                <div className="text-blue-300 font-bold text-center mb-1">🚚 Достижение получено!</div>
+                <div className="text-blue-100 text-sm text-center">Я получил права</div>
+                <div className="text-blue-200 text-xs text-center mt-1">Найти и сыграть в скрытую игру EFD</div>
+              </div>
+            )}
             <div className="mb-2 font-bold">Управление</div>
             <div>← → или A / D — перестраиваться между полосами</div>
             <div className="mt-4 mb-2 font-bold">Цель</div>
