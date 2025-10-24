@@ -9,6 +9,8 @@ export default function UserUploadPage() {
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [playerName, setPlayerName] = useState("");
   const [manualDate, setManualDate] = useState("");
+  const [autoDetectedDate, setAutoDetectedDate] = useState<string>("");
+  const [dateSource, setDateSource] = useState<"exif" | "manual" | null>(null);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState<{
     type: "success" | "error" | "info";
@@ -20,13 +22,52 @@ export default function UserUploadPage() {
     icon: string;
   } | null>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
       setFile(selectedFile);
       setPreviewUrl(URL.createObjectURL(selectedFile));
       setMessage(null);
       setNewAchievement(null);
+      setAutoDetectedDate("");
+      setDateSource(null);
+      setManualDate("");
+
+      // Попытка извлечь EXIF дату на клиенте
+      try {
+        // Динамический импорт exifr только на клиенте
+        const exifr = (await import("exifr")).default;
+        const exifData = await exifr.parse(selectedFile, {
+          pick: ["DateTimeOriginal", "CreateDate", "DateTime"],
+        });
+
+        if (exifData) {
+          const dateValue =
+            exifData.DateTimeOriginal ||
+            exifData.CreateDate ||
+            exifData.DateTime;
+
+          if (dateValue) {
+            const date = new Date(dateValue);
+            const formatted = date.toISOString().split("T")[0];
+            setAutoDetectedDate(formatted);
+            setManualDate(formatted);
+            setDateSource("exif");
+            setMessage({
+              type: "info",
+              text: `✅ Дата автоматически определена из EXIF: ${date.toLocaleDateString(
+                "ru-RU"
+              )}`,
+            });
+          }
+        }
+      } catch (error) {
+        console.log("EXIF parsing failed on client:", error);
+        setMessage({
+          type: "info",
+          text: "ℹ️ EXIF данные не найдены. Укажите дату вручную.",
+        });
+      }
     }
   };
 
@@ -160,7 +201,7 @@ export default function UserUploadPage() {
                 value={playerName}
                 onChange={(e) => setPlayerName(e.target.value)}
                 placeholder="Введите имя, под которым вы играете"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
                 required
               />
               <p className="text-xs text-gray-500 mt-1">
@@ -204,20 +245,37 @@ export default function UserUploadPage() {
               </div>
             )}
 
-            {/* Manual date (optional) */}
+            {/* Manual date */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Дата фотографии (опционально)
+                Дата фотографии {!dateSource && "(опционально)"}
               </label>
               <input
                 type="date"
                 value={manualDate}
-                onChange={(e) => setManualDate(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                onChange={(e) => {
+                  setManualDate(e.target.value);
+                  if (dateSource === "exif") {
+                    setDateSource("manual");
+                  }
+                }}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
               />
-              <p className="text-xs text-gray-500 mt-1">
-                📅 Если система не сможет определить дату автоматически из EXIF, укажите её вручную
-              </p>
+              {dateSource === "exif" && (
+                <p className="text-xs text-green-600 mt-1 font-semibold">
+                  ✅ Дата определена автоматически из EXIF. Вы можете изменить её при необходимости.
+                </p>
+              )}
+              {!dateSource && (
+                <p className="text-xs text-gray-500 mt-1">
+                  📅 Если EXIF данные не найдены, укажите дату вручную
+                </p>
+              )}
+              {dateSource === "manual" && autoDetectedDate && (
+                <p className="text-xs text-blue-600 mt-1">
+                  ℹ️ Вы изменили автоматически определённую дату
+                </p>
+              )}
             </div>
 
             {/* Info box */}
