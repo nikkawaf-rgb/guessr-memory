@@ -43,11 +43,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Проверка размера (макс 10MB)
-    const MAX_SIZE = 10 * 1024 * 1024;
+    // Проверка размера (макс 4.5MB)
+    const MAX_SIZE = 4.5 * 1024 * 1024;
     if (file.size > MAX_SIZE) {
       return NextResponse.json(
-        { error: "Размер файла не должен превышать 10MB" },
+        { error: "Размер файла не должен превышать 4.5MB" },
         { status: 400 }
       );
     }

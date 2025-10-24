@@ -85,62 +85,39 @@ export default function UserUploadPage() {
       return;
     }
 
+    // Проверка размера файла (макс 4.5MB)
+    const MAX_SIZE = 4.5 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      setMessage({
+        type: "error",
+        text: "Размер файла не должен превышать 4.5MB. Пожалуйста, сожмите изображение.",
+      });
+      return;
+    }
+
     setUploading(true);
     setMessage(null);
     setNewAchievement(null);
 
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("playerName", playerName.trim());
+    if (manualDate) {
+      formData.append("manualDate", manualDate);
+    }
+    if (description.trim()) {
+      formData.append("uploaderComment", description.trim());
+    }
+
     try {
-      // Шаг 1: Загрузить файл напрямую в Supabase с клиента
-      const { createClient } = await import("@supabase/supabase-js");
-      
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-      if (!supabaseUrl || !supabaseAnonKey) {
-        throw new Error("Supabase config missing");
-      }
-
-      const supabase = createClient(supabaseUrl, supabaseAnonKey);
-      
-      const fileExt = file.name.split(".").pop()?.toLowerCase() || "jpg";
-      const randomId = Array.from({ length: 32 }, () =>
-        Math.floor(Math.random() * 16).toString(16)
-      ).join("");
-      const fileName = `user_${randomId}.${fileExt}`;
-
-      // Загрузка в Supabase
-      const { error: uploadError } = await supabase.storage
-        .from("photos")
-        .upload(fileName, file, {
-          contentType: file.type,
-          upsert: false,
-        });
-
-      if (uploadError) {
-        console.error("Supabase upload error:", uploadError);
-        throw new Error("Ошибка загрузки файла в хранилище");
-      }
-
-      // Шаг 2: Создать запись в БД через API
-      const dbResponse = await fetch("/api/upload/user-photo-metadata", {
+      const response = await fetch("/api/upload/user-photo", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          playerName: playerName.trim(),
-          fileName: fileName,
-          originalName: file.name,
-          fileSize: file.size,
-          mimeType: file.type,
-          manualDate: manualDate || null,
-          uploaderComment: description.trim() || null,
-        }),
+        body: formData,
       });
 
-      const data = await dbResponse.json();
+      const data = await response.json();
 
-      if (dbResponse.ok) {
+      if (response.ok) {
         setMessage({ type: "success", text: data.message });
 
         if (data.newAchievement) {
@@ -268,7 +245,7 @@ export default function UserUploadPage() {
                 required
               />
               <p className="text-xs text-gray-500 mt-1">
-                📸 Максимум 10MB. Форматы: JPG, PNG, WEBP и др.
+                📸 Максимум 4.5MB. Форматы: JPG, PNG, WEBP и др.
               </p>
             </div>
 
