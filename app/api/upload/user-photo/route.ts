@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
         fileSize: file.size,
         mimeType: file.type,
         exifTakenAt: exifTakenAt,
-        exifRaw: exifData || undefined,
+        exifRaw: exifData ? JSON.parse(JSON.stringify(exifData)) : undefined,
         uploadedBy: user.id,
         moderationStatus: "pending", // Ждёт модерации
         isActive: false, // Не показывать в игре до одобрения
