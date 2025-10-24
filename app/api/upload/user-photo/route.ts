@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
       fileSize: number;
       mimeType: string;
       exifTakenAt: Date | null;
-      exifRaw?: any;
+      exifRaw?: Record<string, unknown>;
       uploadedBy: string;
       uploaderComment: string | null;
       moderationStatus: string;
