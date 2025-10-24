@@ -78,12 +78,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Парсинг EXIF данных
-    let exifData: any = null;
+    let exifData: Record<string, unknown> | null = null;
     let exifTakenAt: Date | null = null;
     let autoDetectedDate = false;
 
     try {
-      exifData = await exifr.parse(buffer, { pick: ["DateTimeOriginal", "CreateDate", "DateTime"] });
+      exifData = await exifr.parse(buffer, { pick: ["DateTimeOriginal", "CreateDate", "DateTime"] }) as Record<string, unknown> | undefined || null;
       
       if (exifData) {
         const dateSource = exifData.DateTimeOriginal || exifData.CreateDate || exifData.DateTime;
