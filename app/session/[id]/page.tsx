@@ -118,6 +118,7 @@ export default async function SessionPage({ params }: SessionPageProps) {
         specialQuestion: shouldShowSpecial ? currentSessionPhoto.photo.specialQuestion : null,
         specialAnswerCorrect: shouldShowSpecial ? currentSessionPhoto.photo.specialAnswerCorrect : null,
         uploaderName: currentSessionPhoto.photo.uploader?.name || null,
+        uploaderComment: currentSessionPhoto.photo.uploaderComment || null,
       }}
       sessionPhotoId={currentSessionPhoto.id}
       hasGuess={!!currentSessionPhoto.guess}

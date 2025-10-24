@@ -14,6 +14,7 @@ export async function POST(request: NextRequest) {
     const file = formData.get("file") as File;
     const playerName = formData.get("playerName") as string;
     const manualDate = formData.get("manualDate") as string | null;
+    const uploaderComment = formData.get("uploaderComment") as string | null;
 
     if (!file || !playerName) {
       return NextResponse.json(
@@ -111,6 +112,7 @@ export async function POST(request: NextRequest) {
         exifTakenAt: exifTakenAt,
         exifRaw: exifData ? JSON.parse(JSON.stringify(exifData)) : undefined,
         uploadedBy: user.id,
+        uploaderComment: uploaderComment || null,
         moderationStatus: "pending", // Ждёт модерации
         isActive: false, // Не показывать в игре до одобрения
       },

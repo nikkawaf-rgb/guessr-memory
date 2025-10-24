@@ -65,6 +65,7 @@ model Photo {
   // Пользовательская загрузка и модерация
   uploadedBy      String?   // ID пользователя, который загрузил (null = админ)
   uploader        User?     @relation("UserUploadedPhotos", fields: [uploadedBy], references: [id], onDelete: SetNull)
+  uploaderComment String?   // Комментарий от загрузчика о фото
   moderationStatus String   @default("approved") // pending, approved, rejected
   moderatedBy     String?   // ID админа, который модерировал
   moderator       User?     @relation("UserModeratedPhotos", fields: [moderatedBy], references: [id], onDelete: SetNull)

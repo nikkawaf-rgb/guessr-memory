@@ -11,6 +11,7 @@ export default function UserUploadPage() {
   const [manualDate, setManualDate] = useState("");
   const [autoDetectedDate, setAutoDetectedDate] = useState<string>("");
   const [dateSource, setDateSource] = useState<"exif" | "manual" | null>(null);
+  const [description, setDescription] = useState("");
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState<{
     type: "success" | "error" | "info";
@@ -94,6 +95,9 @@ export default function UserUploadPage() {
     if (manualDate) {
       formData.append("manualDate", manualDate);
     }
+    if (description.trim()) {
+      formData.append("uploaderComment", description.trim());
+    }
 
     try {
       const response = await fetch("/api/upload/user-photo", {
@@ -114,6 +118,9 @@ export default function UserUploadPage() {
         setFile(null);
         setPreviewUrl("");
         setManualDate("");
+        setDescription("");
+        setDateSource(null);
+        setAutoDetectedDate("");
         
         // Сбросить input file
         const fileInput = document.getElementById("file-input") as HTMLInputElement;
@@ -276,6 +283,24 @@ export default function UserUploadPage() {
                   ℹ️ Вы изменили автоматически определённую дату
                 </p>
               )}
+            </div>
+
+            {/* Description */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Описание фотографии (опционально)
+              </label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Например: 'Мероприятие по робототехнике, октябрь 2023' или 'Наша команда на соревнованиях'"
+                rows={3}
+                maxLength={200}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 resize-none"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                📝 Это описание будет видно всем игрокам, когда им выпадет эта фотография ({description.length}/200)
+              </p>
             </div>
 
             {/* Info box */}
