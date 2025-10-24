@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
     // Добавить exifRaw только если есть данные
     if (exifData) {
       try {
-        photoData.exifRaw = JSON.parse(JSON.stringify(exifData)) as Prisma.JsonValue;
+        photoData.exifRaw = JSON.parse(JSON.stringify(exifData)) as Prisma.InputJsonValue;
       } catch (err) {
         console.log("Failed to serialize EXIF data:", err);
       }
