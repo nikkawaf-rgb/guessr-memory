@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
       
       if (exifData) {
         const dateSource = exifData.DateTimeOriginal || exifData.CreateDate || exifData.DateTime;
-        if (dateSource) {
+        if (dateSource && (typeof dateSource === 'string' || typeof dateSource === 'number' || dateSource instanceof Date)) {
           exifTakenAt = new Date(dateSource);
           autoDetectedDate = true;
         }
