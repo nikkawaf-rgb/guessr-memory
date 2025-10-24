@@ -34,10 +34,11 @@ export async function POST(request: NextRequest) {
 
     console.log("User ID:", user.id);
 
-    // Получить фото со спецвопросами
+    // Получить фото со спецвопросами (только одобренные)
     const photosWithSpecial = await prisma.photo.findMany({
       where: {
         isActive: true,
+        moderationStatus: "approved",
         exifTakenAt: { not: null },
         specialQuestion: { not: null },
         specialAnswerCorrect: { not: null },
@@ -45,10 +46,11 @@ export async function POST(request: NextRequest) {
       select: { id: true },
     });
 
-    // Получить обычные фото (без спецвопросов)
+    // Получить обычные фото (без спецвопросов, только одобренные)
     const regularPhotos = await prisma.photo.findMany({
       where: {
         isActive: true,
+        moderationStatus: "approved",
         exifTakenAt: { not: null },
       },
       select: { id: true },

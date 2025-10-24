@@ -134,9 +134,11 @@ export default function AchievementsPage() {
               {items.map((achievement) => {
                 // Если достижение получено - показываем всё
                 // Если не получено - скрываем в зависимости от редкости
-                const showIcon = achievement.unlocked || achievement.rarity === 'common';
-                const showTitle = achievement.unlocked || achievement.rarity === 'common' || achievement.rarity === 'rare' || achievement.rarity === 'epic';
-                const showDescription = achievement.unlocked || achievement.rarity === 'common';
+                // ИСКЛЮЧЕНИЕ: категория "Контент" всегда показывает всё
+                const isContentCategory = achievement.category === 'Контент';
+                const showIcon = achievement.unlocked || achievement.rarity === 'common' || isContentCategory;
+                const showTitle = achievement.unlocked || achievement.rarity === 'common' || achievement.rarity === 'rare' || achievement.rarity === 'epic' || isContentCategory;
+                const showDescription = achievement.unlocked || achievement.rarity === 'common' || isContentCategory;
 
                 return (
                   <div

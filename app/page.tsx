@@ -50,7 +50,7 @@ export default function HomePage() {
         </div>
 
         {/* Main Actions */}
-        <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {/* Play Game */}
           <Link
             href={currentUser ? "/play" : "/auth/simple-signin"}
@@ -80,6 +80,33 @@ export default function HomePage() {
                 Посмотрите лучшие результаты игроков
               </p>
             </div>
+          </Link>
+
+          {/* Upload Photo */}
+          <Link
+            href={currentUser ? "/upload" : "/auth/simple-signin"}
+            className="bg-purple-600 text-white p-8 rounded-xl shadow-xl hover:bg-purple-700 transition-all transform hover:scale-105"
+          >
+            <div className="text-center">
+              <div className="text-5xl mb-4">📷</div>
+              <h2 className="text-2xl font-bold mb-2">Загрузить фото</h2>
+              <p className="text-purple-100">
+                {currentUser
+                  ? "Поделитесь своими фотографиями из Точки Роста"
+                  : "Войдите, чтобы загружать фото"
+                }
+              </p>
+            </div>
+          </Link>
+        </div>
+
+        {/* Additional Links */}
+        <div className="flex justify-center gap-4 mt-8">
+          <Link
+            href="/achievements"
+            className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white px-6 py-3 rounded-lg font-bold shadow-lg transition transform hover:scale-105"
+          >
+            🏆 Достижения
           </Link>
         </div>
 

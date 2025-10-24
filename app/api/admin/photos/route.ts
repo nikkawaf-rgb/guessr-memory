@@ -18,6 +18,15 @@ export async function GET() {
         hiddenAchievementDescription: true,
         hiddenAchievementIcon: true,
         createdAt: true,
+        uploadedBy: true,
+        uploader: {
+          select: {
+            name: true,
+          },
+        },
+        moderationStatus: true,
+        moderatedAt: true,
+        rejectionReason: true,
         comments: {
           select: {
             id: true,
