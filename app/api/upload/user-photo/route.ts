@@ -103,19 +103,40 @@ export async function POST(request: NextRequest) {
     }
 
     // Создание записи в БД со статусом "pending"
+    const photoData: {
+      storagePath: string;
+      originalName: string;
+      fileSize: number;
+      mimeType: string;
+      exifTakenAt: Date | null;
+      exifRaw?: any;
+      uploadedBy: string;
+      uploaderComment: string | null;
+      moderationStatus: string;
+      isActive: boolean;
+    } = {
+      storagePath: fileName,
+      originalName: file.name,
+      fileSize: file.size,
+      mimeType: file.type,
+      exifTakenAt: exifTakenAt,
+      uploadedBy: user.id,
+      uploaderComment: uploaderComment || null,
+      moderationStatus: "pending",
+      isActive: false,
+    };
+
+    // Добавить exifRaw только если есть данные
+    if (exifData) {
+      try {
+        photoData.exifRaw = JSON.parse(JSON.stringify(exifData));
+      } catch (err) {
+        console.log("Failed to serialize EXIF data:", err);
+      }
+    }
+
     const photo = await prisma.photo.create({
-      data: {
-        storagePath: fileName,
-        originalName: file.name,
-        fileSize: file.size,
-        mimeType: file.type,
-        exifTakenAt: exifTakenAt,
-        exifRaw: exifData ? JSON.parse(JSON.stringify(exifData)) : undefined,
-        uploadedBy: user.id,
-        uploaderComment: uploaderComment || null,
-        moderationStatus: "pending", // Ждёт модерации
-        isActive: false, // Не показывать в игре до одобрения
-      },
+      data: photoData,
     });
 
     // Проверка достижения "Фотограф" (первая загрузка)
@@ -173,8 +194,10 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("User photo upload error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error("Error details:", errorMessage);
     return NextResponse.json(
-      { error: "Внутренняя ошибка сервера" },
+      { error: `Внутренняя ошибка сервера: ${errorMessage}` },
       { status: 500 }
     );
   }
