@@ -89,27 +89,60 @@ export default function UserUploadPage() {
     setMessage(null);
     setNewAchievement(null);
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("playerName", playerName.trim());
-    if (manualDate) {
-      formData.append("manualDate", manualDate);
-    }
-    if (description.trim()) {
-      formData.append("uploaderComment", description.trim());
-    }
-
     try {
-      const response = await fetch("/api/upload/user-photo", {
+      // Шаг 1: Загрузить файл напрямую в Supabase с клиента
+      const { createClient } = await import("@supabase/supabase-js");
+      
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+      if (!supabaseUrl || !supabaseAnonKey) {
+        throw new Error("Supabase config missing");
+      }
+
+      const supabase = createClient(supabaseUrl, supabaseAnonKey);
+      
+      const fileExt = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const randomId = Array.from({ length: 32 }, () =>
+        Math.floor(Math.random() * 16).toString(16)
+      ).join("");
+      const fileName = `user_${randomId}.${fileExt}`;
+
+      // Загрузка в Supabase
+      const { error: uploadError } = await supabase.storage
+        .from("photos")
+        .upload(fileName, file, {
+          contentType: file.type,
+          upsert: false,
+        });
+
+      if (uploadError) {
+        console.error("Supabase upload error:", uploadError);
+        throw new Error("Ошибка загрузки файла в хранилище");
+      }
+
+      // Шаг 2: Создать запись в БД через API
+      const dbResponse = await fetch("/api/upload/user-photo-metadata", {
         method: "POST",
-        body: formData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          playerName: playerName.trim(),
+          fileName: fileName,
+          originalName: file.name,
+          fileSize: file.size,
+          mimeType: file.type,
+          manualDate: manualDate || null,
+          uploaderComment: description.trim() || null,
+        }),
       });
 
-      const data = await response.json();
+      const data = await dbResponse.json();
 
-      if (response.ok) {
+      if (dbResponse.ok) {
         setMessage({ type: "success", text: data.message });
-        
+
         if (data.newAchievement) {
           setNewAchievement(data.newAchievement);
         }
@@ -121,16 +154,21 @@ export default function UserUploadPage() {
         setDescription("");
         setDateSource(null);
         setAutoDetectedDate("");
-        
+
         // Сбросить input file
-        const fileInput = document.getElementById("file-input") as HTMLInputElement;
+        const fileInput = document.getElementById(
+          "file-input"
+        ) as HTMLInputElement;
         if (fileInput) fileInput.value = "";
       } else {
         setMessage({ type: "error", text: data.error || "Ошибка загрузки" });
       }
     } catch (error) {
       console.error("Upload error:", error);
-      setMessage({ type: "error", text: "Ошибка соединения с сервером" });
+      setMessage({
+        type: "error",
+        text: error instanceof Error ? error.message : "Ошибка соединения с сервером",
+      });
     } finally {
       setUploading(false);
     }
