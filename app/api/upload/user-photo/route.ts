@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { createClient } from "@supabase/supabase-js";
 import exifr from "exifr";
 
@@ -103,18 +104,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Создание записи в БД со статусом "pending"
-    const photoData: {
-      storagePath: string;
-      originalName: string;
-      fileSize: number;
-      mimeType: string;
-      exifTakenAt: Date | null;
-      exifRaw?: Record<string, unknown>;
-      uploadedBy: string;
-      uploaderComment: string | null;
-      moderationStatus: string;
-      isActive: boolean;
-    } = {
+    const photoData: Prisma.PhotoCreateInput = {
       storagePath: fileName,
       originalName: file.name,
       fileSize: file.size,
@@ -129,7 +119,7 @@ export async function POST(request: NextRequest) {
     // Добавить exifRaw только если есть данные
     if (exifData) {
       try {
-        photoData.exifRaw = JSON.parse(JSON.stringify(exifData));
+        photoData.exifRaw = JSON.parse(JSON.stringify(exifData)) as Prisma.JsonValue;
       } catch (err) {
         console.log("Failed to serialize EXIF data:", err);
       }
