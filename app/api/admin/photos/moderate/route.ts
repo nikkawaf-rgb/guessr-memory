@@ -175,7 +175,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Если одобрено и есть загрузивший пользователь - проверяем достижения
-    let newAchievements = [];
+    let newAchievements: { title: string; description: string; icon: string }[] = [];
     if (action === "approve" && photo.uploadedBy) {
       newAchievements = await checkUploadAchievements(photo.uploadedBy);
     }

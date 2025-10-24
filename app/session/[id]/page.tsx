@@ -49,7 +49,15 @@ export default async function SessionPage({ params }: SessionPageProps) {
       user: true,
       sessionPhotos: {
         include: {
-          photo: true,
+          photo: {
+            include: {
+              uploader: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          },
           guess: true,
         },
         orderBy: {
@@ -109,6 +117,7 @@ export default async function SessionPage({ params }: SessionPageProps) {
         // Показываем спецвопрос только если showSpecial = true
         specialQuestion: shouldShowSpecial ? currentSessionPhoto.photo.specialQuestion : null,
         specialAnswerCorrect: shouldShowSpecial ? currentSessionPhoto.photo.specialAnswerCorrect : null,
+        uploaderName: currentSessionPhoto.photo.uploader?.name || null,
       }}
       sessionPhotoId={currentSessionPhoto.id}
       hasGuess={!!currentSessionPhoto.guess}

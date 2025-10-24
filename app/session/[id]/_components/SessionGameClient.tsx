@@ -34,6 +34,7 @@ interface SessionGameClientProps {
     height: number | null;
     specialQuestion: string | null;
     specialAnswerCorrect: string | null;
+    uploaderName: string | null;
   };
   sessionPhotoId: string;
   hasGuess: boolean;
@@ -314,6 +315,14 @@ export default function SessionGameClient({
               priority
             />
           </div>
+          {/* Uploader attribution */}
+          {currentPhoto.uploaderName && (
+            <div className="px-4 py-2 bg-gradient-to-r from-purple-50 to-pink-50 border-t border-purple-200">
+              <p className="text-sm text-purple-800 text-center">
+                📷 Фото загружено игроком: <span className="font-bold">{currentPhoto.uploaderName}</span>
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Guess Form */}
