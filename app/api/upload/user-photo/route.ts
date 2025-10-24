@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Создание записи в БД со статусом "pending"
-    const photoData: Prisma.PhotoCreateInput = {
+    const photoData: Prisma.PhotoUncheckedCreateInput = {
       storagePath: fileName,
       originalName: file.name,
       fileSize: file.size,
